@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "Hinch.ar",
+    "slug": "hinchar",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "hinchar",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#080808"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "ar.hinch.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Necesitamos acceso a tu cámara para verificar tu identidad y subir fotos de tu auto.",
+        "NSPhotoLibraryUsageDescription": "Necesitamos acceso a tus fotos para tu foto de perfil y del auto.",
+        "NSLocationWhenInUseUsageDescription": "Usamos tu ubicación para mostrarte viajes cercanos a vos."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#080808"
+      },
+      "package": "ar.hinch.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1D4ED8"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "REEMPLAZAR_CON_TU_PROJECT_ID"
+      }
+    }
+  }
+}

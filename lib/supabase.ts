@@ -1,0 +1,451 @@
+import 'react-native-url-polyfill/auto'
+import { createClient } from '@supabase/supabase-js'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import type {
+  User, Event, Trip, Booking, Rating,
+  AppNotification, TripSearchFilters, NewTripForm, NewBookingForm, RatingScores,
+} from './types'
+
+const supabaseUrl  = process.env.EXPO_PUBLIC_SUPABASE_URL!
+const supabaseAnon = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!
+
+if (!supabaseUrl || !supabaseAnon) {
+  throw new Error('Faltan las variables de entorno de Supabase. Revisá tu archivo .env')
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnon, {
+  auth: {
+    storage: AsyncStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
+})
+
+// =============================================================================
+// AUTH
+// =============================================================================
+
+export const auth = {
+  async signUpWithEmail(email: string, password: string, fullName: string) {
+    return supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName } },
+    })
+  },
+
+  async signInWithEmail(email: string, password: string) {
+    return supabase.auth.signInWithPassword({ email, password })
+  },
+
+  async signOut() {
+    return supabase.auth.signOut()
+  },
+
+  async getSession() {
+    return supabase.auth.getSession()
+  },
+
+  onAuthStateChange(callback: Parameters<typeof supabase.auth.onAuthStateChange>[0]) {
+    return supabase.auth.onAuthStateChange(callback)
+  },
+}
+
+// =============================================================================
+// USERS
+// =============================================================================
+
+export const usersApi = {
+  async getMe(): Promise<User | null> {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const { data } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
+    return data
+  },
+
+  async getById(id: string): Promise<User | null> {
+    const { data } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .single()
+    return data
+  },
+
+  async updateProfile(id: string, updates: Partial<User>) {
+    return supabase
+      .from('users')
+      .update(updates)
+      .eq('id', id)
+  },
+
+  async uploadAvatar(userId: string, uri: string): Promise<string | null> {
+    const ext  = uri.split('.').pop() ?? 'jpg'
+    const path = `${userId}/avatar.${ext}`
+
+    const response = await fetch(uri)
+    const blob     = await response.blob()
+
+    const { error } = await supabase.storage
+      .from('avatars')
+      .upload(path, blob, { upsert: true, contentType: `image/${ext}` })
+
+    if (error) return null
+
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+    return data.publicUrl
+  },
+}
+
+// =============================================================================
+// EVENTS
+// =============================================================================
+
+export const eventsApi = {
+  async list(filters?: { type?: string; city?: string; fromDate?: Date }) {
+    let query = supabase
+      .from('events')
+      .select(`
+        *,
+        trips_count:trips(count)
+      `)
+      .eq('is_active', true)
+      .gte('event_date', new Date().toISOString())
+      .order('event_date', { ascending: true })
+
+    if (filters?.type && filters.type !== 'todos') {
+      query = query.eq('type', filters.type)
+    }
+    if (filters?.city) {
+      query = query.ilike('venue_city', `%${filters.city}%`)
+    }
+    if (filters?.fromDate) {
+      query = query.gte('event_date', filters.fromDate.toISOString())
+    }
+
+    const { data, error } = await query
+    if (error) throw error
+    return data as Event[]
+  },
+
+  async getById(id: string): Promise<Event | null> {
+    const { data } = await supabase
+      .from('events')
+      .select('*')
+      .eq('id', id)
+      .single()
+    return data
+  },
+
+  async getFeatured(): Promise<Event[]> {
+    const { data } = await supabase
+      .from('events')
+      .select('*')
+      .eq('is_active', true)
+      .eq('is_featured', true)
+      .gte('event_date', new Date().toISOString())
+      .order('event_date', { ascending: true })
+      .limit(5)
+    return data ?? []
+  },
+}
+
+// =============================================================================
+// TRIPS
+// =============================================================================
+
+export const tripsApi = {
+  async listByEvent(eventId: string, filters?: TripSearchFilters) {
+    let query = supabase
+      .from('trips')
+      .select(`
+        *,
+        driver:users!driver_id (
+          id, full_name, avatar_url, is_verified,
+          avg_rating_as_driver, total_trips_as_driver
+        ),
+        event:events!event_id (
+          id, title, event_date, venue_name, venue_city
+        )
+      `)
+      .eq('event_id', eventId)
+      .in('status', ['active', 'full'])
+      .order('created_at', { ascending: false })
+
+    if (filters?.origin_city) {
+      query = query.ilike('origin_city', `%${filters.origin_city}%`)
+    }
+    if (filters?.trip_type && filters.trip_type !== 'todos') {
+      query = query.or(`trip_type.eq.${filters.trip_type},trip_type.eq.ida_y_vuelta`)
+    }
+    if (filters?.only_with_seats) {
+      query = query.gt('seats_available', 0)
+    }
+    if (filters?.only_verified) {
+      query = query.eq('driver.is_verified', true)
+    }
+
+    const { data, error } = await query
+    if (error) throw error
+    return data as Trip[]
+  },
+
+  async getById(id: string): Promise<Trip | null> {
+    const { data } = await supabase
+      .from('trips')
+      .select(`
+        *,
+        driver:users!driver_id (
+          id, full_name, avatar_url, is_verified,
+          avg_rating_as_driver, total_trips_as_driver,
+          car_brand, car_model, car_year, car_color, car_photo_url
+        ),
+        event:events!event_id (*)
+      `)
+      .eq('id', id)
+      .single()
+    return data
+  },
+
+  async getMyTrips(userId: string): Promise<Trip[]> {
+    const { data } = await supabase
+      .from('trips')
+      .select(`
+        *,
+        event:events!event_id (id, title, event_date, venue_city, venue_name, image_url)
+      `)
+      .eq('driver_id', userId)
+      .order('created_at', { ascending: false })
+    return data ?? []
+  },
+
+  async create(driverId: string, form: NewTripForm) {
+    const { data, error } = await supabase
+      .from('trips')
+      .insert({
+        driver_id:       driverId,
+        event_id:        form.event_id,
+        origin_address:  form.origin_address,
+        origin_city:     form.origin_city,
+        origin_province: form.origin_province,
+        trip_type:       form.trip_type,
+        seats_total:     form.seats_total,
+        seats_available: form.seats_total,  // empieza lleno de disponibilidad
+        price_outbound:  form.price_outbound,
+        price_return:    form.price_return,
+        departure_time:  form.departure_time?.toISOString(),
+        return_time:     form.return_time?.toISOString(),
+        notes:           form.notes,
+        accepts_luggage: form.accepts_luggage,
+        accepts_pets:    form.accepts_pets,
+        waypoints:       form.waypoints,
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data as Trip
+  },
+
+  async cancel(tripId: string, driverId: string) {
+    return supabase
+      .from('trips')
+      .update({ status: 'cancelled' })
+      .eq('id', tripId)
+      .eq('driver_id', driverId)
+  },
+}
+
+// =============================================================================
+// BOOKINGS
+// =============================================================================
+
+export const bookingsApi = {
+  async getMyBookings(passengerId: string): Promise<Booking[]> {
+    const { data } = await supabase
+      .from('bookings')
+      .select(`
+        *,
+        trip:trips!trip_id (
+          *,
+          driver:users!driver_id (
+            id, full_name, avatar_url, is_verified, avg_rating_as_driver
+          ),
+          event:events!event_id (
+            id, title, event_date, venue_name, venue_city, image_url
+          )
+        )
+      `)
+      .eq('passenger_id', passengerId)
+      .order('created_at', { ascending: false })
+    return data ?? []
+  },
+
+  async getByTrip(tripId: string): Promise<Booking[]> {
+    const { data } = await supabase
+      .from('bookings')
+      .select(`
+        *,
+        passenger:users!passenger_id (
+          id, full_name, avatar_url, is_verified, avg_rating_as_passenger
+        )
+      `)
+      .eq('trip_id', tripId)
+      .neq('status', 'cancelled')
+      .order('created_at', { ascending: true })
+    return data ?? []
+  },
+
+  async create(passengerId: string, tripId: string, form: NewBookingForm, totalAmount: number) {
+    const { data, error } = await supabase
+      .from('bookings')
+      .insert({
+        trip_id:           tripId,
+        passenger_id:      passengerId,
+        segment:           form.segment,
+        seats_booked:      form.seats_booked,
+        total_amount:      totalAmount,
+        payment_method:    form.payment_method,
+        passenger_message: form.passenger_message,
+        pickup_point:      form.pickup_point,
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data as Booking
+  },
+
+  async confirm(bookingId: string, driverId: string) {
+    // El conductor confirma: primero verificamos que el trip le pertenece
+    const { data: booking } = await supabase
+      .from('bookings')
+      .select('trip_id')
+      .eq('id', bookingId)
+      .single()
+
+    if (!booking) throw new Error('Reserva no encontrada')
+
+    const { data: trip } = await supabase
+      .from('trips')
+      .select('driver_id')
+      .eq('id', booking.trip_id)
+      .single()
+
+    if (!trip || trip.driver_id !== driverId) {
+      throw new Error('No tenés permiso para confirmar esta reserva')
+    }
+
+    return supabase
+      .from('bookings')
+      .update({ status: 'confirmed' })
+      .eq('id', bookingId)
+  },
+
+  async cancel(bookingId: string, userId: string) {
+    return supabase
+      .from('bookings')
+      .update({ status: 'cancelled' })
+      .eq('id', bookingId)
+      .or(`passenger_id.eq.${userId}`)
+  },
+}
+
+// =============================================================================
+// RATINGS
+// =============================================================================
+
+export const ratingsApi = {
+  async getRatingsForUser(userId: string, role?: 'driver' | 'passenger'): Promise<Rating[]> {
+    let query = supabase
+      .from('ratings')
+      .select('*')
+      .eq('ratee_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (role) query = query.eq('ratee_role', role)
+
+    const { data } = await query
+    return data ?? []
+  },
+
+  async submitRating(
+    raterId: string,
+    bookingId: string,
+    rateeId: string,
+    rateeRole: 'driver' | 'passenger',
+    scores: RatingScores,
+  ) {
+    const { data, error } = await supabase
+      .from('ratings')
+      .insert({
+        booking_id: bookingId,
+        rater_id:   raterId,
+        ratee_id:   rateeId,
+        ratee_role: rateeRole,
+        score_1:    scores.score_1,
+        score_2:    scores.score_2,
+        score_3:    scores.score_3,
+        score_4:    scores.score_4,
+        score_5:    scores.score_5,
+        comment:    scores.comment,
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data as Rating
+  },
+
+  async canRate(bookingId: string, raterId: string): Promise<boolean> {
+    const { data } = await supabase
+      .from('ratings')
+      .select('id')
+      .eq('booking_id', bookingId)
+      .eq('rater_id', raterId)
+      .single()
+    return !data  // puede calificar si no existe la calificación todavía
+  },
+}
+
+// =============================================================================
+// NOTIFICATIONS
+// =============================================================================
+
+export const notificationsApi = {
+  async getUnread(userId: string): Promise<AppNotification[]> {
+    const { data } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_read', false)
+      .order('created_at', { ascending: false })
+    return data ?? []
+  },
+
+  async markAllRead(userId: string) {
+    return supabase
+      .from('notifications')
+      .update({ is_read: true, read_at: new Date().toISOString() })
+      .eq('user_id', userId)
+      .eq('is_read', false)
+  },
+
+  subscribeToNotifications(userId: string, onNotification: (n: AppNotification) => void) {
+    return supabase
+      .channel(`notifications:${userId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+        (payload) => onNotification(payload.new as AppNotification),
+      )
+      .subscribe()
+  },
+}
