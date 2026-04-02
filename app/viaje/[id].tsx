@@ -201,14 +201,9 @@ export default function ViajeDetailScreen() {
           headerStyle:     { backgroundColor: COLORS.surface },
           headerTintColor: COLORS.textPrimary,
           headerRight: isOwn && trip?.status === 'active' ? () => (
-            <View style={{ flexDirection: 'row', gap: 8, marginRight: 8 }}>
-              <TouchableOpacity onPress={openEdit}>
-                <Text style={{ color: COLORS.primary, fontWeight: '700', fontSize: 15 }}>Editar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleCancelTrip}>
-                <Text style={{ color: COLORS.error, fontWeight: '700', fontSize: 15 }}>Cancelar</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity onPress={openEdit} style={{ marginRight: 8 }}>
+              <Text style={{ color: COLORS.primary, fontWeight: '700', fontSize: 15 }}>Editar</Text>
+            </TouchableOpacity>
           ) : undefined,
         }}
       />
@@ -493,7 +488,7 @@ export default function ViajeDetailScreen() {
 
             <View style={styles.modalBtns}>
               <TouchableOpacity style={styles.cancelModalBtn} onPress={() => setEditModal(false)}>
-                <Text style={styles.cancelModalBtnText}>Cancelar</Text>
+                <Text style={styles.cancelModalBtnText}>Volver</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.confirmBtn, editSaving && styles.confirmBtnDisabled]}
@@ -506,6 +501,13 @@ export default function ViajeDetailScreen() {
                 }
               </TouchableOpacity>
             </View>
+
+            <TouchableOpacity
+              style={styles.deleteBtn}
+              onPress={() => { setEditModal(false); setTimeout(handleCancelTrip, 300) }}
+            >
+              <Text style={styles.deleteBtnText}>🗑️ Eliminar viaje</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -762,6 +764,12 @@ const styles = StyleSheet.create({
   totalLabel: { fontSize: 14, color: COLORS.textSecondary },
   totalAmount: { fontSize: 24, fontWeight: '900', color: COLORS.textPrimary },
   paymentDisclaimer: { fontSize: 12, color: COLORS.textMuted, textAlign: 'center' },
+  deleteBtn: {
+    padding: SPACING.md, borderRadius: RADIUS.md,
+    borderWidth: 1, borderColor: COLORS.error,
+    alignItems: 'center', marginTop: SPACING.xs,
+  },
+  deleteBtnText: { color: COLORS.error, fontWeight: '700', fontSize: 15 },
   emptyBookings: {
     backgroundColor: COLORS.card, borderRadius: RADIUS.lg,
     padding: SPACING.md, borderWidth: 1, borderColor: COLORS.border, alignItems: 'center',
