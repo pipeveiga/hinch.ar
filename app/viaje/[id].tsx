@@ -6,11 +6,13 @@ import {
 import { useLocalSearchParams, router, Stack } from 'expo-router'
 import { useTripsStore } from '@/stores/tripsStore'
 import { useAuthStore } from '@/stores/authStore'
+import { bookingsApi } from '@/lib/supabase'
 import {
   COLORS, SPACING, RADIUS,
   TRIP_TYPE_LABELS, TRIP_TYPE_COLORS,
+  BOOKING_STATUS_LABELS, BOOKING_STATUS_COLORS,
 } from '@/lib/constants'
-import type { TripType, NewBookingForm } from '@/lib/types'
+import type { TripType, NewBookingForm, Booking } from '@/lib/types'
 import { UserAvatar } from '@/components/UserAvatar'
 import { VerificationBadge } from '@/components/VerificationBadge'
 import { format } from 'date-fns'
@@ -19,8 +21,11 @@ import { es } from 'date-fns/locale'
 export default function ViajeDetailScreen() {
   const { id }         = useLocalSearchParams<{ id: string }>()
   const { user }       = useAuthStore()
-  const { selectedTrip, selectedTripLoading, loadTrip, bookTrip } = useTripsStore()
+  const { selectedTrip, selectedTripLoading, loadTrip, bookTrip, confirmBooking, cancelBooking } = useTripsStore()
   const [modalVisible, setModalVisible] = useState(false)
+  const [bookings, setBookings]         = useState<Booking[]>([])
+  const [bookingsLoading, setBookingsLoading] = useState(false)
+  const [actionLoading, setActionLoading]     = useState<string | null>(null)
   const [booking, setBooking] = useState<NewBookingForm>({
     segment:           'ida',
     seats_booked:      1,
@@ -37,8 +42,46 @@ export default function ViajeDetailScreen() {
   const trip   = selectedTrip
   const driver = trip?.driver
   const event  = trip?.event
+  const isOwn  = user?.id === trip?.driver_id
 
-  const isOwn = user?.id === trip?.driver_id
+  useEffect(() => {
+    if (!trip || !isOwn) return
+    setBookingsLoading(true)
+    bookingsApi.getByTrip(trip.id)
+      .then(setBookings)
+      .finally(() => setBookingsLoading(false))
+  }, [trip?.id, isOwn])
+
+  const handleConfirm = async (bookingId: string) => {
+    if (!user) return
+    setActionLoading(bookingId)
+    try {
+      await confirmBooking(bookingId, user.id)
+      setBookings((bs) => bs.map((b) => b.id === bookingId ? { ...b, status: 'confirmed' } : b))
+    } catch {
+      Alert.alert('Error', 'No se pudo confirmar la reserva')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleReject = async (bookingId: string) => {
+    Alert.alert('Rechazar solicitud', '¿Seguro que querés rechazar este pasajero?', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Rechazar', style: 'destructive', onPress: async () => {
+        if (!user) return
+        setActionLoading(bookingId)
+        try {
+          await cancelBooking(bookingId, user.id)
+          setBookings((bs) => bs.map((b) => b.id === bookingId ? { ...b, status: 'cancelled' } : b))
+        } catch {
+          Alert.alert('Error', 'No se pudo rechazar la reserva')
+        } finally {
+          setActionLoading(null)
+        }
+      }},
+    ])
+  }
 
   const computeTotal = (): number => {
     if (!trip) return 0
@@ -240,6 +283,68 @@ export default function ViajeDetailScreen() {
                 </View>
               )}
             </View>
+          </View>
+        )}
+
+        {/* Solicitudes de pasajeros — solo visible para el conductor */}
+        {isOwn && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Solicitudes {bookings.filter(b => b.status === 'pending').length > 0
+                ? `(${bookings.filter(b => b.status === 'pending').length} pendiente${bookings.filter(b => b.status === 'pending').length > 1 ? 's' : ''})`
+                : ''}
+            </Text>
+            {bookingsLoading ? (
+              <ActivityIndicator color={COLORS.primary} />
+            ) : bookings.length === 0 ? (
+              <View style={styles.emptyBookings}>
+                <Text style={styles.emptyBookingsText}>Todavía no hay solicitudes</Text>
+              </View>
+            ) : (
+              bookings.map((b) => (
+                <View key={b.id} style={styles.passengerCard}>
+                  <View style={styles.passengerRow}>
+                    <UserAvatar uri={b.passenger?.avatar_url} name={b.passenger?.full_name ?? '?'} size={40} />
+                    <View style={styles.passengerInfo}>
+                      <Text style={styles.passengerName}>{b.passenger?.full_name}</Text>
+                      <Text style={styles.passengerMeta}>
+                        {TRIP_TYPE_LABELS[b.segment]} · {b.seats_booked} asiento{b.seats_booked > 1 ? 's' : ''} · {b.payment_method}
+                      </Text>
+                      {b.passenger_message ? (
+                        <Text style={styles.passengerMsg}>"{b.passenger_message}"</Text>
+                      ) : null}
+                    </View>
+                    <View style={[styles.statusPill, { backgroundColor: BOOKING_STATUS_COLORS[b.status] + '25' }]}>
+                      <Text style={[styles.statusPillText, { color: BOOKING_STATUS_COLORS[b.status] }]}>
+                        {BOOKING_STATUS_LABELS[b.status]}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {b.status === 'pending' && (
+                    <View style={styles.actionRow}>
+                      <TouchableOpacity
+                        style={styles.rejectBtn}
+                        onPress={() => handleReject(b.id)}
+                        disabled={actionLoading === b.id}
+                      >
+                        <Text style={styles.rejectBtnText}>✕ Rechazar</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.acceptBtn, actionLoading === b.id && { opacity: 0.6 }]}
+                        onPress={() => handleConfirm(b.id)}
+                        disabled={actionLoading === b.id}
+                      >
+                        {actionLoading === b.id
+                          ? <ActivityIndicator size="small" color={COLORS.white} />
+                          : <Text style={styles.acceptBtnText}>✓ Aceptar</Text>
+                        }
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              ))
+            )}
           </View>
         )}
 
@@ -511,6 +616,37 @@ const styles = StyleSheet.create({
   totalLabel: { fontSize: 14, color: COLORS.textSecondary },
   totalAmount: { fontSize: 24, fontWeight: '900', color: COLORS.textPrimary },
   paymentDisclaimer: { fontSize: 12, color: COLORS.textMuted, textAlign: 'center' },
+  emptyBookings: {
+    backgroundColor: COLORS.card, borderRadius: RADIUS.lg,
+    padding: SPACING.md, borderWidth: 1, borderColor: COLORS.border, alignItems: 'center',
+  },
+  emptyBookingsText: { color: COLORS.textMuted, fontSize: 14 },
+  passengerCard: {
+    backgroundColor: COLORS.card, borderRadius: RADIUS.lg,
+    borderWidth: 1, borderColor: COLORS.border,
+    padding: SPACING.md, gap: SPACING.sm, marginBottom: SPACING.sm,
+  },
+  passengerRow: { flexDirection: 'row', gap: SPACING.sm, alignItems: 'flex-start' },
+  passengerInfo: { flex: 1 },
+  passengerName: { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
+  passengerMeta: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
+  passengerMsg: { fontSize: 13, color: COLORS.textMuted, fontStyle: 'italic', marginTop: 4 },
+  statusPill: {
+    paddingHorizontal: SPACING.sm, paddingVertical: 3,
+    borderRadius: RADIUS.full,
+  },
+  statusPillText: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase' },
+  actionRow: { flexDirection: 'row', gap: SPACING.sm },
+  rejectBtn: {
+    flex: 1, padding: SPACING.sm, borderRadius: RADIUS.md,
+    borderWidth: 1, borderColor: COLORS.error, alignItems: 'center',
+  },
+  rejectBtnText: { color: COLORS.error, fontWeight: '700', fontSize: 13 },
+  acceptBtn: {
+    flex: 2, padding: SPACING.sm, borderRadius: RADIUS.md,
+    backgroundColor: COLORS.success ?? '#22c55e', alignItems: 'center',
+  },
+  acceptBtnText: { color: COLORS.white, fontWeight: '800', fontSize: 13 },
   modalBtns: { flexDirection: 'row', gap: SPACING.sm },
   cancelModalBtn: {
     flex: 1, padding: SPACING.md, borderRadius: RADIUS.md,
