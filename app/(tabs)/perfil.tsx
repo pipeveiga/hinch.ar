@@ -184,10 +184,14 @@ export default function PerfilScreen() {
             )}
             <MenuItem
               icon="🪪"
-              label={user.is_verified ? '✅ Identidad verificada' : 'Verificar identidad'}
+              label={
+                user.is_verified ? '✅ Identidad verificada'
+                : user.verification_status === 'pending' ? '⏳ Verificación pendiente'
+                : 'Verificar identidad'
+              }
               onPress={() => {
-                if (user.is_verified) return
-                Alert.alert('Verificación', 'Te vamos a pedir foto del DNI y selfie para verificar tu identidad.')
+                if (user.is_verified || user.verification_status === 'pending') return
+                router.push('/verificacion')
               }}
             />
             <MenuItem

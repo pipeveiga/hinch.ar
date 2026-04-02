@@ -37,6 +37,8 @@ export interface User {
   car_plate?: string
   car_photo_url?: string
   is_active: boolean
+  verification_status: 'none' | 'pending' | 'approved' | 'rejected'
+  verification_submitted_at?: string
 }
 
 // Versión resumida para mostrar en cards/listas

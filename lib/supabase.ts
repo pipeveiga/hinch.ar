@@ -105,6 +105,38 @@ export const usersApi = {
 }
 
 // =============================================================================
+// VERIFICATION
+// =============================================================================
+
+export const verificationApi = {
+  async uploadPhoto(userId: string, type: 'dni_front' | 'dni_back' | 'selfie', uri: string): Promise<string> {
+    const ext  = uri.split('.').pop() ?? 'jpg'
+    const path = `${userId}/${type}.${ext}`
+
+    const response = await fetch(uri)
+    const blob     = await response.blob()
+
+    const { error } = await supabase.storage
+      .from('verifications')
+      .upload(path, blob, { upsert: true, contentType: `image/${ext}` })
+
+    if (error) throw error
+    return path
+  },
+
+  async submit(userId: string) {
+    const { error } = await supabase
+      .from('users')
+      .update({
+        verification_status:       'pending',
+        verification_submitted_at: new Date().toISOString(),
+      })
+      .eq('id', userId)
+    if (error) throw error
+  },
+}
+
+// =============================================================================
 // EVENTS
 // =============================================================================
 
