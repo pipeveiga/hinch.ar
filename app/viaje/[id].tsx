@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, ActivityIndicator, Modal, TextInput, Alert,
+  KeyboardAvoidingView, Platform,
 } from 'react-native'
 import { useLocalSearchParams, router, Stack } from 'expo-router'
 import { useTripsStore } from '@/stores/tripsStore'
@@ -431,7 +432,12 @@ export default function ViajeDetailScreen() {
 
       {/* Modal de edición — solo conductor */}
       <Modal visible={editModal} animationType="slide" transparent>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
         <View style={styles.modalOverlay}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }} keyboardShouldPersistTaps="handled">
           <View style={styles.modalSheet}>
             <Text style={styles.modalTitle}>Editar viaje</Text>
 
@@ -509,7 +515,9 @@ export default function ViajeDetailScreen() {
               <Text style={styles.deleteBtnText}>🗑️ Eliminar viaje</Text>
             </TouchableOpacity>
           </View>
+          </ScrollView>
         </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Modal de reserva */}
