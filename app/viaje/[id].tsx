@@ -522,7 +522,9 @@ export default function ViajeDetailScreen() {
 
       {/* Modal de reserva */}
       <Modal visible={modalVisible} animationType="slide" transparent>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={styles.modalOverlay}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }} keyboardShouldPersistTaps="handled">
           <View style={styles.modalSheet}>
             <Text style={styles.modalTitle}>Confirmar reserva</Text>
 
@@ -646,7 +648,9 @@ export default function ViajeDetailScreen() {
               </TouchableOpacity>
             </View>
           </View>
+          </ScrollView>
         </View>
+        </KeyboardAvoidingView>
       </Modal>
     </>
   )

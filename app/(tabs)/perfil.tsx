@@ -2,6 +2,7 @@ import { useState } from 'react'
 import {
   View, Text, TouchableOpacity, ScrollView,
   StyleSheet, Alert, Modal, TextInput, ActivityIndicator,
+  KeyboardAvoidingView, Platform,
 } from 'react-native'
 import { router } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
@@ -180,7 +181,9 @@ export default function PerfilScreen() {
 
       {/* Modal registro de auto */}
       <Modal visible={autoModal} animationType="slide" transparent>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={styles.modalOverlay}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }} keyboardShouldPersistTaps="handled">
           <View style={styles.modalSheet}>
             <Text style={styles.modalTitle}>
               {user.has_car ? 'Editar auto' : 'Registrar auto'}
@@ -228,7 +231,9 @@ export default function PerfilScreen() {
               </TouchableOpacity>
             </View>
           </View>
+          </ScrollView>
         </View>
+        </KeyboardAvoidingView>
       </Modal>
     </>
   )
