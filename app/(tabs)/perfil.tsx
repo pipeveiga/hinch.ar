@@ -34,8 +34,15 @@ function MenuItem({ icon, label, onPress, danger }: {
 
 export default function PerfilScreen() {
   const { user, setUser, signOut } = useAuthStore()
-  const [autoModal, setAutoModal] = useState(false)
-  const [saving, setSaving] = useState(false)
+  const [autoModal, setAutoModal]   = useState(false)
+  const [editModal, setEditModal]   = useState(false)
+  const [saving, setSaving]         = useState(false)
+  const [editSaving, setEditSaving] = useState(false)
+  const [editForm, setEditForm] = useState({
+    full_name: user?.full_name ?? '',
+    bio:       user?.bio       ?? '',
+    phone:     user?.phone     ?? '',
+  })
   const [carForm, setCarForm] = useState({
     car_brand: user?.car_brand ?? '',
     car_model: user?.car_model ?? '',
@@ -54,6 +61,24 @@ export default function PerfilScreen() {
         router.replace('/(auth)/login')
       }},
     ])
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editForm.full_name.trim()) { Alert.alert('El nombre no puede estar vacío'); return }
+    setEditSaving(true)
+    try {
+      await usersApi.updateProfile(user.id, {
+        full_name: editForm.full_name.trim(),
+        bio:       editForm.bio.trim()   || undefined,
+        phone:     editForm.phone.trim() || undefined,
+      })
+      setUser({ ...user, full_name: editForm.full_name.trim(), bio: editForm.bio.trim(), phone: editForm.phone.trim() })
+      setEditModal(false)
+    } catch {
+      Alert.alert('Error', 'No se pudo guardar el perfil')
+    } finally {
+      setEditSaving(false)
+    }
   }
 
   const handleSaveAuto = async () => {
@@ -145,7 +170,10 @@ export default function PerfilScreen() {
             <MenuItem
               icon="✏️"
               label="Editar perfil"
-              onPress={() => Alert.alert('Próximamente', 'Esta función viene en la v0.2')}
+              onPress={() => {
+                setEditForm({ full_name: user.full_name, bio: user.bio ?? '', phone: user.phone ?? '' })
+                setEditModal(true)
+              }}
             />
             {!user.has_car && (
               <MenuItem
@@ -178,6 +206,54 @@ export default function PerfilScreen() {
 
         <Text style={styles.version}>hinch.ar v0.1.0</Text>
       </ScrollView>
+
+      {/* Modal editar perfil */}
+      <Modal visible={editModal} animationType="slide" transparent>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <View style={styles.modalOverlay}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }} keyboardShouldPersistTaps="handled">
+          <View style={styles.modalSheet}>
+            <Text style={styles.modalTitle}>Editar perfil</Text>
+
+            {[
+              { key: 'full_name', label: 'Nombre completo', placeholder: 'Tu nombre' },
+              { key: 'phone',     label: 'Teléfono',        placeholder: '+54 9 11 1234-5678' },
+              { key: 'bio',       label: 'Bio',             placeholder: 'Contales algo sobre vos...' },
+            ].map(({ key, label, placeholder }) => (
+              <View key={key} style={styles.modalField}>
+                <Text style={styles.modalLabel}>{label}</Text>
+                <TextInput
+                  style={[styles.modalInput, key === 'bio' && { height: 80 }]}
+                  placeholder={placeholder}
+                  placeholderTextColor={COLORS.textMuted}
+                  value={editForm[key as keyof typeof editForm]}
+                  onChangeText={(v) => setEditForm((f) => ({ ...f, [key]: v }))}
+                  multiline={key === 'bio'}
+                  keyboardType={key === 'phone' ? 'phone-pad' : 'default'}
+                />
+              </View>
+            ))}
+
+            <View style={styles.modalBtns}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setEditModal(false)}>
+                <Text style={styles.cancelBtnText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.saveBtn, editSaving && { opacity: 0.6 }]}
+                onPress={handleSaveEdit}
+                disabled={editSaving}
+              >
+                {editSaving
+                  ? <ActivityIndicator color={COLORS.white} />
+                  : <Text style={styles.saveBtnText}>Guardar</Text>
+                }
+              </TouchableOpacity>
+            </View>
+          </View>
+          </ScrollView>
+        </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       {/* Modal registro de auto */}
       <Modal visible={autoModal} animationType="slide" transparent>
