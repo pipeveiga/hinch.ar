@@ -1,6 +1,11 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native'
+import { useState } from 'react'
+import {
+  View, Text, TouchableOpacity, ScrollView,
+  StyleSheet, Alert, Modal, TextInput, ActivityIndicator,
+} from 'react-native'
 import { router } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
+import { usersApi } from '@/lib/supabase'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
 import { UserAvatar } from '@/components/UserAvatar'
 import { VerificationBadge } from '@/components/VerificationBadge'
@@ -27,7 +32,16 @@ function MenuItem({ icon, label, onPress, danger }: {
 }
 
 export default function PerfilScreen() {
-  const { user, signOut } = useAuthStore()
+  const { user, setUser, signOut } = useAuthStore()
+  const [autoModal, setAutoModal] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [carForm, setCarForm] = useState({
+    car_brand: user?.car_brand ?? '',
+    car_model: user?.car_model ?? '',
+    car_year:  user?.car_year?.toString() ?? '',
+    car_color: user?.car_color ?? '',
+    car_plate: user?.car_plate ?? '',
+  })
 
   if (!user) return null
 
@@ -41,104 +55,182 @@ export default function PerfilScreen() {
     ])
   }
 
+  const handleSaveAuto = async () => {
+    if (!carForm.car_brand.trim()) { Alert.alert('Falta la marca del auto'); return }
+    if (!carForm.car_model.trim()) { Alert.alert('Falta el modelo'); return }
+    if (!carForm.car_year.trim())  { Alert.alert('Falta el año'); return }
+    if (!carForm.car_color.trim()) { Alert.alert('Falta el color'); return }
+
+    setSaving(true)
+    try {
+      await usersApi.updateProfile(user.id, {
+        has_car:   true,
+        car_brand: carForm.car_brand.trim(),
+        car_model: carForm.car_model.trim(),
+        car_year:  parseInt(carForm.car_year),
+        car_color: carForm.car_color.trim(),
+        car_plate: carForm.car_plate.trim() || null,
+      })
+      setUser({
+        ...user,
+        has_car:   true,
+        car_brand: carForm.car_brand.trim(),
+        car_model: carForm.car_model.trim(),
+        car_year:  parseInt(carForm.car_year),
+        car_color: carForm.car_color.trim(),
+        car_plate: carForm.car_plate.trim() || null,
+      })
+      setAutoModal(false)
+      Alert.alert('¡Auto registrado! 🚗', 'Ya podés publicar viajes.')
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo guardar el auto')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const driverRating   = user.avg_rating_as_driver.toFixed(1)
   const passengerRating = user.avg_rating_as_passenger.toFixed(1)
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header del perfil */}
-      <View style={styles.profileHeader}>
-        <UserAvatar uri={user.avatar_url} name={user.full_name} size={80} />
-
-        <View style={styles.nameRow}>
-          <Text style={styles.name}>{user.full_name}</Text>
-          <VerificationBadge verified={user.is_verified} />
+    <>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Header del perfil */}
+        <View style={styles.profileHeader}>
+          <UserAvatar uri={user.avatar_url} name={user.full_name} size={80} />
+          <View style={styles.nameRow}>
+            <Text style={styles.name}>{user.full_name}</Text>
+            <VerificationBadge verified={user.is_verified} />
+          </View>
+          {user.bio && <Text style={styles.bio}>{user.bio}</Text>}
+          <View style={styles.stats}>
+            {user.total_trips_as_driver > 0 && (
+              <StatBox value={`⭐ ${driverRating}`} label="Como conductor" />
+            )}
+            {user.total_trips_as_passenger > 0 && (
+              <StatBox value={`⭐ ${passengerRating}`} label="Como pasajero" />
+            )}
+            <StatBox value={user.total_trips_as_driver + user.total_trips_as_passenger} label="Viajes totales" />
+          </View>
         </View>
 
-        {user.bio && (
-          <Text style={styles.bio}>{user.bio}</Text>
+        {/* Auto */}
+        {user.has_car && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Mi auto</Text>
+            <TouchableOpacity
+              style={styles.carCard}
+              onPress={() => setAutoModal(true)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.carEmoji}>🚗</Text>
+              <View style={styles.carInfo}>
+                <Text style={styles.carName}>
+                  {user.car_brand} {user.car_model} {user.car_year}
+                </Text>
+                <Text style={styles.carDetail}>
+                  {user.car_color} · {user.car_plate ?? 'Sin patente'}
+                </Text>
+              </View>
+              <Text style={styles.menuChevron}>›</Text>
+            </TouchableOpacity>
+          </View>
         )}
 
-        {/* Stats */}
-        <View style={styles.stats}>
-          {user.total_trips_as_driver > 0 && (
-            <StatBox value={`⭐ ${driverRating}`} label="Como conductor" />
-          )}
-          {user.total_trips_as_passenger > 0 && (
-            <StatBox value={`⭐ ${passengerRating}`} label="Como pasajero" />
-          )}
-          <StatBox value={user.total_trips_as_driver + user.total_trips_as_passenger} label="Viajes totales" />
-        </View>
-      </View>
-
-      {/* Auto (si aplica) */}
-      {user.has_car && (
+        {/* Menú */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Mi auto</Text>
-          <View style={styles.carCard}>
-            <Text style={styles.carEmoji}>🚗</Text>
-            <View style={styles.carInfo}>
-              <Text style={styles.carName}>
-                {user.car_brand} {user.car_model} {user.car_year}
-              </Text>
-              <Text style={styles.carDetail}>
-                {user.car_color} · Patente: {user.car_plate ?? 'Sin cargar'}
-              </Text>
+          <Text style={styles.sectionTitle}>Cuenta</Text>
+          <View style={styles.menuCard}>
+            <MenuItem
+              icon="✏️"
+              label="Editar perfil"
+              onPress={() => Alert.alert('Próximamente', 'Esta función viene en la v0.2')}
+            />
+            {!user.has_car && (
+              <MenuItem
+                icon="🚗"
+                label="Registrar mi auto"
+                onPress={() => setAutoModal(true)}
+              />
+            )}
+            <MenuItem
+              icon="🪪"
+              label={user.is_verified ? '✅ Identidad verificada' : 'Verificar identidad'}
+              onPress={() => {
+                if (user.is_verified) return
+                Alert.alert('Verificación', 'Te vamos a pedir foto del DNI y selfie para verificar tu identidad.')
+              }}
+            />
+            <MenuItem
+              icon="❓"
+              label="Ayuda y soporte"
+              onPress={() => Alert.alert('Soporte', 'Escribinos a hola@hinch.ar')}
+            />
+          </View>
+        </View>
+
+        <View style={[styles.section, { marginBottom: SPACING.xxl }]}>
+          <View style={styles.menuCard}>
+            <MenuItem icon="🚪" label="Cerrar sesión" onPress={handleSignOut} danger />
+          </View>
+        </View>
+
+        <Text style={styles.version}>hinch.ar v0.1.0</Text>
+      </ScrollView>
+
+      {/* Modal registro de auto */}
+      <Modal visible={autoModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheet}>
+            <Text style={styles.modalTitle}>
+              {user.has_car ? 'Editar auto' : 'Registrar auto'}
+            </Text>
+            <Text style={styles.modalSubtitle}>
+              Necesitás un auto registrado para publicar viajes
+            </Text>
+
+            {[
+              { key: 'car_brand', label: 'Marca', placeholder: 'Ej: Volkswagen' },
+              { key: 'car_model', label: 'Modelo', placeholder: 'Ej: Gol Trend' },
+              { key: 'car_year',  label: 'Año',    placeholder: 'Ej: 2019', numeric: true },
+              { key: 'car_color', label: 'Color',  placeholder: 'Ej: Blanco' },
+              { key: 'car_plate', label: 'Patente (opcional)', placeholder: 'Ej: AB 123 CD' },
+            ].map(({ key, label, placeholder, numeric }) => (
+              <View key={key} style={styles.modalField}>
+                <Text style={styles.modalLabel}>{label}</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder={placeholder}
+                  placeholderTextColor={COLORS.textMuted}
+                  value={carForm[key as keyof typeof carForm]}
+                  onChangeText={(v) => setCarForm((f) => ({ ...f, [key]: v }))}
+                  keyboardType={numeric ? 'numeric' : 'default'}
+                />
+              </View>
+            ))}
+
+            <View style={styles.modalBtns}>
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() => setAutoModal(false)}
+              >
+                <Text style={styles.cancelBtnText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.saveBtn, saving && { opacity: 0.6 }]}
+                onPress={handleSaveAuto}
+                disabled={saving}
+              >
+                {saving
+                  ? <ActivityIndicator color={COLORS.white} />
+                  : <Text style={styles.saveBtnText}>Guardar</Text>
+                }
+              </TouchableOpacity>
             </View>
           </View>
         </View>
-      )}
-
-      {/* Menú */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Cuenta</Text>
-        <View style={styles.menuCard}>
-          <MenuItem
-            icon="✏️"
-            label="Editar perfil"
-            onPress={() => Alert.alert('Próximamente', 'Esta función viene en la v0.2')}
-          />
-          {!user.has_car && (
-            <MenuItem
-              icon="🚗"
-              label="Registrar mi auto"
-              onPress={() => Alert.alert('Próximamente', 'Esta función viene en la v0.2')}
-            />
-          )}
-          <MenuItem
-            icon="🪪"
-            label={user.is_verified ? '✅ Identidad verificada' : 'Verificar identidad'}
-            onPress={() => {
-              if (user.is_verified) return
-              Alert.alert('Verificación', 'Te vamos a pedir foto del DNI y selfie para verificar tu identidad.')
-            }}
-          />
-          <MenuItem
-            icon="🔔"
-            label="Notificaciones"
-            onPress={() => Alert.alert('Próximamente', 'Esta función viene en la v0.2')}
-          />
-          <MenuItem
-            icon="❓"
-            label="Ayuda y soporte"
-            onPress={() => Alert.alert('Soporte', 'Escribinos a hola@hinch.ar')}
-          />
-        </View>
-      </View>
-
-      <View style={[styles.section, { marginBottom: SPACING.xxl }]}>
-        <View style={styles.menuCard}>
-          <MenuItem
-            icon="🚪"
-            label="Cerrar sesión"
-            onPress={handleSignOut}
-            danger
-          />
-        </View>
-      </View>
-
-      <Text style={styles.version}>hinch.ar v0.1.0</Text>
-    </ScrollView>
+      </Modal>
+    </>
   )
 }
 
@@ -193,4 +285,34 @@ const styles = StyleSheet.create({
     textAlign: 'center', color: COLORS.textMuted,
     fontSize: 12, marginBottom: SPACING.xl,
   },
+  // Modal
+  modalOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: COLORS.surface, borderTopLeftRadius: RADIUS.xl,
+    borderTopRightRadius: RADIUS.xl, padding: SPACING.lg, gap: SPACING.md,
+  },
+  modalTitle: { fontSize: 20, fontWeight: '800', color: COLORS.textPrimary },
+  modalSubtitle: { fontSize: 13, color: COLORS.textSecondary, marginTop: -SPACING.xs },
+  modalField: { gap: SPACING.xs },
+  modalLabel: {
+    fontSize: 12, fontWeight: '700', color: COLORS.textSecondary,
+    textTransform: 'uppercase', letterSpacing: 0.5,
+  },
+  modalInput: {
+    backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border,
+    borderRadius: RADIUS.md, padding: SPACING.md, color: COLORS.textPrimary, fontSize: 15,
+  },
+  modalBtns: { flexDirection: 'row', gap: SPACING.sm, marginTop: SPACING.xs },
+  cancelBtn: {
+    flex: 1, padding: SPACING.md, borderRadius: RADIUS.md,
+    borderWidth: 1, borderColor: COLORS.border, alignItems: 'center',
+  },
+  cancelBtnText: { color: COLORS.textSecondary, fontWeight: '600' },
+  saveBtn: {
+    flex: 2, padding: SPACING.md, borderRadius: RADIUS.md,
+    backgroundColor: COLORS.primary, alignItems: 'center',
+  },
+  saveBtnText: { color: COLORS.white, fontWeight: '800', fontSize: 15 },
 })
