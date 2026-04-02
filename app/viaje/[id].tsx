@@ -21,11 +21,19 @@ import { es } from 'date-fns/locale'
 export default function ViajeDetailScreen() {
   const { id }         = useLocalSearchParams<{ id: string }>()
   const { user }       = useAuthStore()
-  const { selectedTrip, selectedTripLoading, loadTrip, bookTrip, confirmBooking, cancelBooking } = useTripsStore()
-  const [modalVisible, setModalVisible] = useState(false)
-  const [bookings, setBookings]         = useState<Booking[]>([])
+  const { selectedTrip, selectedTripLoading, loadTrip, bookTrip, confirmBooking, cancelBooking, cancelTrip } = useTripsStore()
+  const [modalVisible, setModalVisible]       = useState(false)
+  const [editModal, setEditModal]             = useState(false)
+  const [bookings, setBookings]               = useState<Booking[]>([])
   const [bookingsLoading, setBookingsLoading] = useState(false)
   const [actionLoading, setActionLoading]     = useState<string | null>(null)
+  const [editForm, setEditForm] = useState({
+    price_outbound: '',
+    price_return:   '',
+    seats_total:    '',
+    notes:          '',
+  })
+  const [editSaving, setEditSaving] = useState(false)
   const [booking, setBooking] = useState<NewBookingForm>({
     segment:           'ida',
     seats_booked:      1,
@@ -62,6 +70,58 @@ export default function ViajeDetailScreen() {
       Alert.alert('Error', 'No se pudo confirmar la reserva')
     } finally {
       setActionLoading(null)
+    }
+  }
+
+  const handleCancelTrip = () => {
+    Alert.alert(
+      'Cancelar viaje',
+      'Si cancelás, todos los pasajeros confirmados serán notificados. ¿Seguro?',
+      [
+        { text: 'No', style: 'cancel' },
+        { text: 'Sí, cancelar', style: 'destructive', onPress: async () => {
+          if (!user || !trip) return
+          try {
+            await cancelTrip(trip.id, user.id)
+            Alert.alert('Viaje cancelado', 'Tu viaje fue cancelado correctamente.')
+            router.back()
+          } catch {
+            Alert.alert('Error', 'No se pudo cancelar el viaje')
+          }
+        }},
+      ]
+    )
+  }
+
+  const openEdit = () => {
+    if (!trip) return
+    setEditForm({
+      price_outbound: trip.price_outbound?.toString() ?? '',
+      price_return:   trip.price_return?.toString()   ?? '',
+      seats_total:    trip.seats_total.toString(),
+      notes:          trip.notes ?? '',
+    })
+    setEditModal(true)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!trip || !user) return
+    setEditSaving(true)
+    try {
+      const { tripsApi } = await import('@/lib/supabase')
+      await tripsApi.update(trip.id, user.id, {
+        price_outbound: editForm.price_outbound ? parseFloat(editForm.price_outbound) : undefined,
+        price_return:   editForm.price_return   ? parseFloat(editForm.price_return)   : undefined,
+        seats_total:    editForm.seats_total    ? parseInt(editForm.seats_total)      : trip.seats_total,
+        notes:          editForm.notes,
+      })
+      setEditModal(false)
+      loadTrip(id)
+      Alert.alert('¡Listo!', 'Viaje actualizado correctamente.')
+    } catch {
+      Alert.alert('Error', 'No se pudo actualizar el viaje')
+    } finally {
+      setEditSaving(false)
     }
   }
 
@@ -140,6 +200,16 @@ export default function ViajeDetailScreen() {
           headerTitle:     'Detalle del viaje',
           headerStyle:     { backgroundColor: COLORS.surface },
           headerTintColor: COLORS.textPrimary,
+          headerRight: isOwn && trip?.status === 'active' ? () => (
+            <View style={{ flexDirection: 'row', gap: 8, marginRight: 8 }}>
+              <TouchableOpacity onPress={openEdit}>
+                <Text style={{ color: COLORS.primary, fontWeight: '700', fontSize: 15 }}>Editar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleCancelTrip}>
+                <Text style={{ color: COLORS.error, fontWeight: '700', fontSize: 15 }}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          ) : undefined,
         }}
       />
 
@@ -363,6 +433,82 @@ export default function ViajeDetailScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Modal de edición — solo conductor */}
+      <Modal visible={editModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheet}>
+            <Text style={styles.modalTitle}>Editar viaje</Text>
+
+            {(trip?.trip_type === 'ida' || trip?.trip_type === 'ida_y_vuelta') && (
+              <View style={styles.modalField}>
+                <Text style={styles.modalLabel}>Precio ida (ARS)</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  value={editForm.price_outbound}
+                  onChangeText={(v) => setEditForm((f) => ({ ...f, price_outbound: v }))}
+                  keyboardType="numeric"
+                  placeholderTextColor={COLORS.textMuted}
+                  placeholder="Ej: 8000"
+                />
+              </View>
+            )}
+
+            {(trip?.trip_type === 'vuelta' || trip?.trip_type === 'ida_y_vuelta') && (
+              <View style={styles.modalField}>
+                <Text style={styles.modalLabel}>Precio vuelta (ARS)</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  value={editForm.price_return}
+                  onChangeText={(v) => setEditForm((f) => ({ ...f, price_return: v }))}
+                  keyboardType="numeric"
+                  placeholderTextColor={COLORS.textMuted}
+                  placeholder="Ej: 8000"
+                />
+              </View>
+            )}
+
+            <View style={styles.modalField}>
+              <Text style={styles.modalLabel}>Asientos totales</Text>
+              <TextInput
+                style={styles.modalInput}
+                value={editForm.seats_total}
+                onChangeText={(v) => setEditForm((f) => ({ ...f, seats_total: v }))}
+                keyboardType="numeric"
+                placeholderTextColor={COLORS.textMuted}
+              />
+            </View>
+
+            <View style={styles.modalField}>
+              <Text style={styles.modalLabel}>Notas para pasajeros</Text>
+              <TextInput
+                style={[styles.modalInput, { height: 80 }]}
+                value={editForm.notes}
+                onChangeText={(v) => setEditForm((f) => ({ ...f, notes: v }))}
+                multiline
+                placeholderTextColor={COLORS.textMuted}
+                placeholder="Contales algo..."
+              />
+            </View>
+
+            <View style={styles.modalBtns}>
+              <TouchableOpacity style={styles.cancelModalBtn} onPress={() => setEditModal(false)}>
+                <Text style={styles.cancelModalBtnText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.confirmBtn, editSaving && styles.confirmBtnDisabled]}
+                onPress={handleSaveEdit}
+                disabled={editSaving}
+              >
+                {editSaving
+                  ? <ActivityIndicator color={COLORS.white} />
+                  : <Text style={styles.confirmBtnText}>Guardar cambios</Text>
+                }
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Modal de reserva */}
       <Modal visible={modalVisible} animationType="slide" transparent>

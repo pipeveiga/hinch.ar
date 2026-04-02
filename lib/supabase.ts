@@ -254,6 +254,20 @@ export const tripsApi = {
     return data as Trip
   },
 
+  async update(tripId: string, driverId: string, updates: {
+    price_outbound?: number
+    price_return?:   number
+    seats_total?:    number
+    notes?:          string
+  }) {
+    const { error } = await supabase
+      .from('trips')
+      .update(updates)
+      .eq('id', tripId)
+      .eq('driver_id', driverId)
+    if (error) throw error
+  },
+
   async cancel(tripId: string, driverId: string) {
     return supabase
       .from('trips')
