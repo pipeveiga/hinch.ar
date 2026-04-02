@@ -313,7 +313,7 @@ export default function ViajeDetailScreen() {
             <Text style={styles.sectionTitle}>Conductor</Text>
             <TouchableOpacity
               style={styles.driverCard}
-              onPress={() => {/* Futuro: perfil del conductor */}}
+              onPress={() => router.push(`/usuario/${driver.id}`)}
               activeOpacity={0.8}
             >
               <UserAvatar uri={driver.avatar_url} name={driver.full_name} size={52} />
@@ -369,7 +369,11 @@ export default function ViajeDetailScreen() {
             ) : (
               bookings.map((b) => (
                 <View key={b.id} style={styles.passengerCard}>
-                  <View style={styles.passengerRow}>
+                  <TouchableOpacity
+                    style={styles.passengerRow}
+                    onPress={() => b.passenger?.id && router.push(`/usuario/${b.passenger.id}`)}
+                    activeOpacity={0.7}
+                  >
                     <UserAvatar uri={b.passenger?.avatar_url} name={b.passenger?.full_name ?? '?'} size={40} />
                     <View style={styles.passengerInfo}>
                       <Text style={styles.passengerName}>{b.passenger?.full_name}</Text>
@@ -385,7 +389,7 @@ export default function ViajeDetailScreen() {
                         {BOOKING_STATUS_LABELS[b.status]}
                       </Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
 
                   {b.status === 'pending' && (
                     <View style={styles.actionRow}>
