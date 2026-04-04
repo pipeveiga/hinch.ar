@@ -173,7 +173,8 @@ export default function ViajeDetailScreen() {
         [{ text: 'OK', onPress: () => router.push('/(tabs)/mis-viajes') }]
       )
     } catch (err) {
-      Alert.alert('Error', err instanceof Error ? err.message : 'No se pudo reservar')
+      const msg = err instanceof Error ? err.message : (err as any)?.message ?? 'No se pudo reservar'
+      Alert.alert('Error', msg)
     } finally {
       setBookingLoading(false)
     }
@@ -445,11 +446,11 @@ export default function ViajeDetailScreen() {
 
       {/* Modal de edición — solo conductor */}
       <Modal visible={editModal} animationType="slide" transparent>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
         <View style={styles.modalOverlay}>
+          <KeyboardAvoidingView
+            style={{ width: '100%' }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
           <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }} keyboardShouldPersistTaps="handled">
           <View style={styles.modalSheet}>
             <Text style={styles.modalTitle}>Editar viaje</Text>
@@ -529,17 +530,17 @@ export default function ViajeDetailScreen() {
             </TouchableOpacity>
           </View>
           </ScrollView>
+          </KeyboardAvoidingView>
         </View>
-        </KeyboardAvoidingView>
       </Modal>
 
       {/* Modal de reserva */}
       <Modal visible={modalVisible} animationType="slide" transparent>
-        <KeyboardAvoidingView
-          style={{ flex: 1, justifyContent: 'flex-end' }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          <View style={styles.modalOverlay}>
+        <View style={styles.modalOverlay}>
+          <KeyboardAvoidingView
+            style={{ width: '100%' }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
             <ScrollView
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
@@ -668,8 +669,8 @@ export default function ViajeDetailScreen() {
             </View>
             </View>
             </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
+          </KeyboardAvoidingView>
+        </View>
       </Modal>
     </>
   )
