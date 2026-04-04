@@ -1,6 +1,8 @@
+import { useEffect } from 'react'
 import { Tabs, Redirect } from 'expo-router'
 import { View, Text, StyleSheet } from 'react-native'
 import { useAuthStore } from '@/stores/authStore'
+import { useNotificationsStore } from '@/stores/notificationsStore'
 import { COLORS, SPACING } from '@/lib/constants'
 
 function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focused: boolean }) {
@@ -12,8 +14,35 @@ function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focu
   )
 }
 
+function NotifTabIcon({ focused }: { focused: boolean }) {
+  const unreadCount = useNotificationsStore((s) => s.unreadCount)
+  return (
+    <View style={styles.tabIcon}>
+      <View>
+        <Text style={[styles.tabEmoji, focused && styles.tabEmojiFocused]}>🔔</Text>
+        {unreadCount > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+          </View>
+        )}
+      </View>
+      <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>Alertas</Text>
+    </View>
+  )
+}
+
 export default function TabsLayout() {
-  const { session } = useAuthStore()
+  const { session, user } = useAuthStore()
+  const { fetch, subscribe, unsubscribe } = useNotificationsStore()
+
+  useEffect(() => {
+    if (user) {
+      fetch(user.id)
+      subscribe(user.id)
+    }
+    return () => { unsubscribe() }
+  }, [user?.id])
+
   if (!session) return <Redirect href="/(auth)/login" />
 
   return (
@@ -39,6 +68,14 @@ export default function TabsLayout() {
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon emoji="🚗" label="Mis viajes" focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="notificaciones"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <NotifTabIcon focused={focused} />
           ),
         }}
       />
@@ -81,5 +118,15 @@ const styles = StyleSheet.create({
   tabLabelFocused: {
     color: COLORS.accent,
     fontWeight: '700',
+  },
+  badge: {
+    position: 'absolute', top: -4, right: -8,
+    backgroundColor: COLORS.error,
+    borderRadius: 8, minWidth: 16, height: 16,
+    alignItems: 'center', justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  badgeText: {
+    fontSize: 9, fontWeight: '800', color: COLORS.textPrimary,
   },
 })
