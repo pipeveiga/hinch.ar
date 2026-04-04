@@ -412,6 +412,15 @@ export default function ViajeDetailScreen() {
                       </TouchableOpacity>
                     </View>
                   )}
+                  {b.status === 'confirmed' && (
+                    <TouchableOpacity
+                      style={styles.chatBtn}
+                      onPress={() => router.push(`/chat/${b.id}`)}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.chatBtnText}>💬 Abrir chat</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               ))
             )}
@@ -824,6 +833,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.success ?? '#22c55e', alignItems: 'center',
   },
   acceptBtnText: { color: COLORS.white, fontWeight: '800', fontSize: 13 },
+  chatBtn: {
+    padding: SPACING.sm, borderRadius: RADIUS.md,
+    backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border,
+    alignItems: 'center', marginTop: SPACING.xs,
+  },
+  chatBtnText: { color: COLORS.textSecondary, fontWeight: '600', fontSize: 13 },
   modalBtns: { flexDirection: 'row', gap: SPACING.sm },
   cancelModalBtn: {
     flex: 1, padding: SPACING.md, borderRadius: RADIUS.md,

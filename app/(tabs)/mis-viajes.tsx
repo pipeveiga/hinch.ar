@@ -55,14 +55,25 @@ function BookingItem({ booking }: { booking: Booking }) {
         <Text style={styles.bookingAmount}>
           💵 ${booking.total_amount.toLocaleString('es-AR')}
         </Text>
-        {needsRating && (
-          <TouchableOpacity
-            style={styles.rateBtn}
-            onPress={() => router.push(`/calificar/${booking.id}`)}
-          >
-            <Text style={styles.rateBtnText}>⭐ Calificar</Text>
-          </TouchableOpacity>
-        )}
+        <View style={styles.bookingActions}>
+          {booking.status === 'confirmed' && (
+            <TouchableOpacity
+              style={styles.chatBtn}
+              onPress={(e) => { e.stopPropagation?.(); router.push(`/chat/${booking.id}`) }}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.chatBtnText}>💬 Chat</Text>
+            </TouchableOpacity>
+          )}
+          {needsRating && (
+            <TouchableOpacity
+              style={styles.rateBtn}
+              onPress={(e) => { e.stopPropagation?.(); router.push(`/calificar/${booking.id}`) }}
+            >
+              <Text style={styles.rateBtnText}>⭐ Calificar</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </TouchableOpacity>
   )
@@ -195,6 +206,12 @@ const styles = StyleSheet.create({
   bookingDate: { fontSize: 12, color: COLORS.textMuted },
   bookingFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: SPACING.xs },
   bookingAmount: { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
+  bookingActions: { flexDirection: 'row', gap: SPACING.sm },
+  chatBtn: {
+    backgroundColor: COLORS.primary + '20', borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs,
+  },
+  chatBtnText: { fontSize: 12, fontWeight: '700', color: COLORS.primaryLight },
   rateBtn: {
     backgroundColor: COLORS.accent + '20', borderRadius: RADIUS.full,
     paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs,

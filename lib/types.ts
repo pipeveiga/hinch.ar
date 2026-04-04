@@ -224,6 +224,18 @@ export interface AppNotification {
 }
 
 // =============================================================================
+// Message (chat por reserva)
+// =============================================================================
+export interface Message {
+  id: string
+  created_at: string
+  booking_id: string
+  sender_id: string
+  content: string
+  is_read: boolean
+}
+
+// =============================================================================
 // Helpers de navegación / UI
 // =============================================================================
 

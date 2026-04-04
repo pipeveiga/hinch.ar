@@ -2,7 +2,7 @@ import 'react-native-url-polyfill/auto'
 import { createClient } from '@supabase/supabase-js'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import type {
-  User, Event, Trip, Booking, Rating,
+  User, Event, Trip, Booking, Rating, Message,
   AppNotification, TripSearchFilters, NewTripForm, NewBookingForm, RatingScores,
 } from './types'
 
@@ -402,6 +402,29 @@ export const bookingsApi = {
       .eq('id', bookingId)
       .or(`passenger_id.eq.${userId}`)
   },
+
+  async getById(bookingId: string): Promise<Booking | null> {
+    const { data } = await supabase
+      .from('bookings')
+      .select(`
+        *,
+        passenger:users!passenger_id (
+          id, full_name, avatar_url, is_verified, avg_rating_as_passenger
+        ),
+        trip:trips!trip_id (
+          *,
+          driver:users!driver_id (
+            id, full_name, avatar_url, is_verified, avg_rating_as_driver
+          ),
+          event:events!event_id (
+            id, title, event_date, venue_name, venue_city, image_url
+          )
+        )
+      `)
+      .eq('id', bookingId)
+      .single()
+    return data as Booking | null
+  },
 }
 
 // =============================================================================
@@ -491,6 +514,52 @@ export const notificationsApi = {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
         (payload) => onNotification(payload.new as AppNotification),
+      )
+      .subscribe()
+  },
+}
+
+// =============================================================================
+// MESSAGES (chat por reserva)
+// =============================================================================
+
+export const messagesApi = {
+  async getMessages(bookingId: string): Promise<Message[]> {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('booking_id', bookingId)
+      .order('created_at', { ascending: true })
+    if (error) throw error
+    return data ?? []
+  },
+
+  async send(bookingId: string, senderId: string, content: string): Promise<Message> {
+    const { data, error } = await supabase
+      .from('messages')
+      .insert({ booking_id: bookingId, sender_id: senderId, content: content.trim() })
+      .select()
+      .single()
+    if (error) throw error
+    return data as Message
+  },
+
+  async markRead(bookingId: string, readerId: string) {
+    return supabase
+      .from('messages')
+      .update({ is_read: true })
+      .eq('booking_id', bookingId)
+      .eq('is_read', false)
+      .neq('sender_id', readerId)
+  },
+
+  subscribeToMessages(bookingId: string, onMessage: (m: Message) => void) {
+    return supabase
+      .channel(`chat:${bookingId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: `booking_id=eq.${bookingId}` },
+        (payload) => onMessage(payload.new as Message),
       )
       .subscribe()
   },
