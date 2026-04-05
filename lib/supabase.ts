@@ -89,12 +89,12 @@ export const usersApi = {
   async uploadAvatar(userId: string, uri: string): Promise<string> {
     const path = `${userId}/avatar_${Date.now()}.jpg`
 
-    const response = await fetch(uri)
-    const blob     = await response.blob()
+    const response    = await fetch(uri)
+    const arrayBuffer = await response.arrayBuffer()
 
     const { error } = await supabase.storage
       .from('avatars')
-      .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
+      .upload(path, arrayBuffer, { upsert: true, contentType: 'image/jpeg' })
 
     if (error) throw error
 
