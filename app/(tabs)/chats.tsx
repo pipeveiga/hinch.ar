@@ -104,7 +104,7 @@ export default function ChatsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   header: {
-    paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl, paddingBottom: SPACING.md,
+    paddingHorizontal: SPACING.lg, paddingTop: SPACING.xxl + SPACING.md, paddingBottom: SPACING.md,
     backgroundColor: COLORS.surface, borderBottomWidth: 1, borderBottomColor: COLORS.border,
   },
   headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.textPrimary },
