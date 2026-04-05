@@ -31,7 +31,6 @@ function ChatItem({ booking, userId }: { booking: Booking; userId: string }) {
       activeOpacity={0.75}
     >
       <UserAvatar uri={otherAvatar} name={otherName} size={48} />
-      </View>
       <View style={styles.info}>
         <View style={styles.row}>
           <Text style={styles.name} numberOfLines={1}>{otherName}</Text>
