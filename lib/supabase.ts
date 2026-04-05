@@ -441,6 +441,17 @@ export const bookingsApi = {
       .or(`passenger_id.eq.${userId}`)
   },
 
+  async getMyBookingForTrip(passengerId: string, tripId: string): Promise<Booking | null> {
+    const { data } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('passenger_id', passengerId)
+      .eq('trip_id', tripId)
+      .neq('status', 'cancelled')
+      .maybeSingle()
+    return data as Booking | null
+  },
+
   async getById(bookingId: string): Promise<Booking | null> {
     const { data } = await supabase
       .from('bookings')

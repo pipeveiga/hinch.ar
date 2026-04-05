@@ -43,6 +43,8 @@ export default function ViajeDetailScreen() {
     pickup_point:      '',
   })
   const [booking_loading, setBookingLoading] = useState(false)
+  const [myBooking, setMyBooking]             = useState<import('@/lib/types').Booking | null>(null)
+  const [cancelLoading, setCancelLoading]     = useState(false)
 
   useEffect(() => {
     loadTrip(id)
@@ -60,6 +62,11 @@ export default function ViajeDetailScreen() {
       .then(setBookings)
       .finally(() => setBookingsLoading(false))
   }, [trip?.id, isOwn])
+
+  useEffect(() => {
+    if (!trip || isOwn || !user) return
+    bookingsApi.getMyBookingForTrip(user.id, trip.id).then(setMyBooking)
+  }, [trip?.id, isOwn, user?.id])
 
   const handleConfirm = async (bookingId: string) => {
     if (!user) return
@@ -154,6 +161,32 @@ export default function ViajeDetailScreen() {
       total += (trip.price_return ?? 0) * booking.seats_booked
     }
     return total
+  }
+
+  const handleCancelMyBooking = () => {
+    if (!myBooking || !user) return
+    Alert.alert(
+      'Cancelar reserva',
+      '¿Seguro que querés cancelar tu reserva para este viaje?',
+      [
+        { text: 'No', style: 'cancel' },
+        {
+          text: 'Sí, cancelar',
+          style: 'destructive',
+          onPress: async () => {
+            setCancelLoading(true)
+            try {
+              await cancelBooking(myBooking.id, user.id)
+              setMyBooking(null)
+            } catch {
+              Alert.alert('Error', 'No se pudo cancelar la reserva.')
+            } finally {
+              setCancelLoading(false)
+            }
+          },
+        },
+      ]
+    )
   }
 
   const handleBooking = async () => {
@@ -431,16 +464,38 @@ export default function ViajeDetailScreen() {
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Botón reservar */}
-      {!isOwn && trip.status === 'active' && trip.seats_available > 0 && (
+      {/* Botón reservar / estado de mi reserva */}
+      {!isOwn && (
         <View style={styles.bottomBar}>
-          <TouchableOpacity
-            style={styles.reservarBtn}
-            onPress={() => setModalVisible(true)}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.reservarBtnText}>Reservar lugar</Text>
-          </TouchableOpacity>
+          {myBooking ? (
+            <View style={styles.myBookingBar}>
+              <View>
+                <Text style={styles.myBookingLabel}>Tu reserva</Text>
+                <Text style={[styles.myBookingStatus, { color: BOOKING_STATUS_COLORS[myBooking.status] }]}>
+                  {BOOKING_STATUS_LABELS[myBooking.status]}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.cancelBookingBtn}
+                onPress={handleCancelMyBooking}
+                disabled={cancelLoading}
+                activeOpacity={0.8}
+              >
+                {cancelLoading
+                  ? <ActivityIndicator size="small" color={COLORS.error} />
+                  : <Text style={styles.cancelBookingBtnText}>Cancelar reserva</Text>
+                }
+              </TouchableOpacity>
+            </View>
+          ) : trip.status === 'active' && trip.seats_available > 0 ? (
+            <TouchableOpacity
+              style={styles.reservarBtn}
+              onPress={() => setModalVisible(true)}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.reservarBtnText}>Reservar lugar</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       )}
 
@@ -748,6 +803,16 @@ const styles = StyleSheet.create({
     padding: SPACING.md, alignItems: 'center',
   },
   reservarBtnText: { color: COLORS.white, fontSize: 16, fontWeight: '800' },
+  myBookingBar: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+  },
+  myBookingLabel:  { fontSize: 12, color: COLORS.textMuted, fontWeight: '500' },
+  myBookingStatus: { fontSize: 16, fontWeight: '800', marginTop: 2 },
+  cancelBookingBtn: {
+    borderWidth: 1, borderColor: COLORS.error, borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm,
+  },
+  cancelBookingBtnText: { color: COLORS.error, fontWeight: '700', fontSize: 13 },
 
   // Modal
   modalOverlay: {
