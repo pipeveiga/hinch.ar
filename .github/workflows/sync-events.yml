@@ -24,7 +24,7 @@ jobs:
         env:
           SUPABASE_URL:        ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          APIFOOTBALL_KEY:     ${{ secrets.APIFOOTBALL_KEY }}
+          FOOTBALL_DATA_KEY:   ${{ secrets.FOOTBALL_DATA_KEY }}
           TICKETMASTER_KEY:    ${{ secrets.TICKETMASTER_KEY }}
         run: |
           mkdir -p /tmp/sync-deps
