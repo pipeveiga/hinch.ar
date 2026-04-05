@@ -33,6 +33,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
   },
 
   subscribe: (userId: string) => {
+    if (get().channel) return // ya suscripto
     const channel = notificationsApi.subscribeToNotifications(userId, (n) => {
       get().addNotification(n)
     })
