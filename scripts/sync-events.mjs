@@ -8,7 +8,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const SUPABASE_URL      = process.env.SUPABASE_URL
 const SUPABASE_SERVICE  = process.env.SUPABASE_SERVICE_KEY
-const FOOTBALL_DATA_KEY = process.env.FOOTBALL_DATA_KEY   // football-data.org
+// TheSportsDB no requiere key para el plan gratuito (key pública = "3")
 const TICKETMASTER_KEY  = process.env.TICKETMASTER_KEY
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE) {
@@ -28,82 +28,93 @@ function getDateRange() {
 }
 
 // =============================================================================
-// FOOTBALL-DATA.ORG — Ligas argentinas (plan gratuito)
-// Competiciones: BSA = Primera División Argentina
+// THESPORTSDB — Ligas argentinas (gratuito, sin key)
+// Liga Profesional Argentina: id=4406
+// Copa Argentina: id=4644
+// Copa Libertadores: id=4517
 // =============================================================================
 
-const COMPETICIONES = [
-  { code: 'BSA', name: 'Liga Profesional Argentina' },
+const LIGAS_AR = [
+  { id: 4406, name: 'Liga Profesional Argentina', featured: true },
+  { id: 4644, name: 'Copa Argentina', featured: false },
+  { id: 4517, name: 'Copa Libertadores', featured: false },
 ]
 
 const ESTADIOS = {
-  'Estadio Alberto J. Armando "La Bombonera"': { address: 'Brandsen 805', city: 'Buenos Aires', province: 'Buenos Aires' },
-  'Estadio Monumental':                         { address: 'Av. Figueroa Alcorta 7597', city: 'Buenos Aires', province: 'Buenos Aires' },
-  'Estadio Pedro Bidegain':                     { address: 'Av. Perito Moreno 5301', city: 'Buenos Aires', province: 'Buenos Aires' },
-  'Estadio Tomás Adolfo Ducó':                 { address: 'Av. Amancio Alcorta 2884', city: 'Buenos Aires', province: 'Buenos Aires' },
-  'Estadio Ciudad de La Plata':                 { address: 'Calle 25 y 527', city: 'La Plata', province: 'Buenos Aires' },
-  'Estadio Mario Alberto Kempes':               { address: 'Av. Cárcano s/n', city: 'Córdoba', province: 'Córdoba' },
-  'Estadio Marcelo Bielsa':                     { address: 'Av. Carlos Pellegrini 2890', city: 'Rosario', province: 'Santa Fe' },
-  'Estadio Juan Domingo Perón "El Cilindro"':  { address: 'Av. Galicia 2070', city: 'Avellaneda', province: 'Buenos Aires' },
-  'Estadio José Amalfitani':                    { address: 'Av. Juan B. Justo 9200', city: 'Buenos Aires', province: 'Buenos Aires' },
-  'Estadio Gigante de Arroyito':                { address: 'Av. Torcuato de Alvear 1000', city: 'Rosario', province: 'Santa Fe' },
+  'Estadio Alberto J. Armando': { address: 'Brandsen 805', city: 'Buenos Aires', province: 'Buenos Aires' },
+  'Estadio Monumental':         { address: 'Av. Figueroa Alcorta 7597', city: 'Buenos Aires', province: 'Buenos Aires' },
+  'Estadio Pedro Bidegain':     { address: 'Av. Perito Moreno 5301', city: 'Buenos Aires', province: 'Buenos Aires' },
+  'Estadio Tomás Adolfo Ducó': { address: 'Av. Amancio Alcorta 2884', city: 'Buenos Aires', province: 'Buenos Aires' },
+  'Estadio Ciudad de La Plata': { address: 'Calle 25 y 527', city: 'La Plata', province: 'Buenos Aires' },
+  'Estadio Mario Alberto Kempes': { address: 'Av. Cárcano s/n', city: 'Córdoba', province: 'Córdoba' },
+  'Estadio Marcelo Bielsa':     { address: 'Av. Carlos Pellegrini 2890', city: 'Rosario', province: 'Santa Fe' },
+  'Estadio Juan Domingo Perón': { address: 'Av. Galicia 2070', city: 'Avellaneda', province: 'Buenos Aires' },
+  'Estadio José Amalfitani':    { address: 'Av. Juan B. Justo 9200', city: 'Buenos Aires', province: 'Buenos Aires' },
+  'Estadio Gigante de Arroyito':{ address: 'Av. Torcuato de Alvear 1000', city: 'Rosario', province: 'Santa Fe' },
 }
 
 async function syncFootball() {
-  if (!FOOTBALL_DATA_KEY) {
-    console.log('⚠️  Sin FOOTBALL_DATA_KEY, saltando fútbol')
-    return 0
-  }
-
   const { from, to } = getDateRange()
+  const fromDate = new Date(from)
+  const toDate   = new Date(to)
   let total = 0
 
-  for (const comp of COMPETICIONES) {
-    console.log(`⚽ Sincronizando ${comp.name}...`)
+  for (const liga of LIGAS_AR) {
+    console.log(`⚽ Sincronizando ${liga.name}...`)
 
-    const url = `https://api.football-data.org/v4/competitions/${comp.code}/matches?dateFrom=${from}&dateTo=${to}&status=SCHEDULED`
-    const res = await fetch(url, {
-      headers: { 'X-Auth-Token': FOOTBALL_DATA_KEY }
-    })
-
+    // TheSportsDB: próximos 25 eventos de la liga
+    const url = `https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${liga.id}`
+    const res  = await fetch(url)
     const data = await res.json()
 
     if (!res.ok) {
-      console.error(`  Error ${res.status} en ${comp.name}:`, JSON.stringify(data))
+      console.error(`  Error ${res.status} en ${liga.name}`)
       continue
     }
 
-    const matches = data.matches ?? []
-    console.log(`  → ${matches.length} partidos encontrados`)
+    const events = data.events ?? []
+    // Filtrar solo los que caen en nuestro rango de fechas
+    const filtered = events.filter(e => {
+      if (!e.dateEvent) return false
+      const d = new Date(e.dateEvent)
+      return d >= fromDate && d <= toDate
+    })
+    console.log(`  → ${filtered.length} partidos en rango (de ${events.length} totales)`)
 
-    for (const m of matches) {
-      const homeTeam = m.homeTeam.name
-      const awayTeam = m.awayTeam.name
-      const title    = `${homeTeam} vs ${awayTeam}`
-      const venueName = m.venue ?? 'Estadio'
+    for (const e of events) {
+      if (!e.dateEvent) continue
+      const d = new Date(e.dateEvent)
+      if (d < fromDate || d > toDate) continue
+
+      const homeTeam  = e.strHomeTeam
+      const awayTeam  = e.strAwayTeam
+      const title     = `${homeTeam} vs ${awayTeam}`
+      const venueName = e.strVenue ?? 'Estadio'
       const venueInfo = ESTADIOS[venueName] ?? {
         address:  venueName,
         city:     'Buenos Aires',
         province: 'Buenos Aires',
       }
+      const time = e.strTime ?? '18:00:00'
+      const eventDate = `${e.dateEvent}T${time}Z`
 
       const event = {
         type:           'partido',
         title,
-        subtitle:       comp.name,
+        subtitle:       liga.name,
         venue_name:     venueName,
         venue_address:  venueInfo.address,
         venue_city:     venueInfo.city,
         venue_province: venueInfo.province,
-        event_date:     m.utcDate,
-        image_url:      m.homeTeam.crest ?? null,
+        event_date:     eventDate,
+        image_url:      e.strThumb ?? e.strBanner ?? null,
         home_team:      homeTeam,
         away_team:      awayTeam,
-        competition:    comp.name,
-        tags:           ['fútbol', comp.name.toLowerCase()],
+        competition:    liga.name,
+        tags:           ['fútbol', liga.name.toLowerCase()],
         is_active:      true,
-        is_featured:    true,
-        external_id:    `footballdata_${m.id}`,
+        is_featured:    liga.featured,
+        external_id:    `sportsdb_${e.idEvent}`,
       }
 
       const { error } = await supabase
