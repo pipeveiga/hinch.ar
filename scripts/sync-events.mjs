@@ -69,14 +69,20 @@ async function syncFootball() {
       }
     })
 
+    const data = await res.json()
+
     if (!res.ok) {
-      console.error(`  Error ${res.status} en ${liga.name}`)
+      console.error(`  Error ${res.status} en ${liga.name}:`, JSON.stringify(data))
       continue
     }
 
-    const data = await res.json()
+    if (data.errors && Object.keys(data.errors).length > 0) {
+      console.error(`  API error en ${liga.name}:`, JSON.stringify(data.errors))
+      continue
+    }
+
     const fixtures = data.response ?? []
-    console.log(`  → ${fixtures.length} partidos encontrados`)
+    console.log(`  → ${fixtures.length} partidos encontrados (quota: ${JSON.stringify(data.paging)})`)
 
     for (const f of fixtures) {
       const fixture  = f.fixture
@@ -149,14 +155,21 @@ async function syncConcerts() {
     `&sort=date,asc`
 
   const res  = await fetch(url)
+  const data = await res.json()
+
   if (!res.ok) {
-    console.error(`  Error ${res.status} en Ticketmaster`)
+    console.error(`  Error ${res.status} en Ticketmaster:`, JSON.stringify(data))
     return 0
   }
 
-  const data   = await res.json()
+  if (data.errors) {
+    console.error(`  Ticketmaster API error:`, JSON.stringify(data.errors))
+    return 0
+  }
+
   const events = data._embedded?.events ?? []
   console.log(`  → ${events.length} recitales encontrados`)
+  if (events.length === 0) console.log('  Debug TM response:', JSON.stringify(data).slice(0, 300))
 
   let total = 0
   for (const e of events) {
