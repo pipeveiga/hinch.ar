@@ -365,7 +365,16 @@ export const bookingsApi = {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      const msg = error.message ?? ''
+      if (msg.includes('bookings_trip_id_passenger_id_segment_key') || msg.includes('duplicate key'))
+        throw new Error('Ya tenés una reserva para este viaje y tramo.')
+      if (msg.includes('foreign key') || msg.includes('violates foreign key'))
+        throw new Error('El viaje ya no existe.')
+      if (msg.includes('check constraint') || msg.includes('violates check'))
+        throw new Error('Los datos ingresados no son válidos.')
+      throw new Error(msg || 'No se pudo reservar. Intentá de nuevo.')
+    }
     return data as Booking
   },
 
