@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { View, Text, Image, StyleSheet } from 'react-native'
 import { COLORS, RADIUS } from '@/lib/constants'
 
@@ -29,6 +29,8 @@ function getAvatarColor(name: string): string {
 
 export function UserAvatar({ uri, name, size = 40 }: UserAvatarProps) {
   const [imgError, setImgError] = useState(false)
+  // Resetear error cuando cambia la URI
+  useEffect(() => { setImgError(false) }, [uri])
   const initials = getInitials(name)
   const bgColor  = getAvatarColor(name)
   const fontSize = size * 0.36

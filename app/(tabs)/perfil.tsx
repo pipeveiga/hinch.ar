@@ -70,10 +70,9 @@ export default function PerfilScreen() {
     try {
       const uri = result.assets[0].uri
       const url = await usersApi.uploadAvatar(user!.id, uri)
-      if (url) {
-        await usersApi.updateProfile(user!.id, { avatar_url: url })
-        setUser({ ...user!, avatar_url: url })
-      }
+      await usersApi.updateProfile(user!.id, { avatar_url: url })
+      setUser({ ...user!, avatar_url: url })
+      Alert.alert('URL generada', url)  // debug temporal
     } catch (err: any) {
       Alert.alert('Error', err?.message ?? 'No se pudo subir la foto.')
     } finally {
