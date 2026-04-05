@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  tabText: { color: COLORS.textSecondary, fontSize: 13, fontWeight: '600' },
+  tabText: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '600' },
   tabTextActive: { color: COLORS.white },
   list: { padding: SPACING.lg, gap: SPACING.md, paddingBottom: SPACING.xxl },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: SPACING.md, padding: SPACING.xl },
