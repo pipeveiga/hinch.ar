@@ -21,7 +21,11 @@ jobs:
           node-version: '20'
 
       - name: Instalar dependencias
-        run: npm install @supabase/supabase-js
+        run: |
+          mkdir -p /tmp/sync-deps
+          cd /tmp/sync-deps
+          npm init -y
+          npm install @supabase/supabase-js
 
       - name: Sincronizar eventos
         env:
@@ -29,4 +33,5 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           APIFOOTBALL_KEY:     ${{ secrets.APIFOOTBALL_KEY }}
           TICKETMASTER_KEY:    ${{ secrets.TICKETMASTER_KEY }}
+          NODE_PATH:           /tmp/sync-deps/node_modules
         run: node scripts/sync-events.mjs
