@@ -2,16 +2,17 @@ import { useState } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, KeyboardAvoidingView, Platform,
-  ScrollView, Alert,
+  ScrollView, Alert, Pressable,
 } from 'react-native'
 import { router, Link } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
 
 export default function LoginScreen() {
-  const [email,    setEmail]    = useState('')
-  const [password, setPassword] = useState('')
-  const { signIn, isLoading }   = useAuthStore()
+  const [email,       setEmail]       = useState('')
+  const [password,    setPassword]    = useState('')
+  const [showPass,    setShowPass]    = useState(false)
+  const { signIn, isLoading }         = useAuthStore()
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
@@ -65,14 +66,19 @@ export default function LoginScreen() {
 
           <View style={styles.field}>
             <Text style={styles.label}>Contraseña</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="••••••••"
-              placeholderTextColor={COLORS.textMuted}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
+            <View style={styles.inputRow}>
+              <TextInput
+                style={styles.inputFlex}
+                placeholder="••••••••"
+                placeholderTextColor={COLORS.textMuted}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPass}
+              />
+              <Pressable onPress={() => setShowPass((v) => !v)} style={styles.eyeBtn}>
+                <Text style={styles.eyeIcon}>{showPass ? '🙈' : '👁️'}</Text>
+              </Pressable>
+            </View>
           </View>
 
           <TouchableOpacity
@@ -154,6 +160,18 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontSize: 16,
   },
+  inputRow: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: COLORS.card,
+    borderWidth: 1, borderColor: COLORS.border,
+    borderRadius: RADIUS.md,
+  },
+  inputFlex: {
+    flex: 1, padding: SPACING.md,
+    color: COLORS.textPrimary, fontSize: 16,
+  },
+  eyeBtn: { paddingHorizontal: SPACING.md },
+  eyeIcon: { fontSize: 18 },
   btn: {
     backgroundColor: COLORS.primary,
     borderRadius: RADIUS.md,

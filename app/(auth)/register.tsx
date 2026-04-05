@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  View, Text, TextInput, TouchableOpacity,
+  View, Text, TextInput, TouchableOpacity, Pressable,
   StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert,
 } from 'react-native'
 import { router, Link } from 'expo-router'
@@ -8,12 +8,14 @@ import { useAuthStore } from '@/stores/authStore'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
 
 export default function RegisterScreen() {
-  const [step, setStep]       = useState<1 | 2>(1)
+  const [step, setStep]         = useState<1 | 2>(1)
   const [fullName, setFullName] = useState('')
-  const [phone,    setPhone]   = useState('')
-  const [email,    setEmail]   = useState('')
+  const [phone,    setPhone]    = useState('')
+  const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [confirm,  setConfirm]  = useState('')
+  const [showPass,    setShowPass]    = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const { signUp, isLoading }   = useAuthStore()
 
   const handleNext = () => {
@@ -134,26 +136,36 @@ export default function RegisterScreen() {
 
             <View style={styles.field}>
               <Text style={styles.label}>Contraseña</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Mínimo 8 caracteres"
-                placeholderTextColor={COLORS.textMuted}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
+              <View style={styles.inputRow}>
+                <TextInput
+                  style={styles.inputFlex}
+                  placeholder="Mínimo 8 caracteres"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPass}
+                />
+                <Pressable onPress={() => setShowPass((v) => !v)} style={styles.eyeBtn}>
+                  <Text style={styles.eyeIcon}>{showPass ? '🙈' : '👁️'}</Text>
+                </Pressable>
+              </View>
             </View>
 
             <View style={styles.field}>
               <Text style={styles.label}>Repetir contraseña</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Igual que la anterior"
-                placeholderTextColor={COLORS.textMuted}
-                value={confirm}
-                onChangeText={setConfirm}
-                secureTextEntry
-              />
+              <View style={styles.inputRow}>
+                <TextInput
+                  style={styles.inputFlex}
+                  placeholder="Igual que la anterior"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={confirm}
+                  onChangeText={setConfirm}
+                  secureTextEntry={!showConfirm}
+                />
+                <Pressable onPress={() => setShowConfirm((v) => !v)} style={styles.eyeBtn}>
+                  <Text style={styles.eyeIcon}>{showConfirm ? '🙈' : '👁️'}</Text>
+                </Pressable>
+              </View>
             </View>
 
             <TouchableOpacity
@@ -208,6 +220,18 @@ const styles = StyleSheet.create({
     fontSize: 13, fontWeight: '600', color: COLORS.textSecondary,
     textTransform: 'uppercase', letterSpacing: 0.5,
   },
+  inputRow: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: COLORS.card,
+    borderWidth: 1, borderColor: COLORS.border,
+    borderRadius: RADIUS.md,
+  },
+  inputFlex: {
+    flex: 1, padding: SPACING.md,
+    color: COLORS.textPrimary, fontSize: 16,
+  },
+  eyeBtn: { paddingHorizontal: SPACING.md },
+  eyeIcon: { fontSize: 18 },
   input: {
     backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border,
     borderRadius: RADIUS.md, padding: SPACING.md, color: COLORS.textPrimary, fontSize: 16,
