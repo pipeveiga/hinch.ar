@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   View, Text, ScrollView, StyleSheet,
-  ActivityIndicator,
+  ActivityIndicator, TouchableOpacity, Modal, Image, Pressable,
 } from 'react-native'
 import { useLocalSearchParams, Stack } from 'expo-router'
 import { usersApi, ratingsApi } from '@/lib/supabase'
@@ -28,9 +28,10 @@ function StarRow({ score, label }: { score: number; label: string }) {
 
 export default function UsuarioPerfilScreen() {
   const { id }              = useLocalSearchParams<{ id: string }>()
-  const [user, setUser]     = useState<User | null>(null)
+  const [user, setUser]       = useState<User | null>(null)
   const [ratings, setRatings] = useState<Rating[]>([])
   const [loading, setLoading] = useState(true)
+  const [photoModal, setPhotoModal] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -75,7 +76,20 @@ export default function UsuarioPerfilScreen() {
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <UserAvatar uri={user.avatar_url} name={user.full_name} size={80} />
+          <TouchableOpacity onPress={() => user.avatar_url && setPhotoModal(true)} activeOpacity={0.85}>
+            <UserAvatar uri={user.avatar_url} name={user.full_name} size={80} />
+          </TouchableOpacity>
+
+          {/* Modal foto en grande */}
+          <Modal visible={photoModal} transparent animationType="fade">
+            <Pressable style={styles.photoModalBg} onPress={() => setPhotoModal(false)}>
+              <Image
+                source={{ uri: user.avatar_url! }}
+                style={styles.photoModalImg}
+                resizeMode="contain"
+              />
+            </Pressable>
+          </Modal>
           <View style={styles.nameRow}>
             <Text style={styles.name}>{user.full_name}</Text>
             <VerificationBadge verified={user.is_verified} />
@@ -183,6 +197,13 @@ const styles = StyleSheet.create({
   center:    { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
   notFound:  { color: COLORS.textMuted, fontSize: 15 },
 
+  photoModalBg: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.92)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  photoModalImg: {
+    width: '90%', height: '70%', borderRadius: RADIUS.md,
+  },
   header: {
     alignItems: 'center', gap: SPACING.xs,
     padding: SPACING.xl, paddingTop: SPACING.lg,

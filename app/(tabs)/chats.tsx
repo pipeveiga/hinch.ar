@@ -11,14 +11,18 @@ import { COLORS, SPACING, RADIUS, BOOKING_STATUS_COLORS } from '@/lib/constants'
 import type { Booking } from '@/lib/types'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { UserAvatar } from '@/components/UserAvatar'
 
 function ChatItem({ booking, userId }: { booking: Booking; userId: string }) {
-  const isDriver   = booking.trip?.driver?.id === userId || booking.trip?.driver_id === userId
-  const otherName  = isDriver
+  const isDriver    = booking.trip?.driver?.id === userId || booking.trip?.driver_id === userId
+  const otherName   = isDriver
     ? (booking.passenger?.full_name ?? 'Pasajero')
     : (booking.trip?.driver?.full_name ?? 'Conductor')
-  const eventTitle = booking.trip?.event?.title ?? '—'
-  const eventDate  = booking.trip?.event?.event_date
+  const otherAvatar = isDriver
+    ? booking.passenger?.avatar_url
+    : booking.trip?.driver?.avatar_url
+  const eventTitle  = booking.trip?.event?.title ?? '—'
+  const eventDate   = booking.trip?.event?.event_date
 
   return (
     <TouchableOpacity
@@ -26,8 +30,7 @@ function ChatItem({ booking, userId }: { booking: Booking; userId: string }) {
       onPress={() => router.push(`/chat/${booking.id}`)}
       activeOpacity={0.75}
     >
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{otherName.charAt(0).toUpperCase()}</Text>
+      <UserAvatar uri={otherAvatar} name={otherName} size={48} />
       </View>
       <View style={styles.info}>
         <View style={styles.row}>
@@ -114,12 +117,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md,
     backgroundColor: COLORS.card,
   },
-  avatar: {
-    width: 48, height: 48, borderRadius: 24,
-    backgroundColor: COLORS.primary + '30',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  avatarText: { fontSize: 20, fontWeight: '700', color: COLORS.primaryLight },
   info: { flex: 1, gap: 2 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   name: { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary, flex: 1 },
