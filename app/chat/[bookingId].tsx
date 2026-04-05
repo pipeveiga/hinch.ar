@@ -24,12 +24,18 @@ export default function ChatScreen() {
   const flatListRef = useRef<FlatList>(null)
   const channelRef = useRef<RealtimeChannel | null>(null)
 
-  // Nombre del otro participante
+  // Nombre e ID del otro participante
+  const isPassenger = user?.id === booking?.passenger_id
   const otherName = booking
-    ? user?.id === booking.passenger_id
+    ? isPassenger
       ? booking.trip?.driver?.full_name ?? 'Conductor'
       : booking.passenger?.full_name ?? 'Pasajero'
     : '...'
+  const otherId = booking
+    ? isPassenger
+      ? (booking.trip as any)?.driver_id ?? booking.trip?.driver?.id
+      : booking.passenger_id
+    : null
 
   useEffect(() => {
     if (!bookingId || !user) return
@@ -95,12 +101,16 @@ export default function ChatScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backText}>← Volver</Text>
         </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerName} numberOfLines={1}>{otherName}</Text>
+        <TouchableOpacity
+          style={styles.headerCenter}
+          onPress={() => otherId && router.push(`/usuario/${otherId}`)}
+          activeOpacity={otherId ? 0.7 : 1}
+        >
+          <Text style={styles.headerName} numberOfLines={1}>{otherName} {otherId ? '›' : ''}</Text>
           {booking?.trip?.event?.title ? (
             <Text style={styles.headerSub} numberOfLines={1}>{booking.trip.event.title}</Text>
           ) : null}
-        </View>
+        </TouchableOpacity>
         <View style={{ width: 70 }} />
       </View>
 

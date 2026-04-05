@@ -71,7 +71,7 @@ export default function PerfilScreen() {
       const uri = result.assets[0].uri
       const url = await usersApi.uploadAvatar(user!.id, uri)
       if (url) {
-        await usersApi.update(user!.id, { avatar_url: url })
+        await usersApi.updateProfile(user!.id, { avatar_url: url })
         setUser({ ...user!, avatar_url: url })
       }
     } catch {
