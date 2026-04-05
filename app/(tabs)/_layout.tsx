@@ -9,7 +9,7 @@ function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focu
   return (
     <View style={styles.tabIcon}>
       <Text style={[styles.tabEmoji, focused && styles.tabEmojiFocused]}>{emoji}</Text>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>{label}</Text>
+      <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]} numberOfLines={1}>{label}</Text>
     </View>
   )
 }
@@ -26,7 +26,7 @@ function NotifTabIcon({ focused }: { focused: boolean }) {
           </View>
         )}
       </View>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>Alertas</Text>
+      <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]} numberOfLines={1}>Alertas</Text>
     </View>
   )
 }
@@ -67,7 +67,7 @@ export default function TabsLayout() {
         name="mis-viajes"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="🚗" label="Mis viajes" focused={focused} />
+            <TabIcon emoji="🚗" label="Viajes" focused={focused} />
           ),
         }}
       />
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
     paddingTop: SPACING.sm,
-    height: 65,
+    height: 70,
   },
   tabIcon: {
     alignItems: 'center',
