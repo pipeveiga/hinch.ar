@@ -99,8 +99,7 @@ export const usersApi = {
     if (error) throw error
 
     const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-    // Forzar recarga evitando caché
-    return `${data.publicUrl}?t=${Date.now()}`
+    return data.publicUrl
   },
 }
 
