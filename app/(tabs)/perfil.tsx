@@ -4,6 +4,7 @@ import {
   StyleSheet, Alert, Modal, TextInput, ActivityIndicator,
   KeyboardAvoidingView, Platform,
 } from 'react-native'
+import * as ImagePicker from 'expo-image-picker'
 import { router } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
 import { usersApi } from '@/lib/supabase'
@@ -34,10 +35,11 @@ function MenuItem({ icon, label, onPress, danger }: {
 
 export default function PerfilScreen() {
   const { user, setUser, signOut } = useAuthStore()
-  const [autoModal, setAutoModal]   = useState(false)
-  const [editModal, setEditModal]   = useState(false)
-  const [saving, setSaving]         = useState(false)
-  const [editSaving, setEditSaving] = useState(false)
+  const [autoModal, setAutoModal]     = useState(false)
+  const [editModal, setEditModal]     = useState(false)
+  const [saving, setSaving]           = useState(false)
+  const [editSaving, setEditSaving]   = useState(false)
+  const [avatarLoading, setAvatarLoading] = useState(false)
   const [editForm, setEditForm] = useState({
     full_name: user?.full_name ?? '',
     bio:       user?.bio       ?? '',
@@ -50,6 +52,34 @@ export default function PerfilScreen() {
     car_color: user?.car_color ?? '',
     car_plate: user?.car_plate ?? '',
   })
+
+  const handlePickAvatar = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (status !== 'granted') {
+      Alert.alert('Permiso requerido', 'Necesitamos acceso a tu galería.')
+      return
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaType.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    })
+    if (result.canceled) return
+    setAvatarLoading(true)
+    try {
+      const uri = result.assets[0].uri
+      const url = await usersApi.uploadAvatar(user!.id, uri)
+      if (url) {
+        await usersApi.update(user!.id, { avatar_url: url })
+        setUser({ ...user!, avatar_url: url })
+      }
+    } catch {
+      Alert.alert('Error', 'No se pudo subir la foto.')
+    } finally {
+      setAvatarLoading(false)
+    }
+  }
 
   if (!user) return null
 
@@ -123,7 +153,13 @@ export default function PerfilScreen() {
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Header del perfil */}
         <View style={styles.profileHeader}>
-          <UserAvatar uri={user.avatar_url} name={user.full_name} size={80} />
+          <TouchableOpacity onPress={handlePickAvatar} activeOpacity={0.8} style={styles.avatarWrapper}>
+            <UserAvatar uri={user.avatar_url} name={user.full_name} size={80} />
+            {avatarLoading
+              ? <View style={styles.avatarOverlay}><ActivityIndicator color="#fff" /></View>
+              : <View style={styles.avatarOverlay}><Text style={styles.avatarCam}>📷</Text></View>
+            }
+          </TouchableOpacity>
           <View style={styles.nameRow}>
             <Text style={styles.name}>{user.full_name}</Text>
             <VerificationBadge verified={user.is_verified} />
@@ -321,6 +357,14 @@ export default function PerfilScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
+  avatarWrapper: { position: 'relative' },
+  avatarOverlay: {
+    position: 'absolute', bottom: 0, right: 0,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    width: 26, height: 26, borderRadius: 13,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  avatarCam: { fontSize: 13 },
   profileHeader: {
     alignItems: 'center',
     paddingTop: SPACING.xxl + SPACING.md,
