@@ -62,8 +62,8 @@ async function syncFootball() {
   for (const liga of LIGAS_AR) {
     console.log(`⚽ Sincronizando ${liga.name}...`)
 
-    // TheSportsDB: próximos 25 eventos de la liga
-    const url = `https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${liga.id}`
+    // TheSportsDB: próximos 25 eventos de la liga (key pública = 123)
+    const url = `https://www.thesportsdb.com/api/v1/json/123/eventsnextleague.php?id=${liga.id}`
     const res  = await fetch(url)
     const data = await res.json()
 
