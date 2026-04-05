@@ -334,6 +334,36 @@ export const bookingsApi = {
     return data ?? []
   },
 
+  async getDriverBookings(driverId: string): Promise<Booking[]> {
+    const { data: trips } = await supabase
+      .from('trips')
+      .select('id')
+      .eq('driver_id', driverId)
+    if (!trips?.length) return []
+    const tripIds = trips.map((t) => t.id)
+    const { data } = await supabase
+      .from('bookings')
+      .select(`
+        *,
+        passenger:users!passenger_id (
+          id, full_name, avatar_url, is_verified, avg_rating_as_passenger
+        ),
+        trip:trips!trip_id (
+          *,
+          driver:users!driver_id (
+            id, full_name, avatar_url, is_verified, avg_rating_as_driver
+          ),
+          event:events!event_id (
+            id, title, event_date, venue_name, venue_city, image_url
+          )
+        )
+      `)
+      .in('trip_id', tripIds)
+      .neq('status', 'cancelled')
+      .order('created_at', { ascending: false })
+    return data ?? []
+  },
+
   async getByTrip(tripId: string): Promise<Booking[]> {
     const { data } = await supabase
       .from('bookings')

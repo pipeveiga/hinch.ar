@@ -8,6 +8,7 @@ import { eventsApi } from '@/lib/supabase'
 import { COLORS, SPACING, RADIUS, EVENT_TYPE_ICONS } from '@/lib/constants'
 import type { Event, EventType } from '@/lib/types'
 import { EventCard } from '@/components/EventCard'
+import { useNotificationsStore } from '@/stores/notificationsStore'
 
 type Filter = 'todos' | EventType
 
@@ -17,6 +18,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false)
   const [filter,     setFilter]     = useState<Filter>('todos')
   const [search,     setSearch]     = useState('')
+  const unreadCount = useNotificationsStore((s) => s.unreadCount)
 
   const load = useCallback(async () => {
     try {
@@ -49,8 +51,22 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>⚽ hinch.ar</Text>
-        <Text style={styles.headerSubtitle}>¿A qué evento vas?</Text>
+        <View>
+          <Text style={styles.headerTitle}>⚽ hinch.ar</Text>
+          <Text style={styles.headerSubtitle}>¿A qué evento vas?</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.bellBtn}
+          onPress={() => router.push('/(tabs)/notificaciones')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.bellIcon}>🔔</Text>
+          {unreadCount > 0 && (
+            <View style={styles.bellBadge}>
+              <Text style={styles.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
 
       {/* Buscador */}
@@ -127,7 +143,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.xxl + SPACING.md,
     paddingBottom: SPACING.md,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
+  bellBtn: { position: 'relative', padding: SPACING.xs },
+  bellIcon: { fontSize: 24 },
+  bellBadge: {
+    position: 'absolute', top: 0, right: 0,
+    backgroundColor: COLORS.error,
+    borderRadius: 8, minWidth: 16, height: 16,
+    alignItems: 'center', justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  bellBadgeText: { fontSize: 9, fontWeight: '800', color: '#fff' },
   headerTitle: {
     fontSize: 28,
     fontWeight: '900',

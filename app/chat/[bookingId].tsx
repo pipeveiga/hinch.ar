@@ -50,7 +50,7 @@ export default function ChatScreen() {
 
       // Suscripción real-time
       channelRef.current = messagesApi.subscribeToMessages(bookingId, (m) => {
-        setMessages((prev) => [...prev, m])
+        setMessages((prev) => prev.some((x) => x.id === m.id) ? prev : [...prev, m])
         if (m.sender_id !== user!.id) {
           messagesApi.markRead(bookingId, user!.id)
         }
@@ -67,9 +67,8 @@ export default function ChatScreen() {
     setSending(true)
     setText('')
     try {
-      const msg = await messagesApi.send(bookingId, user.id, trimmed)
-      setMessages((prev) => [...prev, msg])
-      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100)
+      await messagesApi.send(bookingId, user.id, trimmed)
+      // el real-time subscription agrega el mensaje, evitando duplicados
     } finally {
       setSending(false)
     }

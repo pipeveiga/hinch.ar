@@ -72,12 +72,16 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="notificaciones"
+        name="chats"
         options={{
           tabBarIcon: ({ focused }) => (
-            <NotifTabIcon focused={focused} />
+            <TabIcon emoji="💬" label="Chats" focused={focused} />
           ),
         }}
+      />
+      <Tabs.Screen
+        name="notificaciones"
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="perfil"
