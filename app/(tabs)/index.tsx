@@ -9,8 +9,9 @@ import { COLORS, SPACING, RADIUS, EVENT_TYPE_ICONS } from '@/lib/constants'
 import type { Event, EventType } from '@/lib/types'
 import { EventCard } from '@/components/EventCard'
 import { useNotificationsStore } from '@/stores/notificationsStore'
+import { useCurrentUser } from '@/stores/authStore'
 
-type Filter = 'todos' | EventType
+type Filter = 'todos' | EventType | 'mi_ciudad'
 
 export default function HomeScreen() {
   const [events,     setEvents]     = useState<Event[]>([])
@@ -19,11 +20,12 @@ export default function HomeScreen() {
   const [filter,     setFilter]     = useState<Filter>('todos')
   const [search,     setSearch]     = useState('')
   const unreadCount = useNotificationsStore((s) => s.unreadCount)
+  const currentUser = useCurrentUser()
 
   const load = useCallback(async () => {
     try {
       const data = await eventsApi.list({
-        type: filter === 'todos' ? undefined : filter,
+        type: filter === 'todos' || filter === 'mi_ciudad' ? undefined : filter,
       })
       setEvents(data)
     } catch (err) {
@@ -42,10 +44,18 @@ export default function HomeScreen() {
     setRefreshing(false)
   }
 
-  const filtered = events.filter((e) =>
-    e.title.toLowerCase().includes(search.toLowerCase()) ||
-    e.venue_city.toLowerCase().includes(search.toLowerCase())
-  )
+  const userCity = currentUser?.city?.toLowerCase()
+
+  const filtered = events.filter((e) => {
+    const matchesSearch =
+      e.title.toLowerCase().includes(search.toLowerCase()) ||
+      e.venue_city.toLowerCase().includes(search.toLowerCase())
+    if (!matchesSearch) return false
+    if (filter === 'mi_ciudad' && userCity) {
+      return e.venue_city.toLowerCase().includes(userCity)
+    }
+    return true
+  })
 
   return (
     <View style={styles.container}>
@@ -80,22 +90,28 @@ export default function HomeScreen() {
         />
       </View>
 
-      {/* Filtros por tipo */}
+      {/* Filtros */}
       <View style={styles.filters}>
-        {(['todos', 'partido', 'recital'] as Filter[]).map((f) => (
-          <TouchableOpacity
-            key={f}
-            style={[styles.filterChip, filter === f && styles.filterChipActive]}
-            onPress={() => setFilter(f)}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
-              {f === 'todos'
-                ? 'Todos'
-                : `${EVENT_TYPE_ICONS[f as EventType]} ${f.charAt(0).toUpperCase() + f.slice(1)}s`}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {([
+          { key: 'todos',     label: 'Todos' },
+          { key: 'mi_ciudad', label: `📍 ${currentUser?.city ?? 'Mi ciudad'}` },
+          { key: 'partido',   label: '⚽ Partidos' },
+          { key: 'recital',   label: '🎸 Recitales' },
+        ] as { key: Filter; label: string }[]).map(({ key, label }) => {
+          if (key === 'mi_ciudad' && !currentUser?.city) return null
+          return (
+            <TouchableOpacity
+              key={key}
+              style={[styles.filterChip, filter === key && styles.filterChipActive]}
+              onPress={() => setFilter(key)}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.filterText, filter === key && styles.filterTextActive]}>
+                {label}
+              </Text>
+            </TouchableOpacity>
+          )
+        })}
       </View>
 
       {/* Lista de eventos */}
@@ -106,7 +122,11 @@ export default function HomeScreen() {
       ) : filtered.length === 0 ? (
         <View style={styles.center}>
           <Text style={styles.emptyIcon}>🏟️</Text>
-          <Text style={styles.emptyText}>No hay eventos próximos</Text>
+          <Text style={styles.emptyText}>
+            {filter === 'mi_ciudad'
+              ? `No hay eventos en ${currentUser?.city}`
+              : 'No hay eventos próximos'}
+          </Text>
           <Text style={styles.emptySubtext}>Volvé a revisar en los próximos días</Text>
         </View>
       ) : (
