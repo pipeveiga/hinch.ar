@@ -149,7 +149,28 @@ async function scrapeFixtures(liga) {
   return fixtures
 }
 
+async function discoverPromiedosUrls() {
+  console.log('🔍 Descubriendo URLs de promiedos.com.ar...')
+  const res = await fetch('https://www.promiedos.com.ar/', {
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; hinch.ar-bot/1.0)' }
+  })
+  const html = await res.text()
+  const $ = cheerio.load(html)
+  const links = []
+  $('a[href]').each((_, el) => {
+    const href = $(el).attr('href')
+    const text = $(el).text().trim()
+    if (href && !href.startsWith('http') && href.length > 1) {
+      links.push(`${text}: ${href}`)
+    }
+  })
+  console.log('Links internos encontrados:')
+  links.slice(0, 30).forEach(l => console.log(' ', l))
+}
+
 async function syncFootball() {
+  await discoverPromiedosUrls()
+
   const { from, to } = getDateRange()
   let total = 0
 
