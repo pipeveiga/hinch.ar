@@ -111,7 +111,7 @@ export default function MisViajesScreen() {
             onPress={() => setTab(t)}
           >
             <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
-              {t === 'reservas' ? '🎟️ Mis reservas' : '🚗 Conductor'}
+              {t === 'reservas' ? '🎟️ Reservas' : '🚗 Conductor'}
             </Text>
           </TouchableOpacity>
         ))}
