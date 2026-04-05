@@ -5,11 +5,11 @@ import {
 } from 'react-native'
 import { router } from 'expo-router'
 import { eventsApi } from '@/lib/supabase'
-import { COLORS, SPACING, RADIUS, EVENT_TYPE_ICONS } from '@/lib/constants'
+import { COLORS, SPACING, RADIUS } from '@/lib/constants'
 import type { Event, EventType } from '@/lib/types'
 import { EventCard } from '@/components/EventCard'
 import { useNotificationsStore } from '@/stores/notificationsStore'
-import { useCurrentUser } from '@/stores/authStore'
+import { useUserCity } from '@/hooks/useUserCity'
 
 type Filter = 'todos' | EventType | 'mi_ciudad'
 
@@ -20,7 +20,7 @@ export default function HomeScreen() {
   const [filter,     setFilter]     = useState<Filter>('todos')
   const [search,     setSearch]     = useState('')
   const unreadCount = useNotificationsStore((s) => s.unreadCount)
-  const currentUser = useCurrentUser()
+  const { city: userCity, loading: cityLoading } = useUserCity()
 
   const load = useCallback(async () => {
     try {
@@ -44,15 +44,13 @@ export default function HomeScreen() {
     setRefreshing(false)
   }
 
-  const userCity = currentUser?.city?.toLowerCase()
-
   const filtered = events.filter((e) => {
     const matchesSearch =
       e.title.toLowerCase().includes(search.toLowerCase()) ||
       e.venue_city.toLowerCase().includes(search.toLowerCase())
     if (!matchesSearch) return false
     if (filter === 'mi_ciudad' && userCity) {
-      return e.venue_city.toLowerCase().includes(userCity)
+      return e.venue_city.toLowerCase().includes(userCity.toLowerCase())
     }
     return true
   })
@@ -94,11 +92,11 @@ export default function HomeScreen() {
       <View style={styles.filters}>
         {([
           { key: 'todos',     label: 'Todos' },
-          { key: 'mi_ciudad', label: `📍 ${currentUser?.city ?? 'Mi ciudad'}` },
+          { key: 'mi_ciudad', label: cityLoading ? '📍 ...' : `📍 ${userCity ?? 'Mi ciudad'}` },
           { key: 'partido',   label: '⚽ Partidos' },
           { key: 'recital',   label: '🎸 Recitales' },
         ] as { key: Filter; label: string }[]).map(({ key, label }) => {
-          if (key === 'mi_ciudad' && !currentUser?.city) return null
+          if (key === 'mi_ciudad' && !cityLoading && !userCity) return null
           return (
             <TouchableOpacity
               key={key}
@@ -124,7 +122,7 @@ export default function HomeScreen() {
           <Text style={styles.emptyIcon}>🏟️</Text>
           <Text style={styles.emptyText}>
             {filter === 'mi_ciudad'
-              ? `No hay eventos en ${currentUser?.city}`
+              ? `No hay eventos en ${userCity}`
               : 'No hay eventos próximos'}
           </Text>
           <Text style={styles.emptySubtext}>Volvé a revisar en los próximos días</Text>
