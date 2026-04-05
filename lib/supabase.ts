@@ -86,21 +86,21 @@ export const usersApi = {
       .eq('id', id)
   },
 
-  async uploadAvatar(userId: string, uri: string): Promise<string | null> {
-    const ext  = uri.split('.').pop() ?? 'jpg'
-    const path = `${userId}/avatar.${ext}`
+  async uploadAvatar(userId: string, uri: string): Promise<string> {
+    const path = `${userId}/avatar_${Date.now()}.jpg`
 
     const response = await fetch(uri)
     const blob     = await response.blob()
 
     const { error } = await supabase.storage
       .from('avatars')
-      .upload(path, blob, { upsert: true, contentType: `image/${ext}` })
+      .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
 
-    if (error) return null
+    if (error) throw error
 
     const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-    return data.publicUrl
+    // Forzar recarga evitando caché
+    return `${data.publicUrl}?t=${Date.now()}`
   },
 }
 
