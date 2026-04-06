@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#080808"
+      "backgroundColor": "#0f172a"
     },
     "ios": {
       "supportsTablet": false,
@@ -24,7 +24,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#080808"
+        "backgroundColor": "#0f172a"
       },
       "package": "ar.hinch.app",
       "permissions": [
