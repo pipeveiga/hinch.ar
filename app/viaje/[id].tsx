@@ -233,6 +233,7 @@ export default function ViajeDetailScreen() {
         options={{
           headerShown:     true,
           headerTitle:     'Detalle del viaje',
+          headerBackTitle: '',
           headerStyle:     { backgroundColor: COLORS.surface },
           headerTintColor: COLORS.textPrimary,
           headerRight: isOwn && trip?.status === 'active' ? () => (

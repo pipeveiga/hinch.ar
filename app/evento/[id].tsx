@@ -76,6 +76,7 @@ export default function EventoScreen() {
         options={{
           headerShown:       true,
           headerTitle:       '',
+          headerBackTitle:   '',
           headerStyle:       { backgroundColor: COLORS.surface },
           headerTintColor:   COLORS.textPrimary,
           headerBackVisible: true,
