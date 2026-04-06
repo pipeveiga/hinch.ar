@@ -22,6 +22,7 @@ export default function RootLayout() {
           headerShown:        false,
           contentStyle:       { backgroundColor: COLORS.background },
           animation:          'slide_from_right',
+          headerBackTitle:    '',
         }}
       >
         <Stack.Screen name="(auth)"  options={{ animation: 'fade' }} />
