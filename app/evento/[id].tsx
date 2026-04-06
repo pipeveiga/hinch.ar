@@ -74,12 +74,13 @@ export default function EventoScreen() {
     <>
       <Stack.Screen
         options={{
-          headerShown:       true,
-          headerTitle:       '',
-          headerBackTitle:   '',
-          headerStyle:       { backgroundColor: COLORS.surface },
-          headerTintColor:   COLORS.textPrimary,
-          headerBackVisible: true,
+          headerShown:            true,
+          headerTitle:            '',
+          headerBackTitle:        '',
+          headerBackTitleVisible: false,
+          headerStyle:            { backgroundColor: COLORS.surface },
+          headerTintColor:        COLORS.textPrimary,
+          headerBackVisible:      true,
         }}
       />
 

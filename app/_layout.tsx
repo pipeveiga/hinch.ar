@@ -26,7 +26,7 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(auth)"  options={{ animation: 'fade' }} />
-        <Stack.Screen name="(tabs)"  options={{ animation: 'fade', headerBackTitle: '' }} />
+        <Stack.Screen name="(tabs)"  options={{ animation: 'fade', headerTitle: '', headerBackTitle: '' }} />
         <Stack.Screen name="evento/[id]"        options={{ headerBackTitle: '' }} />
         <Stack.Screen name="viaje/[id]"         options={{ headerBackTitle: '' }} />
         <Stack.Screen name="viaje/nuevo"        options={{ headerBackTitle: '' }} />
