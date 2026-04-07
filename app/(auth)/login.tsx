@@ -4,6 +4,7 @@ import {
   StyleSheet, KeyboardAvoidingView, Platform,
   ScrollView, Alert, Pressable,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, Link } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
@@ -36,9 +37,10 @@ export default function LoginScreen() {
   }
 
   return (
+    <SafeAreaView style={styles.flex} edges={['bottom']}>
     <KeyboardAvoidingView
       style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
         contentContainerStyle={styles.container}
@@ -78,6 +80,9 @@ export default function LoginScreen() {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPass}
+                returnKeyType="done"
+                onSubmitEditing={handleLogin}
+                textContentType="password"
               />
               <Pressable onPress={() => setShowPass((v) => !v)} style={styles.eyeBtn}>
                 <Text style={styles.eyeIcon}>{showPass ? '🙈' : '👁️'}</Text>
@@ -108,6 +113,7 @@ export default function LoginScreen() {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   )
 }
 
@@ -172,7 +178,7 @@ const styles = StyleSheet.create({
   },
   inputFlex: {
     flex: 1, padding: SPACING.md,
-    color: COLORS.textPrimary, fontSize: 16,
+    color: '#F1F5F9', fontSize: 16,
   },
   eyeBtn: { paddingHorizontal: SPACING.md },
   eyeIcon: { fontSize: 18 },

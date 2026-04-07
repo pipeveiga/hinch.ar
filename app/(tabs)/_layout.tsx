@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Tabs, Redirect } from 'expo-router'
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, Platform } from 'react-native'
 import { useAuthStore } from '@/stores/authStore'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import { useChatsStore } from '@/stores/chatsStore'
@@ -122,7 +122,8 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
     paddingTop: SPACING.sm,
-    height: 70,
+    height: Platform.OS === 'android' ? 65 : 70,
+    paddingBottom: Platform.OS === 'android' ? 8 : 0,
   },
   tabIcon: {
     alignItems: 'center',
