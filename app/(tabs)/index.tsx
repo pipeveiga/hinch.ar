@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from 'react'
 import {
   View, Text, FlatList, TextInput, TouchableOpacity,
-  StyleSheet, RefreshControl, ActivityIndicator,
+  StyleSheet, RefreshControl, ActivityIndicator, ScrollView,
 } from 'react-native'
 import { router } from 'expo-router'
 import { eventsApi } from '@/lib/supabase'
-import { COLORS, SPACING, RADIUS } from '@/lib/constants'
+import { COLORS, SPACING } from '@/lib/constants'
 import type { Event, EventType } from '@/lib/types'
 import { EventCard } from '@/components/EventCard'
 import { useNotificationsStore } from '@/stores/notificationsStore'
@@ -55,18 +55,22 @@ export default function HomeScreen() {
     return true
   })
 
+  const chips: { key: Filter; label: string }[] = [
+    { key: 'todos',     label: 'Todos' },
+    ...((!cityLoading && userCity) ? [{ key: 'mi_ciudad' as Filter, label: `📍 ${userCity}` }] : []),
+    { key: 'partido',   label: '⚽ Partidos' },
+    { key: 'recital',   label: '🎸 Recitales' },
+  ]
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>⚽ hinch.ar</Text>
-          <Text style={styles.headerSubtitle}>¿A qué evento vas?</Text>
-        </View>
+        <Text style={styles.headerTitle}>hinch.ar</Text>
         <TouchableOpacity
-          style={styles.bellBtn}
           onPress={() => router.push('/(tabs)/notificaciones')}
-          activeOpacity={0.7}
+          activeOpacity={0.6}
+          style={styles.bellBtn}
         >
           <Text style={styles.bellIcon}>🔔</Text>
           {unreadCount > 0 && (
@@ -78,7 +82,8 @@ export default function HomeScreen() {
       </View>
 
       {/* Buscador */}
-      <View style={styles.searchContainer}>
+      <View style={styles.searchWrap}>
+        <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar evento o ciudad..."
@@ -89,30 +94,27 @@ export default function HomeScreen() {
       </View>
 
       {/* Filtros */}
-      <View style={styles.filters}>
-        {([
-          { key: 'todos',     label: 'Todos' },
-          { key: 'mi_ciudad', label: cityLoading ? '📍 ...' : `📍 ${userCity ?? 'Mi ciudad'}` },
-          { key: 'partido',   label: '⚽ Partidos' },
-          { key: 'recital',   label: '🎸 Recitales' },
-        ] as { key: Filter; label: string }[]).map(({ key, label }) => {
-          if (key === 'mi_ciudad' && !cityLoading && !userCity) return null
-          return (
-            <TouchableOpacity
-              key={key}
-              style={[styles.filterChip, filter === key && styles.filterChipActive]}
-              onPress={() => setFilter(key)}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.filterText, filter === key && styles.filterTextActive]}>
-                {label}
-              </Text>
-            </TouchableOpacity>
-          )
-        })}
-      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filtersContent}
+        style={styles.filters}
+      >
+        {chips.map(({ key, label }) => (
+          <TouchableOpacity
+            key={key}
+            style={[styles.chip, filter === key && styles.chipActive]}
+            onPress={() => setFilter(key)}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.chipText, filter === key && styles.chipTextActive]}>
+              {label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-      {/* Lista de eventos */}
+      {/* Lista */}
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={COLORS.primary} />
@@ -121,9 +123,7 @@ export default function HomeScreen() {
         <View style={styles.center}>
           <Text style={styles.emptyIcon}>🏟️</Text>
           <Text style={styles.emptyText}>
-            {filter === 'mi_ciudad'
-              ? `No hay eventos en ${userCity}`
-              : 'No hay eventos próximos'}
+            {filter === 'mi_ciudad' ? `No hay eventos en ${userCity}` : 'No hay eventos próximos'}
           </Text>
           <Text style={styles.emptySubtext}>Volvé a revisar en los próximos días</Text>
         </View>
@@ -132,18 +132,12 @@ export default function HomeScreen() {
           data={filtered}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <EventCard
-              event={item}
-              onPress={() => router.push(`/evento/${item.id}`)}
-            />
+            <EventCard event={item} onPress={() => router.push(`/evento/${item.id}`)} />
           )}
           contentContainerStyle={styles.list}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
           refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={COLORS.primary}
-            />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
           }
           showsVerticalScrollIndicator={false}
         />
@@ -157,16 +151,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+
+  // Header
   header: {
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.xxl + SPACING.md,
-    paddingBottom: SPACING.md,
+    paddingTop: SPACING.xxl + SPACING.lg,
+    paddingBottom: SPACING.sm,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
-  bellBtn: { position: 'relative', padding: SPACING.xs },
-  bellIcon: { fontSize: 24 },
+  headerTitle: {
+    fontSize: 34,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+    letterSpacing: -1,
+  },
+  bellBtn: { position: 'relative', padding: 4 },
+  bellIcon: { fontSize: 22 },
   bellBadge: {
     position: 'absolute', top: 0, right: 0,
     backgroundColor: COLORS.error,
@@ -175,69 +177,72 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
   bellBadgeText: { fontSize: 9, fontWeight: '800', color: '#fff' },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: COLORS.textPrimary,
-    letterSpacing: -0.5,
-  },
-  headerSubtitle: {
-    fontSize: 15,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-  searchContainer: {
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
-  },
-  searchInput: {
-    backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: RADIUS.xl,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm + 2,
-    color: COLORS.textPrimary,
-    fontSize: 15,
-  },
-  filters: {
+
+  // Search
+  searchWrap: {
     flexDirection: 'row',
-    gap: SPACING.sm,
-    paddingHorizontal: SPACING.lg,
+    alignItems: 'center',
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+    marginTop: SPACING.xs,
+    backgroundColor: '#1C1C1E',
+    borderRadius: 12,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  searchIcon: { fontSize: 15 },
+  searchInput: {
+    flex: 1,
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    padding: 0,
+  },
+
+  // Filters
+  filters: {
     marginBottom: SPACING.md,
   },
-  filterChip: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs + 2,
-    borderRadius: RADIUS.full,
-    backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+  filtersContent: {
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.sm,
   },
-  filterChipActive: {
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    backgroundColor: '#1C1C1E',
+  },
+  chipActive: {
     backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
   },
-  filterText: {
+  chipText: {
+    fontSize: 14,
+    fontWeight: '500',
     color: COLORS.textSecondary,
-    fontSize: 13,
+  },
+  chipTextActive: {
+    color: '#fff',
     fontWeight: '600',
   },
-  filterTextActive: {
-    color: COLORS.white,
-  },
+
+  // List
   list: {
-    padding: SPACING.lg,
-    gap: SPACING.md,
-    paddingBottom: SPACING.xxl,
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.xxl + SPACING.lg,
   },
+  separator: {
+    height: SPACING.sm,
+  },
+
+  // Empty
   center: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: SPACING.sm,
   },
-  emptyIcon: { fontSize: 48 },
-  emptyText: { fontSize: 16, fontWeight: '600', color: COLORS.textPrimary },
-  emptySubtext: { fontSize: 13, color: COLORS.textSecondary },
+  emptyIcon:    { fontSize: 48 },
+  emptyText:    { fontSize: 17, fontWeight: '600', color: COLORS.textPrimary },
+  emptySubtext: { fontSize: 14, color: COLORS.textSecondary },
 })
