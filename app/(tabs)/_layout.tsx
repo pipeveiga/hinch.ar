@@ -52,13 +52,18 @@ function ChatsTabIcon({ focused }: { focused: boolean }) {
 export default function TabsLayout() {
   const { session, user } = useAuthStore()
   const { fetch, subscribe, unsubscribe } = useNotificationsStore()
+  const { initialize: initChats, unsubscribe: unsubChats } = useChatsStore()
 
   useEffect(() => {
     if (user) {
       fetch(user.id)
       subscribe(user.id)
+      initChats(user.id)
     }
-    return () => { unsubscribe() }
+    return () => {
+      unsubscribe()
+      unsubChats()
+    }
   }, [user?.id])
 
   if (!session) return <Redirect href="/(auth)/login" />

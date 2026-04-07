@@ -1,11 +1,12 @@
 import { create } from 'zustand'
-import { messagesApi } from '@/lib/supabase'
+import { messagesApi, bookingsApi } from '@/lib/supabase'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 
 interface ChatsState {
   unreadByBooking: Record<string, number>
   totalUnread: number
   channel: RealtimeChannel | null
+  initialize: (userId: string) => Promise<void>
   fetch: (userId: string, bookingIds: string[]) => Promise<void>
   markBookingRead: (bookingId: string) => void
   incrementBooking: (bookingId: string) => void
@@ -17,6 +18,21 @@ export const useChatsStore = create<ChatsState>((set, get) => ({
   unreadByBooking: {},
   totalUnread: 0,
   channel: null,
+
+  initialize: async (userId) => {
+    try {
+      const [asPassenger, asDriver] = await Promise.all([
+        bookingsApi.getMyBookings(userId),
+        bookingsApi.getDriverBookings(userId),
+      ])
+      const confirmed = [...asPassenger, ...asDriver].filter(
+        (b, i, arr) => b.status === 'confirmed' && arr.findIndex(x => x.id === b.id) === i
+      )
+      const ids = confirmed.map(b => b.id)
+      await get().fetch(userId, ids)
+      get().subscribe(userId, ids)
+    } catch { /* ignorar errores de red al iniciar */ }
+  },
 
   fetch: async (userId, bookingIds) => {
     const counts = await messagesApi.getUnreadCounts(userId, bookingIds)
