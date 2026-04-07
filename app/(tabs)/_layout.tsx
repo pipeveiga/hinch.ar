@@ -3,6 +3,7 @@ import { Tabs, Redirect } from 'expo-router'
 import { View, Text, StyleSheet } from 'react-native'
 import { useAuthStore } from '@/stores/authStore'
 import { useNotificationsStore } from '@/stores/notificationsStore'
+import { useChatsStore } from '@/stores/chatsStore'
 import { COLORS, SPACING } from '@/lib/constants'
 
 function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focused: boolean }) {
@@ -27,6 +28,23 @@ function NotifTabIcon({ focused }: { focused: boolean }) {
         )}
       </View>
       <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]} numberOfLines={1}>Alertas</Text>
+    </View>
+  )
+}
+
+function ChatsTabIcon({ focused }: { focused: boolean }) {
+  const totalUnread = useChatsStore((s) => s.totalUnread)
+  return (
+    <View style={styles.tabIcon}>
+      <View>
+        <Text style={[styles.tabEmoji, focused && styles.tabEmojiFocused]}>💬</Text>
+        {totalUnread > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{totalUnread > 9 ? '9+' : totalUnread}</Text>
+          </View>
+        )}
+      </View>
+      <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]} numberOfLines={1}>Chats</Text>
     </View>
   )
 }
@@ -74,9 +92,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="chats"
         options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="💬" label="Chats" focused={focused} />
-          ),
+          tabBarIcon: ({ focused }) => <ChatsTabIcon focused={focused} />,
         }}
       />
       <Tabs.Screen

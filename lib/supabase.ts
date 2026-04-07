@@ -653,6 +653,21 @@ export const messagesApi = {
       .neq('sender_id', readerId)
   },
 
+  async getUnreadCounts(userId: string, bookingIds: string[]): Promise<Record<string, number>> {
+    if (!bookingIds.length) return {}
+    const { data } = await supabase
+      .from('messages')
+      .select('booking_id')
+      .in('booking_id', bookingIds)
+      .eq('is_read', false)
+      .neq('sender_id', userId)
+    if (!data) return {}
+    return data.reduce<Record<string, number>>((acc, { booking_id }) => {
+      acc[booking_id] = (acc[booking_id] ?? 0) + 1
+      return acc
+    }, {})
+  },
+
   subscribeToMessages(bookingId: string, onMessage: (m: Message) => void) {
     return supabase
       .channel(`chat:${bookingId}`)
@@ -660,6 +675,22 @@ export const messagesApi = {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `booking_id=eq.${bookingId}` },
         (payload) => onMessage(payload.new as Message),
+      )
+      .subscribe()
+  },
+
+  subscribeToUserMessages(bookingIds: string[], senderId: string, onNew: (bookingId: string) => void) {
+    return supabase
+      .channel('user_messages_unread')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          const msg = payload.new as { booking_id: string; sender_id: string }
+          if (msg.sender_id !== senderId && bookingIds.includes(msg.booking_id)) {
+            onNew(msg.booking_id)
+          }
+        },
       )
       .subscribe()
   },

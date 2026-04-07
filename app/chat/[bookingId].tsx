@@ -6,6 +6,7 @@ import {
 } from 'react-native'
 import { useLocalSearchParams, router } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useChatsStore } from '@/stores/chatsStore'
 import { messagesApi, bookingsApi } from '@/lib/supabase'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
 import type { Message, Booking } from '@/lib/types'
@@ -20,6 +21,7 @@ export default function ChatScreen() {
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
+  const markBookingRead = useChatsStore((s) => s.markBookingRead)
 
   const flatListRef = useRef<FlatList>(null)
   const channelRef = useRef<RealtimeChannel | null>(null)
@@ -53,6 +55,7 @@ export default function ChatScreen() {
       setMessages(msgs)
       setBooking(bk)
       await messagesApi.markRead(bookingId, user!.id)
+      markBookingRead(bookingId)
 
       // Suscripción real-time
       channelRef.current = messagesApi.subscribeToMessages(bookingId, (m) => {
