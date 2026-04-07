@@ -26,10 +26,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   initialize: async () => {
     try {
-      // INITIAL_SESSION es la forma correcta de restaurar sesión en React Native
-      // (getSession() puede fallar al leer AsyncStorage en Android)
+      // Escuchar cambios futuros de sesión
       auth.onAuthStateChange(async (event, session) => {
         if (event === 'INITIAL_SESSION') {
+          // Solo actuar si aún no nos hidratamos (getSession() puede llegar primero)
+          if (get().isHydrated) return
           let user: User | null = null
           if (session) {
             try { user = await usersApi.getMe() } catch { /* ignorar */ }
@@ -37,16 +38,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           set({ session, user, isLoading: false, isHydrated: true })
         } else if (event === 'SIGNED_IN') {
           set({ session })
-          try {
-            const user = await usersApi.getMe()
-            set({ user })
-          } catch { /* ignorar */ }
+          try { set({ user: await usersApi.getMe() }) } catch { /* ignorar */ }
         } else if (event === 'TOKEN_REFRESHED') {
           set({ session })
         } else if (event === 'SIGNED_OUT') {
           set({ user: null, session: null })
         }
       })
+
+      // Fallback inmediato: getSession() lee AsyncStorage directamente.
+      // En Android a veces llega antes que INITIAL_SESSION.
+      const { data: { session } } = await auth.getSession()
+      if (get().isHydrated) return  // INITIAL_SESSION ya lo manejó
+      let user: User | null = null
+      if (session) {
+        try { user = await usersApi.getMe() } catch { /* ignorar */ }
+      }
+      set({ session, user, isLoading: false, isHydrated: true })
     } catch (error) {
       console.error('[AuthStore] Error al inicializar:', error)
       set({ isLoading: false, isHydrated: true })
