@@ -206,6 +206,7 @@ const styles = StyleSheet.create({
   filtersContent: {
     paddingHorizontal: SPACING.lg,
     gap: SPACING.sm,
+    paddingRight: SPACING.xxl,
   },
   chip: {
     paddingHorizontal: 14,
