@@ -16,6 +16,7 @@ export default function RegisterScreen() {
   const [confirm,  setConfirm]  = useState('')
   const [showPass,    setShowPass]    = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [aceptaTerminos, setAceptaTerminos] = useState(false)
   const { signUp, isLoading }   = useAuthStore()
 
   const handleNext = () => {
@@ -41,6 +42,10 @@ export default function RegisterScreen() {
     }
     if (password !== confirm) {
       Alert.alert('Las contraseñas no coinciden', 'Revisá que sean iguales.')
+      return
+    }
+    if (!aceptaTerminos) {
+      Alert.alert('Términos y Condiciones', 'Tenés que aceptar los Términos y la Política de Privacidad para continuar.')
       return
     }
     try {
@@ -172,10 +177,31 @@ export default function RegisterScreen() {
               </View>
             </View>
 
+            {/* Checkbox T&C */}
             <TouchableOpacity
-              style={[styles.btn, isLoading && styles.btnDisabled]}
+              style={styles.checkboxRow}
+              onPress={() => setAceptaTerminos((v) => !v)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.checkbox, aceptaTerminos && styles.checkboxChecked]}>
+                {aceptaTerminos && <Text style={styles.checkmark}>✓</Text>}
+              </View>
+              <Text style={styles.checkboxText}>
+                Leí y acepto los{' '}
+                <Text style={styles.checkboxLink} onPress={() => router.push('/terminos')}>
+                  Términos y Condiciones
+                </Text>
+                {' '}y la{' '}
+                <Text style={styles.checkboxLink} onPress={() => router.push('/privacidad')}>
+                  Política de Privacidad
+                </Text>
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.btn, (isLoading || !aceptaTerminos) && styles.btnDisabled]}
               onPress={handleRegister}
-              disabled={isLoading}
+              disabled={isLoading || !aceptaTerminos}
               activeOpacity={0.8}
             >
               <Text style={styles.btnText}>
@@ -199,9 +225,16 @@ export default function RegisterScreen() {
           </Link>
         </View>
 
-        <Text style={styles.terms}>
-          Al registrarte aceptás nuestros Términos de Uso y Política de Privacidad.
-        </Text>
+        <View style={styles.termsRow}>
+          <Text style={styles.termsText}>Podés leer nuestros </Text>
+          <TouchableOpacity onPress={() => router.push('/terminos')}>
+            <Text style={styles.termsLink}>Términos</Text>
+          </TouchableOpacity>
+          <Text style={styles.termsText}> y </Text>
+          <TouchableOpacity onPress={() => router.push('/privacidad')}>
+            <Text style={styles.termsLink}>Privacidad</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   )
@@ -251,5 +284,20 @@ const styles = StyleSheet.create({
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: SPACING.xl },
   footerText: { color: COLORS.textSecondary, fontSize: 14 },
   footerLink: { color: COLORS.primaryLight, fontSize: 14, fontWeight: '600' },
-  terms: { color: COLORS.textMuted, fontSize: 11, textAlign: 'center', marginTop: SPACING.md },
+  termsRow: { flexDirection: 'row', justifyContent: 'center', marginTop: SPACING.md, flexWrap: 'wrap' },
+  termsText: { color: COLORS.textMuted, fontSize: 11 },
+  termsLink: { color: COLORS.primaryLight, fontSize: 11 },
+  checkboxRow: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm, marginTop: SPACING.xs,
+  },
+  checkbox: {
+    width: 22, height: 22, borderRadius: 6,
+    borderWidth: 1.5, borderColor: COLORS.border,
+    alignItems: 'center', justifyContent: 'center',
+    marginTop: 1,
+  },
+  checkboxChecked: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  checkmark: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  checkboxText: { flex: 1, fontSize: 13, color: COLORS.textSecondary, lineHeight: 20 },
+  checkboxLink: { color: COLORS.primaryLight, fontWeight: '600' },
 })
