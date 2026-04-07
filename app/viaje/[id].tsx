@@ -734,7 +734,7 @@ export default function ViajeDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.background, paddingTop: SPACING.md },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
   eventBadge: {
     backgroundColor: COLORS.surface, padding: SPACING.md,
