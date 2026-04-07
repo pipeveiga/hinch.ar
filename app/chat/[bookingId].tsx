@@ -63,7 +63,6 @@ export default function ChatScreen() {
         if (m.sender_id !== user!.id) {
           messagesApi.markRead(bookingId, user!.id)
         }
-        setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100)
       })
     } finally {
       setLoading(false)
@@ -119,7 +118,7 @@ export default function ChatScreen() {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior="padding"
         keyboardVerticalOffset={0}
       >
         {loading ? (
@@ -129,11 +128,11 @@ export default function ChatScreen() {
         ) : (
           <FlatList
             ref={flatListRef}
-            data={messages}
+            data={[...messages].reverse()}
             keyExtractor={(m) => m.id}
             renderItem={renderMessage}
             contentContainerStyle={styles.list}
-            onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
+            inverted
             ListEmptyComponent={
               <View style={styles.empty}>
                 <Text style={styles.emptyIcon}>💬</Text>
@@ -193,8 +192,6 @@ const styles = StyleSheet.create({
   list: {
     padding: SPACING.md,
     gap: SPACING.sm,
-    flexGrow: 1,
-    justifyContent: 'flex-end',
   },
 
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: SPACING.sm, paddingVertical: 60 },
