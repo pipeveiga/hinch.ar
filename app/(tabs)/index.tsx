@@ -62,25 +62,8 @@ export default function HomeScreen() {
     { key: 'recital',   label: '🎸 Recitales' },
   ]
 
-  return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>hinch.ar</Text>
-        <TouchableOpacity
-          onPress={() => router.push('/(tabs)/notificaciones')}
-          activeOpacity={0.6}
-          style={styles.bellBtn}
-        >
-          <Text style={styles.bellIcon}>🔔</Text>
-          {unreadCount > 0 && (
-            <View style={styles.bellBadge}>
-              <Text style={styles.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-      </View>
-
+  const ListHeader = (
+    <View>
       {/* Buscador */}
       <View style={styles.searchWrap}>
         <Text style={styles.searchIcon}>🔍</Text>
@@ -113,24 +96,49 @@ export default function HomeScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+    </View>
+  )
 
-      {/* Lista */}
+  return (
+    <View style={styles.container}>
+      {/* Header fijo */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>hinch.ar</Text>
+        <TouchableOpacity
+          onPress={() => router.push('/(tabs)/notificaciones')}
+          activeOpacity={0.6}
+          style={styles.bellBtn}
+        >
+          <Text style={styles.bellIcon}>🔔</Text>
+          {unreadCount > 0 && (
+            <View style={styles.bellBadge}>
+              <Text style={styles.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      {/* Lista con header integrado */}
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : filtered.length === 0 ? (
-        <View style={styles.center}>
-          <Text style={styles.emptyIcon}>🏟️</Text>
-          <Text style={styles.emptyText}>
-            {filter === 'mi_ciudad' ? `No hay eventos en ${userCity}` : 'No hay eventos próximos'}
-          </Text>
-          <Text style={styles.emptySubtext}>Volvé a revisar en los próximos días</Text>
-        </View>
+        <>
+          {ListHeader}
+          <View style={styles.center}>
+            <Text style={styles.emptyIcon}>🏟️</Text>
+            <Text style={styles.emptyText}>
+              {filter === 'mi_ciudad' ? `No hay eventos en ${userCity}` : 'No hay eventos próximos'}
+            </Text>
+            <Text style={styles.emptySubtext}>Volvé a revisar en los próximos días</Text>
+          </View>
+        </>
       ) : (
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.id}
+          ListHeaderComponent={ListHeader}
           renderItem={({ item }) => (
             <EventCard event={item} onPress={() => router.push(`/evento/${item.id}`)} />
           )}
@@ -152,7 +160,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
 
-  // Header
   header: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.xxl + SPACING.lg,
@@ -178,7 +185,6 @@ const styles = StyleSheet.create({
   },
   bellBadgeText: { fontSize: 9, fontWeight: '800', color: '#fff' },
 
-  // Search
   searchWrap: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -199,14 +205,12 @@ const styles = StyleSheet.create({
     padding: 0,
   },
 
-  // Filters
   filters: {
     marginBottom: SPACING.md,
   },
   filtersContent: {
     paddingHorizontal: SPACING.lg,
     gap: SPACING.sm,
-    paddingRight: SPACING.xxl,
   },
   chip: {
     paddingHorizontal: 14,
@@ -227,7 +231,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // List
   list: {
     paddingHorizontal: SPACING.lg,
     paddingBottom: SPACING.xxl + SPACING.lg,
@@ -236,7 +239,6 @@ const styles = StyleSheet.create({
     height: SPACING.sm,
   },
 
-  // Empty
   center: {
     flex: 1,
     alignItems: 'center',
