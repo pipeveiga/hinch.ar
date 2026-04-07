@@ -19,6 +19,10 @@ export default function LoginScreen() {
       Alert.alert('Faltan datos', 'Completá el email y la contraseña.')
       return
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      Alert.alert('Email inválido', 'Ingresá un email válido.')
+      return
+    }
     try {
       await signIn(email.trim().toLowerCase(), password)
       router.replace('/(tabs)')

@@ -70,19 +70,26 @@ export const usersApi = {
     return data
   },
 
-  async getById(id: string): Promise<User | null> {
+  async getById(id: string): Promise<Partial<User> | null> {
+    // Solo campos públicos — nunca exponer dni, car_plate, verification_status, etc.
     const { data } = await supabase
       .from('users')
-      .select('*')
+      .select('id, full_name, avatar_url, bio, is_verified, avg_rating_as_driver, avg_rating_as_passenger, total_trips_as_driver, total_trips_as_passenger, created_at')
       .eq('id', id)
       .single()
     return data
   },
 
   async updateProfile(id: string, updates: Partial<User>) {
+    // Whitelist de campos editables — nunca permitir is_verified, verification_status, etc.
+    const { full_name, bio, phone, avatar_url, has_car,
+            car_brand, car_model, car_year, car_color,
+            car_plate, car_photo_url, accepts_luggage, accepts_pets } = updates
     return supabase
       .from('users')
-      .update(updates)
+      .update({ full_name, bio, phone, avatar_url, has_car,
+                car_brand, car_model, car_year, car_color,
+                car_plate, car_photo_url, accepts_luggage, accepts_pets })
       .eq('id', id)
   },
 
@@ -438,7 +445,7 @@ export const bookingsApi = {
       .from('bookings')
       .update({ status: 'cancelled' })
       .eq('id', bookingId)
-      .or(`passenger_id.eq.${userId}`)
+      .eq('passenger_id', userId)
   },
 
   async getMyBookingForTrip(passengerId: string, tripId: string): Promise<Booking | null> {
@@ -584,9 +591,11 @@ export const messagesApi = {
   },
 
   async send(bookingId: string, senderId: string, content: string): Promise<Message> {
+    const trimmed = content.trim()
+    if (!trimmed || trimmed.length > 1000) throw new Error('Mensaje inválido')
     const { data, error } = await supabase
       .from('messages')
-      .insert({ booking_id: bookingId, sender_id: senderId, content: content.trim() })
+      .insert({ booking_id: bookingId, sender_id: senderId, content: trimmed })
       .select()
       .single()
     if (error) throw error

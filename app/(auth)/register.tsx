@@ -31,6 +31,10 @@ export default function RegisterScreen() {
       Alert.alert('Faltan datos', 'Completá el email y la contraseña.')
       return
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      Alert.alert('Email inválido', 'Ingresá un email válido.')
+      return
+    }
     if (password.length < 8) {
       Alert.alert('Contraseña muy corta', 'Usá al menos 8 caracteres.')
       return
