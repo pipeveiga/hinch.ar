@@ -1,22 +1,28 @@
 import { useEffect, useRef } from 'react'
 import * as Notifications from 'expo-notifications'
 import { Platform } from 'react-native'
+import Constants from 'expo-constants'
 import { supabase } from '@/lib/supabase'
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge:  true,
-  }),
-})
+// En Expo Go (SDK 53+) las push notifications no están soportadas
+const isExpoGo = Constants.appOwnership === 'expo'
+
+if (!isExpoGo) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge:  true,
+    }),
+  })
+}
 
 export function usePushNotifications(userId: string | undefined) {
   const notificationListener = useRef<Notifications.EventSubscription>()
   const responseListener     = useRef<Notifications.EventSubscription>()
 
   useEffect(() => {
-    if (!userId) return
+    if (!userId || isExpoGo) return
 
     registerForPushNotifications(userId)
 
