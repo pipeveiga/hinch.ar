@@ -13,6 +13,17 @@ if (!supabaseUrl || !supabaseAnon) {
   throw new Error('Faltan las variables de entorno de Supabase. Revisá tu archivo .env')
 }
 
+// Manda una notificación push via Edge Function (fire and forget)
+async function sendPushNotification(userId: string, title: string, body: string, data?: Record<string, unknown>) {
+  try {
+    await supabase.functions.invoke('send-notification', {
+      body: { user_id: userId, title, body, data: data ?? {} },
+    })
+  } catch {
+    // No bloquear el flujo principal si falla la notificación
+  }
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnon, {
   auth: {
     storage: AsyncStorage,
@@ -411,6 +422,24 @@ export const bookingsApi = {
         throw new Error('Los datos ingresados no son válidos.')
       throw new Error(msg || 'No se pudo reservar. Intentá de nuevo.')
     }
+
+    // Notificar al conductor
+    const { data: trip } = await supabase
+      .from('trips')
+      .select('driver_id, event:events!event_id(title)')
+      .eq('id', tripId)
+      .single()
+    if (trip) {
+      const eventTitle = (trip.event as any)?.title ?? 'un evento'
+      const { data: passenger } = await supabase.from('users').select('full_name').eq('id', passengerId).single()
+      sendPushNotification(
+        trip.driver_id,
+        '¡Nueva reserva! 🚗',
+        `${passenger?.full_name ?? 'Alguien'} quiere sumarse a tu viaje para ${eventTitle}`,
+        { booking_id: (data as Booking).id },
+      )
+    }
+
     return data as Booking
   },
 
@@ -434,10 +463,23 @@ export const bookingsApi = {
       throw new Error('No tenés permiso para confirmar esta reserva')
     }
 
-    return supabase
+    const result = await supabase
       .from('bookings')
       .update({ status: 'confirmed' })
       .eq('id', bookingId)
+      .select('passenger_id, trip:trips!trip_id(event:events!event_id(title))')
+      .single()
+
+    if (result.data) {
+      const eventTitle = (result.data.trip as any)?.event?.title ?? 'un evento'
+      sendPushNotification(
+        result.data.passenger_id,
+        '¡Reserva confirmada! ✅',
+        `Tu lugar para ${eventTitle} está confirmado. ¡A prepararse!`,
+        { booking_id: bookingId },
+      )
+    }
+    return result
   },
 
   async cancel(bookingId: string, userId: string) {
