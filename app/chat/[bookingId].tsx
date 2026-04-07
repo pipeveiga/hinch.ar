@@ -75,7 +75,7 @@ export default function ChatScreen() {
     setSending(true)
     setText('')
     try {
-      await messagesApi.send(bookingId, user.id, trimmed)
+      await messagesApi.send(bookingId, user.id, trimmed, otherId ?? undefined, user.full_name)
       // el real-time subscription agrega el mensaje, evitando duplicados
     } finally {
       setSending(false)

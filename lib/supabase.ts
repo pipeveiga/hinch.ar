@@ -632,7 +632,13 @@ export const messagesApi = {
     return data ?? []
   },
 
-  async send(bookingId: string, senderId: string, content: string): Promise<Message> {
+  async send(
+    bookingId: string,
+    senderId: string,
+    content: string,
+    receiverId?: string,
+    senderName?: string,
+  ): Promise<Message> {
     const trimmed = content.trim()
     if (!trimmed || trimmed.length > 1000) throw new Error('Mensaje inválido')
     const { data, error } = await supabase
@@ -641,6 +647,18 @@ export const messagesApi = {
       .select()
       .single()
     if (error) throw error
+
+    // Push notification al receptor (fire and forget)
+    if (receiverId) {
+      const preview = trimmed.length > 60 ? trimmed.slice(0, 57) + '...' : trimmed
+      sendPushNotification(
+        receiverId,
+        `💬 ${senderName ?? 'Mensaje nuevo'}`,
+        preview,
+        { bookingId },
+      )
+    }
+
     return data as Message
   },
 
