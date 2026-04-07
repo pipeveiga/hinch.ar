@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   },
   trips: {
     fontSize: 13,
-    color: COLORS.accent,
+    color: COLORS.success,
     fontWeight: '600',
   },
 })
