@@ -3,6 +3,7 @@ import {
   View, Text, FlatList, TouchableOpacity,
   StyleSheet, ActivityIndicator, Alert,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, router, Stack } from 'expo-router'
 import { eventsApi } from '@/lib/supabase'
 import { useTripsStore } from '@/stores/tripsStore'
@@ -71,20 +72,17 @@ export default function EventoScreen() {
   const eventDate = new Date(event.event_date)
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          headerShown:            true,
-          headerTitle:            '',
-          headerBackTitle:        '',
-          headerBackTitleVisible: false,
-          headerStyle:            { backgroundColor: COLORS.surface },
-          headerTintColor:        COLORS.textPrimary,
-          headerBackVisible:      true,
-        }}
-      />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={styles.container}>
+      {/* Header custom con botón volver */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+          <Text style={styles.backText}>‹ Volver</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={{ flex: 1 }}>
         {/* Banner del evento */}
         <View style={styles.eventBanner}>
           <Text style={styles.eventType}>
@@ -171,13 +169,21 @@ export default function EventoScreen() {
           <Text style={styles.fabText}>🚗 Publicar viaje</Text>
         </TouchableOpacity>
       </View>
-    </>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
+  header: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm,
+    backgroundColor: COLORS.surface,
+    borderBottomWidth: 1, borderBottomColor: COLORS.border,
+  },
+  backBtn: { paddingVertical: SPACING.xs, paddingRight: SPACING.md },
+  backText: { color: COLORS.primary, fontSize: 17, fontWeight: '600' },
   eventBanner: {
     backgroundColor: COLORS.surface,
     padding: SPACING.lg,

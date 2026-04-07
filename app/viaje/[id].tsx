@@ -4,6 +4,7 @@ import {
   StyleSheet, ActivityIndicator, Modal, TextInput, Alert,
   KeyboardAvoidingView, Platform,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, router, Stack } from 'expo-router'
 import { useTripsStore } from '@/stores/tripsStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -228,22 +229,23 @@ export default function ViajeDetailScreen() {
     : [trip.trip_type]
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          headerShown:     true,
-          headerTitle:     'Detalle del viaje',
-          headerBackTitle: '',
-          headerBackTitleVisible: false,
-          headerStyle:     { backgroundColor: COLORS.surface },
-          headerTintColor: COLORS.textPrimary,
-          headerRight: isOwn && trip?.status === 'active' ? () => (
-            <TouchableOpacity onPress={openEdit} style={{ marginRight: 8 }}>
-              <Text style={{ color: COLORS.primary, fontWeight: '700', fontSize: 15 }}>Editar</Text>
-            </TouchableOpacity>
-          ) : undefined,
-        }}
-      />
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }} edges={['top']}>
+      <Stack.Screen options={{ headerShown: false }} />
+
+      {/* Header custom */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+          <Text style={styles.backText}>‹ Volver</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Detalle del viaje</Text>
+        {isOwn && trip?.status === 'active' ? (
+          <TouchableOpacity onPress={openEdit} style={styles.editBtn} activeOpacity={0.7}>
+            <Text style={styles.editText}>Editar</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 60 }} />
+        )}
+      </View>
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Evento */}
@@ -729,13 +731,24 @@ export default function ViajeDetailScreen() {
           </KeyboardAvoidingView>
         </View>
       </Modal>
-    </>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background, paddingTop: SPACING.md },
+  container: { flex: 1, backgroundColor: COLORS.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm,
+    backgroundColor: COLORS.surface,
+    borderBottomWidth: 1, borderBottomColor: COLORS.border,
+  },
+  backBtn: { paddingVertical: SPACING.xs, paddingRight: SPACING.md, width: 80 },
+  backText: { color: COLORS.primary, fontSize: 17, fontWeight: '600' },
+  headerTitle: { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
+  editBtn: { width: 60, alignItems: 'flex-end' },
+  editText: { color: COLORS.primary, fontWeight: '700', fontSize: 15 },
   eventBadge: {
     backgroundColor: COLORS.surface, padding: SPACING.md,
     borderBottomWidth: 1, borderBottomColor: COLORS.border,
