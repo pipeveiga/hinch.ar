@@ -26,7 +26,11 @@ export function EventCard({ event, onPress }: EventCardProps) {
         <Text style={styles.competition}>
           {EVENT_TYPE_ICONS[event.type]}  {event.subtitle ?? event.competition ?? ''}
         </Text>
-        {event.is_featured && <View style={styles.featuredDot} />}
+        {event.is_featured && (
+          <View style={styles.featuredBadge}>
+            <Text style={styles.featuredText}>Destacado</Text>
+          </View>
+        )}
       </View>
 
       {/* Título */}
@@ -68,12 +72,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
     flex: 1,
   },
-  featuredDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: COLORS.accent,
-    marginLeft: SPACING.sm,
+  featuredBadge: {
+    backgroundColor: COLORS.accent + '22',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 20,
+  },
+  featuredText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.accent,
   },
   title: {
     fontSize: 19,
