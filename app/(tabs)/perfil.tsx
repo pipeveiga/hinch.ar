@@ -35,10 +35,13 @@ function MenuItem({ icon, label, onPress, danger }: {
 
 export default function PerfilScreen() {
   const { user, setUser, signOut } = useAuthStore()
-  const [autoModal, setAutoModal]     = useState(false)
-  const [editModal, setEditModal]     = useState(false)
-  const [saving, setSaving]           = useState(false)
-  const [editSaving, setEditSaving]   = useState(false)
+  const [autoModal, setAutoModal]         = useState(false)
+  const [editModal, setEditModal]         = useState(false)
+  const [deleteModal, setDeleteModal]     = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState('')
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [saving, setSaving]               = useState(false)
+  const [editSaving, setEditSaving]       = useState(false)
   const [avatarLoading, setAvatarLoading] = useState(false)
   const [editForm, setEditForm] = useState({
     full_name: user?.full_name ?? '',
@@ -80,6 +83,21 @@ export default function PerfilScreen() {
   }
 
   if (!user) return null
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirm !== 'ELIMINAR') return
+    setDeleteLoading(true)
+    try {
+      await usersApi.updateProfile(user.id, { is_active: false } as any)
+      await signOut()
+      router.replace('/(auth)/login')
+    } catch {
+      Alert.alert('Error', 'No se pudo eliminar la cuenta. Escribinos a hola@hinch.ar')
+    } finally {
+      setDeleteLoading(false)
+      setDeleteModal(false)
+    }
+  }
 
   const handleSignOut = () => {
     Alert.alert('Cerrar sesión', '¿Seguro que querés salir?', [
@@ -239,6 +257,7 @@ export default function PerfilScreen() {
         <View style={[styles.section, { marginBottom: SPACING.xxl }]}>
           <View style={styles.menuCard}>
             <MenuItem icon="🚪" label="Cerrar sesión" onPress={handleSignOut} danger />
+            <MenuItem icon="🗑️" label="Eliminar cuenta" onPress={() => { setDeleteConfirm(''); setDeleteModal(true) }} danger />
           </View>
         </View>
 
@@ -289,6 +308,50 @@ export default function PerfilScreen() {
             </View>
           </View>
           </ScrollView>
+        </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Modal eliminar cuenta */}
+      <Modal visible={deleteModal} animationType="slide" transparent>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheet}>
+            <Text style={styles.modalTitle}>⚠️ Eliminar cuenta</Text>
+            <Text style={styles.deleteWarning}>
+              Esta acción es permanente. Se eliminarán todos tus datos, viajes y reservas. No se puede deshacer.
+            </Text>
+            <Text style={styles.deleteInstruction}>
+              Para confirmar, escribí <Text style={styles.deleteWord}>ELIMINAR</Text> en el campo de abajo:
+            </Text>
+            <TextInput
+              style={[styles.modalInput, styles.deleteInput]}
+              placeholder="ELIMINAR"
+              placeholderTextColor={COLORS.textMuted}
+              value={deleteConfirm}
+              onChangeText={setDeleteConfirm}
+              autoCapitalize="characters"
+              autoCorrect={false}
+            />
+            <View style={styles.modalBtns}>
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() => setDeleteModal(false)}
+              >
+                <Text style={styles.cancelBtnText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.deleteBtn, (deleteConfirm !== 'ELIMINAR' || deleteLoading) && styles.deleteBtnDisabled]}
+                onPress={handleDeleteAccount}
+                disabled={deleteConfirm !== 'ELIMINAR' || deleteLoading}
+              >
+                {deleteLoading
+                  ? <ActivityIndicator color={COLORS.white} />
+                  : <Text style={styles.deleteBtnText}>Eliminar</Text>
+                }
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
         </KeyboardAvoidingView>
       </Modal>
@@ -442,4 +505,17 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary, alignItems: 'center',
   },
   saveBtnText: { color: COLORS.white, fontWeight: '800', fontSize: 15 },
+  deleteWarning: {
+    fontSize: 14, color: COLORS.textSecondary, lineHeight: 20,
+    backgroundColor: COLORS.errorBg, padding: SPACING.md, borderRadius: RADIUS.md,
+  },
+  deleteInstruction: { fontSize: 14, color: COLORS.textSecondary, lineHeight: 20 },
+  deleteWord: { fontWeight: '800', color: COLORS.error },
+  deleteInput: { borderColor: COLORS.error },
+  deleteBtn: {
+    flex: 2, padding: SPACING.md, borderRadius: RADIUS.md,
+    backgroundColor: COLORS.error, alignItems: 'center',
+  },
+  deleteBtnDisabled: { opacity: 0.4 },
+  deleteBtnText: { color: COLORS.white, fontWeight: '800', fontSize: 15 },
 })
