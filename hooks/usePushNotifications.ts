@@ -2,8 +2,8 @@ import { useEffect } from 'react'
 import Constants from 'expo-constants'
 import { supabase } from '@/lib/supabase'
 
-// En Expo Go SDK 53+ expo-notifications tira error al importarse — no importar el módulo
 const isExpoGo = Constants.appOwnership === 'expo'
+const PROJECT_ID = Constants.expoConfig?.extra?.eas?.projectId as string | undefined
 
 export function usePushNotifications(userId: string | undefined) {
   useEffect(() => {
@@ -14,7 +14,6 @@ export function usePushNotifications(userId: string | undefined) {
 
 async function registerForPushNotifications(userId: string) {
   try {
-    // Import dinámico para evitar que el módulo se cargue en Expo Go
     const Notifications = await import('expo-notifications')
     const { Platform } = await import('react-native')
 
@@ -38,14 +37,21 @@ async function registerForPushNotifications(userId: string) {
 
     if (finalStatus !== 'granted') return
 
-    const token = (await Notifications.getExpoPushTokenAsync()).data
+    // projectId es obligatorio en builds de producción con expo-notifications SDK 0.32+
+    if (!PROJECT_ID) {
+      console.warn('[PushNotifications] projectId no encontrado en Constants')
+      return
+    }
+
+    const tokenData = await Notifications.getExpoPushTokenAsync({ projectId: PROJECT_ID })
+    const token = tokenData.data
     if (!token) return
 
     await supabase
       .from('users')
       .update({ push_token: token })
       .eq('id', userId)
-  } catch {
-    // Falla silenciosamente en Expo Go o sin proyecto EAS configurado
+  } catch (e) {
+    console.warn('[PushNotifications] Error al registrar token:', e)
   }
 }
