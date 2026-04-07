@@ -33,8 +33,9 @@ export default function RootLayout() {
         <Stack.Screen name="viaje/[id]"         options={{ headerBackTitle: '' }} />
         <Stack.Screen name="viaje/nuevo"        options={{ headerBackTitle: '' }} />
         <Stack.Screen name="calificar/[bookingId]" options={{ headerBackTitle: '' }} />
-        <Stack.Screen name="terminos"   options={{ headerBackTitle: '' }} />
-        <Stack.Screen name="privacidad" options={{ headerBackTitle: '' }} />
+        <Stack.Screen name="terminos"    options={{ headerBackTitle: '' }} />
+        <Stack.Screen name="privacidad"  options={{ headerBackTitle: '' }} />
+        <Stack.Screen name="onboarding"  options={{ animation: 'fade' }} />
       </Stack>
     </GestureHandlerRootView>
   )
