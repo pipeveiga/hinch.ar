@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   View, Text, StyleSheet, FlatList, TextInput,
   TouchableOpacity, KeyboardAvoidingView, Platform,
-  ActivityIndicator, SafeAreaView,
+  ActivityIndicator,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, router } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useChatsStore } from '@/stores/chatsStore'
