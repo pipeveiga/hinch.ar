@@ -28,6 +28,7 @@
       },
       "googleServicesFile": "./google-services.json",
       "package": "ar.hinch.app",
+      "softwareKeyboardLayoutMode": "pan",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
