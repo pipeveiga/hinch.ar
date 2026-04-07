@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "316784131510",
+    "project_id": "hinchar-e67a0",
+    "storage_bucket": "hinchar-e67a0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:316784131510:android:29e18a0ae7a40f858d9517",
+        "android_client_info": {
+          "package_name": "ar.hinch.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0tlt705WSTzzYmUx4B-sPCToGSlQcSKM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
