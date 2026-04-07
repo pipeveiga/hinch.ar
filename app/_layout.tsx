@@ -3,10 +3,12 @@ import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { useAuthStore } from '@/stores/authStore'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { COLORS } from '@/lib/constants'
 
 export default function RootLayout() {
-  const { initialize, isHydrated } = useAuthStore()
+  const { initialize, isHydrated, user } = useAuthStore()
+  usePushNotifications(user?.id)
 
   useEffect(() => {
     initialize()
