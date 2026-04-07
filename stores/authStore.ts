@@ -26,22 +26,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   initialize: async () => {
     try {
-      const { data: { session } } = await auth.getSession()
-      let user: User | null = null
-
-      if (session) {
-        user = await usersApi.getMe()
-      }
-
-      set({ session, user, isLoading: false, isHydrated: true })
-
-      // Escuchar cambios de sesión
+      // INITIAL_SESSION es la forma correcta de restaurar sesión en React Native
+      // (getSession() puede fallar al leer AsyncStorage en Android)
       auth.onAuthStateChange(async (event, session) => {
-        set({ session })
-
-        if (event === 'SIGNED_IN' && session) {
-          const user = await usersApi.getMe()
-          set({ user })
+        if (event === 'INITIAL_SESSION') {
+          let user: User | null = null
+          if (session) {
+            try { user = await usersApi.getMe() } catch { /* ignorar */ }
+          }
+          set({ session, user, isLoading: false, isHydrated: true })
+        } else if (event === 'SIGNED_IN') {
+          set({ session })
+          try {
+            const user = await usersApi.getMe()
+            set({ user })
+          } catch { /* ignorar */ }
+        } else if (event === 'TOKEN_REFRESHED') {
+          set({ session })
         } else if (event === 'SIGNED_OUT') {
           set({ user: null, session: null })
         }
