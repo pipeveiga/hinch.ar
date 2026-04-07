@@ -257,7 +257,6 @@ export default function PerfilScreen() {
         <View style={[styles.section, { marginBottom: SPACING.xxl }]}>
           <View style={styles.menuCard}>
             <MenuItem icon="🚪" label="Cerrar sesión" onPress={handleSignOut} danger />
-            <MenuItem icon="🗑️" label="Eliminar cuenta" onPress={() => { setDeleteConfirm(''); setDeleteModal(true) }} danger />
           </View>
         </View>
 
@@ -306,6 +305,13 @@ export default function PerfilScreen() {
                 }
               </TouchableOpacity>
             </View>
+
+            <TouchableOpacity
+              style={styles.deleteAccountBtn}
+              onPress={() => { setEditModal(false); setTimeout(() => { setDeleteConfirm(''); setDeleteModal(true) }, 300) }}
+            >
+              <Text style={styles.deleteAccountText}>Eliminar cuenta</Text>
+            </TouchableOpacity>
           </View>
           </ScrollView>
         </View>
@@ -518,4 +524,6 @@ const styles = StyleSheet.create({
   },
   deleteBtnDisabled: { opacity: 0.4 },
   deleteBtnText: { color: COLORS.white, fontWeight: '800', fontSize: 15 },
+  deleteAccountBtn: { alignItems: 'center', paddingVertical: SPACING.sm },
+  deleteAccountText: { color: COLORS.error, fontSize: 13, fontWeight: '500' },
 })
