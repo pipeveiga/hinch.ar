@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Tabs, Redirect } from 'expo-router'
-import { View, Text, StyleSheet, Platform } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuthStore } from '@/stores/authStore'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import { useChatsStore } from '@/stores/chatsStore'
@@ -53,6 +54,7 @@ export default function TabsLayout() {
   const { session, user } = useAuthStore()
   const { fetch, subscribe, unsubscribe } = useNotificationsStore()
   const { initialize: initChats, unsubscribe: unsubChats } = useChatsStore()
+  const insets = useSafeAreaInsets()
 
   useEffect(() => {
     if (user) {
@@ -72,7 +74,7 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [styles.tabBar, { height: 60 + insets.bottom, paddingBottom: insets.bottom }],
         tabBarActiveTintColor:   COLORS.accent,
         tabBarInactiveTintColor: COLORS.textMuted,
         tabBarShowLabel: false,
@@ -122,8 +124,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
     paddingTop: SPACING.sm,
-    height: Platform.OS === 'android' ? 65 : 70,
-    paddingBottom: Platform.OS === 'android' ? 8 : 0,
   },
   tabIcon: {
     alignItems: 'center',
