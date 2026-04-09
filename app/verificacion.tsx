@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  Alert, ActivityIndicator, Image, ScrollView,
+  Alert, ActivityIndicator, Image, ScrollView, Platform,
 } from 'react-native'
 import { router, Stack } from 'expo-router'
-import * as ImagePicker from 'expo-image-picker'
 import { useAuthStore } from '@/stores/authStore'
 import { verificationApi } from '@/lib/supabase'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
@@ -44,7 +43,26 @@ export default function VerificacionScreen() {
   const [photos, setPhotos]   = useState<Partial<Record<PhotoKey, string>>>({})
   const [loading, setLoading] = useState<PhotoKey | 'submit' | null>(null)
 
+  // La verificación requiere cámara — no disponible en web
+  if (Platform.OS === 'web') {
+    return (
+      <View style={[styles.container, { alignItems: 'center', justifyContent: 'center', gap: 16 }]}>
+        <Text style={{ fontSize: 48 }}>📱</Text>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: COLORS.textPrimary, textAlign: 'center' }}>
+          Disponible solo en la app móvil
+        </Text>
+        <Text style={{ fontSize: 14, color: COLORS.textSecondary, textAlign: 'center' }}>
+          La verificación de identidad requiere acceso a la cámara. Descargá la app para completarla.
+        </Text>
+        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 8 }}>
+          <Text style={{ color: COLORS.primary, fontWeight: '600', fontSize: 16 }}>← Volver</Text>
+        </TouchableOpacity>
+      </View>
+    )
+  }
+
   const pickPhoto = async (key: PhotoKey) => {
+    const ImagePicker = await import('expo-image-picker')
     const { status } = await ImagePicker.requestCameraPermissionsAsync()
     if (status !== 'granted') {
       Alert.alert('Permiso requerido', 'Necesitamos acceso a tu cámara para tomar las fotos.')

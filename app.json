@@ -38,7 +38,11 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static"
+      "output": "static",
+      "favicon": "./assets/icon.png",
+      "name": "Hinch.ar",
+      "shortName": "Hinch.ar",
+      "description": "Compartí el viaje, viví el partido."
     },
     "plugins": [
       "expo-router",

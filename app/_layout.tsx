@@ -1,10 +1,15 @@
 import { useEffect } from 'react'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { View, Platform } from 'react-native'
 import { useAuthStore } from '@/stores/authStore'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { COLORS } from '@/lib/constants'
+
+// GestureHandlerRootView no existe en web
+const GestureWrapper = Platform.OS !== 'web'
+  ? require('react-native-gesture-handler').GestureHandlerRootView
+  : View
 
 export default function RootLayout() {
   const { initialize, isHydrated, user } = useAuthStore()
@@ -17,7 +22,7 @@ export default function RootLayout() {
   if (!isHydrated) return null
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureWrapper style={{ flex: 1 }}>
       <StatusBar style="light" backgroundColor={COLORS.background} />
       <Stack
         screenOptions={{
@@ -37,6 +42,6 @@ export default function RootLayout() {
         <Stack.Screen name="privacidad"  options={{ headerBackTitle: '' }} />
         <Stack.Screen name="onboarding"  options={{ animation: 'fade' }} />
       </Stack>
-    </GestureHandlerRootView>
+    </GestureWrapper>
   )
 }

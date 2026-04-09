@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import * as Location from 'expo-location'
+import { Platform } from 'react-native'
 
 interface UserCity {
   city: string | null
@@ -15,31 +15,41 @@ export function useUserCity(): UserCity {
 
     async function detect() {
       try {
-        const { status } = await Location.requestForegroundPermissionsAsync()
-        if (status !== 'granted' || cancelled) {
-          setLoading(false)
+        if (Platform.OS === 'web') {
+          // Usar browser Geolocation API en web
+          if (!('geolocation' in navigator)) { setLoading(false); return }
+          navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+              try {
+                // Reverse geocode con API pública
+                const res = await fetch(
+                  `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`
+                )
+                const data = await res.json()
+                const detected = data?.address?.city ?? data?.address?.town ?? data?.address?.village ?? null
+                if (!cancelled) setCity(detected)
+              } catch { /* silencioso */ }
+              finally { if (!cancelled) setLoading(false) }
+            },
+            () => { if (!cancelled) setLoading(false) }
+          )
           return
         }
 
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        })
+        // Mobile: usar expo-location
+        const Location = await import('expo-location')
+        const { status } = await Location.requestForegroundPermissionsAsync()
+        if (status !== 'granted' || cancelled) { setLoading(false); return }
 
-        const [place] = await Location.reverseGeocodeAsync({
-          latitude:  location.coords.latitude,
-          longitude: location.coords.longitude,
+        const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced })
+        const [place]  = await Location.reverseGeocodeAsync({
+          latitude: location.coords.latitude, longitude: location.coords.longitude,
         })
-
         if (!cancelled && place) {
-          // Expo devuelve city o subregion dependiendo del país
-          const detected = place.city ?? place.subregion ?? place.region ?? null
-          setCity(detected)
+          setCity(place.city ?? place.subregion ?? place.region ?? null)
         }
-      } catch {
-        // Sin permiso o sin GPS — silencioso
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
+      } catch { /* sin permiso o sin GPS */ }
+      finally { if (!cancelled) setLoading(false) }
     }
 
     detect()

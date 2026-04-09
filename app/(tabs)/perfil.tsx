@@ -57,6 +57,30 @@ export default function PerfilScreen() {
   })
 
   const handlePickAvatar = async () => {
+    if (Platform.OS === 'web') {
+      // En web usar file input nativo
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = 'image/*'
+      input.onchange = async (e: any) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        setAvatarLoading(true)
+        try {
+          const uri = URL.createObjectURL(file)
+          const url = await usersApi.uploadAvatar(user!.id, uri)
+          await usersApi.updateProfile(user!.id, { avatar_url: url })
+          setUser({ ...user!, avatar_url: url })
+        } catch (err: any) {
+          Alert.alert('Error', err?.message ?? 'No se pudo subir la foto.')
+        } finally {
+          setAvatarLoading(false)
+        }
+      }
+      input.click()
+      return
+    }
+
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
     if (status !== 'granted') {
       Alert.alert('Permiso requerido', 'Necesitamos acceso a tu galería.')
