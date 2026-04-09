@@ -13,15 +13,25 @@ export default function LoginScreen() {
   const [email,       setEmail]       = useState('')
   const [password,    setPassword]    = useState('')
   const [showPass,    setShowPass]    = useState(false)
+  const [errorMsg,    setErrorMsg]    = useState<string | null>(null)
   const { signIn, isLoading }         = useAuthStore()
 
+  const showError = (msg: string) => {
+    if (Platform.OS === 'web') {
+      setErrorMsg(msg)
+    } else {
+      Alert.alert('Error', msg)
+    }
+  }
+
   const handleLogin = async () => {
+    setErrorMsg(null)
     if (!email.trim() || !password) {
-      Alert.alert('Faltan datos', 'Completá el email y la contraseña.')
+      showError('Completá el email y la contraseña.')
       return
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      Alert.alert('Email inválido', 'Ingresá un email válido.')
+      showError('Ingresá un email válido.')
       return
     }
     try {
@@ -29,7 +39,7 @@ export default function LoginScreen() {
       router.replace('/(tabs)')
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al iniciar sesión'
-      Alert.alert('Error', msg === 'Invalid login credentials'
+      showError(msg === 'Invalid login credentials'
         ? 'Email o contraseña incorrectos. Revisá y volvé a intentar.'
         : msg
       )
@@ -89,6 +99,12 @@ export default function LoginScreen() {
               </Pressable>
             </View>
           </View>
+
+          {errorMsg && (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>{errorMsg}</Text>
+            </View>
+          )}
 
           <TouchableOpacity
             style={[styles.btn, isLoading && styles.btnDisabled]}
@@ -191,6 +207,18 @@ const styles = StyleSheet.create({
   },
   btnDisabled: {
     opacity: 0.6,
+  },
+  errorBox: {
+    backgroundColor: '#450a0a',
+    borderWidth: 1,
+    borderColor: '#b91c1c',
+    borderRadius: RADIUS.md,
+    padding: SPACING.sm,
+  },
+  errorText: {
+    color: '#fca5a5',
+    fontSize: 14,
+    textAlign: 'center',
   },
   btnText: {
     color: COLORS.white,
