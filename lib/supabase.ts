@@ -1,17 +1,24 @@
 import 'react-native-url-polyfill/auto'
 import { createClient } from '@supabase/supabase-js'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Platform } from 'react-native'
+
+// En web usamos localStorage con guard SSR (window no existe durante el render estático)
+const webStorage = {
+  getItem:    (key: string) => typeof window !== 'undefined' ? localStorage.getItem(key) : null,
+  setItem:    (key: string, value: string) => { if (typeof window !== 'undefined') localStorage.setItem(key, value) },
+  removeItem: (key: string) => { if (typeof window !== 'undefined') localStorage.removeItem(key) },
+}
+
+const storage = Platform.OS === 'web' ? webStorage : AsyncStorage
 import type {
   User, Event, Trip, Booking, Rating, Message,
   AppNotification, TripSearchFilters, NewTripForm, NewBookingForm, RatingScores,
 } from './types'
 
-const supabaseUrl  = process.env.EXPO_PUBLIC_SUPABASE_URL!
-const supabaseAnon = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!
-
-if (!supabaseUrl || !supabaseAnon) {
-  throw new Error('Faltan las variables de entorno de Supabase. Revisá tu archivo .env')
-}
+// Durante el build estático (Vercel) las vars pueden no estar — el runtime las tendrá
+const supabaseUrl  = process.env.EXPO_PUBLIC_SUPABASE_URL  ?? 'https://placeholder.supabase.co'
+const supabaseAnon = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? 'placeholder-anon-key'
 
 // Manda una notificación push via Edge Function (fire and forget)
 async function sendPushNotification(userId: string, title: string, body: string, data?: Record<string, unknown>) {
@@ -26,7 +33,7 @@ async function sendPushNotification(userId: string, title: string, body: string,
 
 export const supabase = createClient(supabaseUrl, supabaseAnon, {
   auth: {
-    storage: AsyncStorage,
+    storage,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
