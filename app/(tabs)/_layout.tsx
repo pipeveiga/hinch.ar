@@ -16,23 +16,6 @@ function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focu
   )
 }
 
-function NotifTabIcon({ focused }: { focused: boolean }) {
-  const unreadCount = useNotificationsStore((s) => s.unreadCount)
-  return (
-    <View style={styles.tabIcon}>
-      <View>
-        <Text style={[styles.tabEmoji, focused && styles.tabEmojiFocused]}>🔔</Text>
-        {unreadCount > 0 && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
-          </View>
-        )}
-      </View>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]} numberOfLines={1}>Alertas</Text>
-    </View>
-  )
-}
-
 function ChatsTabIcon({ focused }: { focused: boolean }) {
   const totalUnread = useChatsStore((s) => s.totalUnread)
   return (

@@ -33,7 +33,7 @@ interface TripsState {
   clearEventTrips: () => void
 }
 
-export const useTripsStore = create<TripsState>((set, get) => ({
+export const useTripsStore = create<TripsState>((set) => ({
   eventTrips:          [],
   eventTripsLoading:   false,
   eventTripsError:     null,

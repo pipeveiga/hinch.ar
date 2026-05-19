@@ -12,20 +12,6 @@ import type { User, Rating } from '@/lib/types'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
-function StarRow({ score, label }: { score: number; label: string }) {
-  return (
-    <View style={styles.starRow}>
-      <Text style={styles.starLabel}>{label}</Text>
-      <View style={styles.stars}>
-        {[1,2,3,4,5].map((n) => (
-          <Text key={n} style={{ fontSize: 12, opacity: n <= Math.round(score) ? 1 : 0.25 }}>⭐</Text>
-        ))}
-      </View>
-      <Text style={styles.starScore}>{score.toFixed(1)}</Text>
-    </View>
-  )
-}
-
 export default function UsuarioPerfilScreen() {
   const { id }              = useLocalSearchParams<{ id: string }>()
   const [user, setUser]       = useState<User | null>(null)

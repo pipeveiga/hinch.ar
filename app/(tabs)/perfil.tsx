@@ -178,7 +178,7 @@ export default function PerfilScreen() {
       })
       setAutoModal(false)
       Alert.alert('¡Auto registrado! 🚗', 'Ya podés publicar viajes.')
-    } catch (e) {
+    } catch {
       Alert.alert('Error', 'No se pudo guardar el auto')
     } finally {
       setSaving(false)
