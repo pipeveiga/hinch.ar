@@ -7,7 +7,7 @@ import { router } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { COLORS, SPACING } from '@/lib/constants'
 
-const { width, height } = Dimensions.get('window')
+const { width } = Dimensions.get('window')
 
 const SLIDES = [
   {

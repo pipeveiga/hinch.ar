@@ -102,12 +102,12 @@ export const usersApi = {
     // Whitelist de campos editables — nunca permitir is_verified, verification_status, etc.
     const { full_name, bio, phone, avatar_url, has_car,
             car_brand, car_model, car_year, car_color,
-            car_plate, car_photo_url, accepts_luggage, accepts_pets } = updates
+            car_plate, car_photo_url } = updates
     return supabase
       .from('users')
       .update({ full_name, bio, phone, avatar_url, has_car,
                 car_brand, car_model, car_year, car_color,
-                car_plate, car_photo_url, accepts_luggage, accepts_pets })
+                car_plate, car_photo_url })
       .eq('id', id)
   },
 
