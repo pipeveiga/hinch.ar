@@ -27,6 +27,10 @@ export const COLORS = {
   textMuted:     '#475569',
   textInverse:   '#080808',
 
+  // Neutros
+  white:         '#FFFFFF',
+  black:         '#000000',
+
   // Semánticos
   success:  '#22C55E',
   successBg:'#14532D',

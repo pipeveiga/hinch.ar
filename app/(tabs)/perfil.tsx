@@ -165,7 +165,7 @@ export default function PerfilScreen() {
         car_model: carForm.car_model.trim(),
         car_year:  parseInt(carForm.car_year),
         car_color: carForm.car_color.trim(),
-        car_plate: carForm.car_plate.trim() || null,
+        car_plate: carForm.car_plate.trim() || undefined,
       })
       setUser({
         ...user,
@@ -174,7 +174,7 @@ export default function PerfilScreen() {
         car_model: carForm.car_model.trim(),
         car_year:  parseInt(carForm.car_year),
         car_color: carForm.car_color.trim(),
-        car_plate: carForm.car_plate.trim() || null,
+        car_plate: carForm.car_plate.trim() || undefined,
       })
       setAutoModal(false)
       Alert.alert('¡Auto registrado! 🚗', 'Ya podés publicar viajes.')

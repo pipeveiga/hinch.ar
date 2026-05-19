@@ -38,7 +38,7 @@ export default function UsuarioPerfilScreen() {
       usersApi.getById(id),
       ratingsApi.getRatingsForUser(id),
     ]).then(([u, r]) => {
-      setUser(u)
+      setUser(u as User | null)
       setRatings(r)
     }).finally(() => setLoading(false))
   }, [id])
