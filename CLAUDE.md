@@ -44,5 +44,4 @@ npm run lint
 
 ## Branches activas
 
-- `claude/review-project-status-LXTR1`: rama actual de trabajo.
-- `claude/hinchar-carpool-mvp-eq1Ol`: rama vieja, candidata a eliminar si no tiene cambios pendientes.
+- `main`: branch principal. CI corre acá en cada push y PR.
