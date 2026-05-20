@@ -6,7 +6,7 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-05-20
+Última actualización del documento: 2026-05-20 (auditoría de seguridad y fixes)
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -140,14 +140,32 @@ Hecho:
   [x] Default branch en `main`.
   [x] Pantalla de carga con imagen de fondo (auto + estadio al atardecer)
       en lugar de fondo negro liso.
+  [x] Auditoría de seguridad + endurecimiento (migración 003):
+      - Trigger BEFORE UPDATE en users que impide auto-verificarse,
+        inflar ratings, modificar DNI o reactivar cuentas desactivadas.
+      - Edge function send-notification ahora valida JWT y exige que el
+        invocador comparta un booking con el destinatario.
+      - Policy de chat ya no permite mandar mensajes a bookings ajenos
+        (cambio OR → AND).
+      - Columnas verification_status / verification_submitted_at agregadas
+        al schema (el flujo de verificación estaba pinchado).
+      - total_amount de bookings se calcula server-side (trigger).
+      - Resta atómica de seats_available (sin race conditions).
+      - RLS consolidada en un solo archivo (la migración 003 es la
+        fuente de verdad; scripts/rls-policies.sql quedó obsoleto).
+      - Rate limit básico en chat (20 mensajes/min por user).
+      - Security headers (CSP, X-Frame-Options, HSTS, etc.) en vercel.json.
+      - Tokens de sesión en mobile pasan de AsyncStorage a expo-secure-store.
+      - Whitelist de extensiones + MIME en uploads de verificación.
+      - Whitelist de trip_type en filtros (no más .or() con interpolación).
 
 Pendiente:
+  [ ] Aplicar la migración 003_security_hardening.sql en Supabase prod.
+  [ ] Redeploy de la edge function send-notification.
   [ ] QA real end-to-end en device Android (login, crear viaje, reservar,
-      chat, push notification).
-  [ ] QA web Vercel completo.
-  [ ] Confirmar que la edge function send-notification está deployada con
-      sus secrets en Supabase.
-  [ ] Bump a Expo SDK 55 para cerrar las 5 vulnerabilidades restantes
+      chat, push notification, verificación).
+  [ ] QA web Vercel completo (validar CSP no bloquee nada inesperado).
+  [ ] Bump a Expo SDK 55 para cerrar las 4 vulnerabilidades restantes
       del árbol de Expo (npm audit).
   [ ] Tag v0.1.0 + primer release en Play Store.
 

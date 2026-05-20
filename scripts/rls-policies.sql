@@ -1,6 +1,10 @@
 -- ============================================================
 -- HINCH.AR — Row Level Security (RLS) Policies
--- Ejecutar en Supabase SQL Editor
+--
+-- ⚠️  OBSOLETO: este script quedó superseded por la migración
+--     supabase/migrations/003_security_hardening.sql, que es ahora
+--     la única fuente de verdad de RLS. No volver a ejecutar este
+--     archivo; queda acá solo como referencia histórica.
 -- ============================================================
 
 -- ============================================================
