@@ -1,6 +1,5 @@
 import 'react-native-url-polyfill/auto'
 import { createClient } from '@supabase/supabase-js'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Platform } from 'react-native'
 
 // En web usamos localStorage con guard SSR (window no existe durante el render estático)
@@ -10,7 +9,57 @@ const webStorage = {
   removeItem: (key: string) => { if (typeof window !== 'undefined') localStorage.removeItem(key) },
 }
 
-const storage = Platform.OS === 'web' ? webStorage : AsyncStorage
+// En mobile usamos expo-secure-store (keystore/keychain) en vez de AsyncStorage.
+// SecureStore tiene un límite de ~2KB por entrada en iOS — el JWT de Supabase
+// suele rondar los 700 bytes, pero por las dudas particionamos en chunks.
+const SECURE_CHUNK_SIZE = 1800
+const nativeSecureStorage = {
+  async getItem(key: string): Promise<string | null> {
+    const SecureStore = await import('expo-secure-store')
+    const header = await SecureStore.getItemAsync(key)
+    if (!header) return null
+    // Si guardamos en chunks, header tiene la forma "__chunked__:N"
+    if (header.startsWith('__chunked__:')) {
+      const n = parseInt(header.slice('__chunked__:'.length), 10)
+      const parts: string[] = []
+      for (let i = 0; i < n; i++) {
+        const part = await SecureStore.getItemAsync(`${key}__${i}`)
+        if (part == null) return null
+        parts.push(part)
+      }
+      return parts.join('')
+    }
+    return header
+  },
+  async setItem(key: string, value: string): Promise<void> {
+    const SecureStore = await import('expo-secure-store')
+    if (value.length <= SECURE_CHUNK_SIZE) {
+      await SecureStore.setItemAsync(key, value)
+      return
+    }
+    const chunks: string[] = []
+    for (let i = 0; i < value.length; i += SECURE_CHUNK_SIZE) {
+      chunks.push(value.slice(i, i + SECURE_CHUNK_SIZE))
+    }
+    await SecureStore.setItemAsync(key, `__chunked__:${chunks.length}`)
+    for (let i = 0; i < chunks.length; i++) {
+      await SecureStore.setItemAsync(`${key}__${i}`, chunks[i])
+    }
+  },
+  async removeItem(key: string): Promise<void> {
+    const SecureStore = await import('expo-secure-store')
+    const header = await SecureStore.getItemAsync(key)
+    if (header?.startsWith('__chunked__:')) {
+      const n = parseInt(header.slice('__chunked__:'.length), 10)
+      for (let i = 0; i < n; i++) {
+        await SecureStore.deleteItemAsync(`${key}__${i}`)
+      }
+    }
+    await SecureStore.deleteItemAsync(key)
+  },
+}
+
+const storage = Platform.OS === 'web' ? webStorage : nativeSecureStorage
 import type {
   User, Event, Trip, Booking, Rating, Message,
   AppNotification, TripSearchFilters, NewTripForm, NewBookingForm, RatingScores,
@@ -118,17 +167,23 @@ export const usersApi = {
     return data
   },
 
-  async updateProfile(id: string, updates: Partial<User>) {
-    // Whitelist de campos editables — nunca permitir is_verified, verification_status, etc.
-    const { full_name, bio, phone, avatar_url, has_car,
-            car_brand, car_model, car_year, car_color,
-            car_plate, car_photo_url } = updates
-    return supabase
-      .from('users')
-      .update({ full_name, bio, phone, avatar_url, has_car,
-                car_brand, car_model, car_year, car_color,
-                car_plate, car_photo_url })
-      .eq('id', id)
+  async updateProfile(id: string, updates: Partial<User> & { push_token?: string | null }) {
+    // Whitelist de campos editables desde el cliente.
+    // Las columnas sensibles (is_verified, verified_at, dni*, avg_rating_*,
+    // total_trips_*, verification_status excepto la transición permitida)
+    // están protegidas a nivel DB por el trigger protect_user_columns.
+    const patch: Record<string, unknown> = {}
+    const allowed = [
+      'full_name', 'bio', 'phone', 'avatar_url',
+      'has_car', 'car_brand', 'car_model', 'car_year', 'car_color',
+      'car_plate', 'car_photo_url',
+      'push_token',
+      'is_active',  // permite soft-delete (el trigger impide reactivar)
+    ] as const
+    for (const key of allowed) {
+      if (key in updates) patch[key] = (updates as Record<string, unknown>)[key]
+    }
+    return supabase.from('users').update(patch).eq('id', id)
   },
 
   async uploadAvatar(userId: string, uri: string): Promise<string> {
@@ -152,9 +207,25 @@ export const usersApi = {
 // VERIFICATION
 // =============================================================================
 
+// MIME types permitidos para uploads de verificación.
+// La extensión y el content-type se hardcodean a partir de esta lista —
+// nunca confiamos en lo que viene del URI (un atacante podría pasar .svg
+// con JS adentro y servirse como image/svg+xml).
+const ALLOWED_IMAGE_MIME: Readonly<Record<string, string>> = {
+  jpg:  'image/jpeg',
+  jpeg: 'image/jpeg',
+  png:  'image/png',
+  webp: 'image/webp',
+}
+
 export const verificationApi = {
   async uploadPhoto(userId: string, type: 'dni_front' | 'dni_back' | 'selfie', uri: string): Promise<string> {
-    const ext  = uri.split('.').pop() ?? 'jpg'
+    const rawExt = (uri.split('?')[0].split('.').pop() ?? '').toLowerCase()
+    const mime   = ALLOWED_IMAGE_MIME[rawExt]
+    if (!mime) {
+      throw new Error('Formato de imagen no soportado. Usá JPG, PNG o WEBP.')
+    }
+    const ext  = rawExt === 'jpeg' ? 'jpg' : rawExt
     const path = `${userId}/${type}.${ext}`
 
     const response = await fetch(uri)
@@ -162,7 +233,7 @@ export const verificationApi = {
 
     const { error } = await supabase.storage
       .from('verifications')
-      .upload(path, blob, { upsert: true, contentType: `image/${ext}` })
+      .upload(path, blob, { upsert: true, contentType: mime })
 
     if (error) throw error
     return path
@@ -259,7 +330,15 @@ export const tripsApi = {
       query = query.ilike('origin_city', `%${filters.origin_city}%`)
     }
     if (filters?.trip_type && filters.trip_type !== 'todos') {
-      query = query.or(`trip_type.eq.${filters.trip_type},trip_type.eq.ida_y_vuelta`)
+      // Whitelist explícito — nunca interpolar el valor del filtro en un .or() crudo.
+      const ALLOWED_TRIP_TYPES = ['ida', 'vuelta', 'ida_y_vuelta'] as const
+      if ((ALLOWED_TRIP_TYPES as readonly string[]).includes(filters.trip_type)) {
+        // Un viaje 'ida_y_vuelta' aparece en cualquier filtro de tramo único.
+        const matches = filters.trip_type === 'ida_y_vuelta'
+          ? ['ida_y_vuelta']
+          : [filters.trip_type, 'ida_y_vuelta']
+        query = query.in('trip_type', matches)
+      }
     }
     if (filters?.only_with_seats) {
       query = query.gt('seats_available', 0)
@@ -423,7 +502,12 @@ export const bookingsApi = {
     return data ?? []
   },
 
-  async create(passengerId: string, tripId: string, form: NewBookingForm, totalAmount: number) {
+  async create(passengerId: string, tripId: string, form: NewBookingForm, _totalAmount?: number) {
+    // total_amount lo calcula el trigger compute_booking_total en el server,
+    // tomando seats_booked × precio publicado del viaje. El parámetro
+    // _totalAmount se ignora — queda en la firma por compatibilidad pero
+    // ya no es la fuente de verdad. El cliente lo seguirá usando solo
+    // para mostrar un "preview" antes de enviar.
     const { data, error } = await supabase
       .from('bookings')
       .insert({
@@ -431,7 +515,7 @@ export const bookingsApi = {
         passenger_id:      passengerId,
         segment:           form.segment,
         seats_booked:      form.seats_booked,
-        total_amount:      totalAmount,
+        total_amount:      0, // sobreescrito por trigger BEFORE INSERT
         payment_method:    form.payment_method,
         passenger_message: form.passenger_message,
         pickup_point:      form.pickup_point,
@@ -496,6 +580,14 @@ export const bookingsApi = {
       .eq('id', bookingId)
       .select('passenger_id, trip:trips!trip_id(event:events!event_id(title))')
       .single()
+
+    if (result.error) {
+      const msg = result.error.message ?? ''
+      if (msg.includes('Sin asientos disponibles')) {
+        throw new Error('Ya no hay asientos disponibles en este viaje.')
+      }
+      throw result.error
+    }
 
     if (result.data) {
       const eventTitle = (result.data.trip as any)?.event?.title ?? 'un evento'
