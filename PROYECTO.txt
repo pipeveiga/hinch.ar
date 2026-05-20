@@ -1,0 +1,174 @@
+================================================================================
+                              HINCH.AR — PROYECTO
+================================================================================
+
+App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
+o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
+Si no tenés auto, reservás un lugar en el viaje de alguien más.
+
+Última actualización del documento: 2026-05-20
+
+--------------------------------------------------------------------------------
+QUÉ HACE LA APP
+--------------------------------------------------------------------------------
+
+1. Lista eventos (partidos de fútbol, recitales, etc.) en Argentina.
+2. Para cada evento, muestra los viajes que la gente publicó.
+3. Si tenés auto: publicás un viaje con origen, asientos disponibles, precio
+   y tipo (solo ida / solo vuelta / ida y vuelta).
+4. Si no: reservás un asiento en un viaje. El conductor confirma o rechaza.
+5. Chat por reserva entre conductor y pasajero.
+6. Después del viaje, ambos se califican (sistema 5x5: puntualidad,
+   seguridad, comunicación, etc.).
+7. Verificación de identidad de usuarios (DNI) para que viajes tranquilo.
+8. Push notifications cuando te reservan, te confirman o te mandan chat.
+
+--------------------------------------------------------------------------------
+STACK TÉCNICO
+--------------------------------------------------------------------------------
+
+- Framework: Expo SDK 54 + React Native 0.81
+- Routing: expo-router 6 (file-based)
+- Backend: Supabase (Postgres + Auth + Realtime + Edge Functions + Storage)
+- Estado en cliente: Zustand
+- Idioma: TypeScript
+- Targets: Android (Google Play vía EAS) + Web (Vercel)
+
+--------------------------------------------------------------------------------
+ESTRUCTURA DEL CÓDIGO
+--------------------------------------------------------------------------------
+
+app/                Pantallas (routing por archivos con expo-router)
+  (auth)/             login + registro
+  (tabs)/             home, mis viajes, chats, notificaciones, perfil
+  evento/[id]         detalle de evento + lista de viajes
+  viaje/[id]          detalle de viaje + reservar
+  viaje/nuevo         crear viaje (drivers)
+  chat/[bookingId]    chat por reserva
+  usuario/[id]        perfil público + ratings
+  calificar/          flujo de calificación post-viaje
+  onboarding.tsx      3 slides de bienvenida
+  verificacion.tsx    subir DNI
+
+components/         EventCard, TripCard, UserAvatar, VerificationBadge
+
+hooks/              usePushNotifications (registrar token Expo Push)
+
+stores/             zustand: authStore, tripsStore, chatsStore, notificationsStore
+
+lib/
+  supabase.ts         cliente + APIs (usersApi, tripsApi, etc.)
+  types.ts            tipos TS espejo del schema SQL
+  constants.ts        paleta de colores, spacing, reglas de negocio
+
+supabase/
+  migrations/         schema SQL (001_initial_schema, 002_chat)
+  functions/
+    send-notification   Edge function (Deno) que manda push via Expo
+
+assets/             logo, splash, íconos
+scripts/            seeds SQL, sync-events.mjs
+
+--------------------------------------------------------------------------------
+CÓMO CORRERLO
+--------------------------------------------------------------------------------
+
+Requisitos: Node 20+, cuenta Supabase, cuenta Expo (para builds Android).
+
+  1. cp .env.example .env
+     Llenar EXPO_PUBLIC_SUPABASE_URL y EXPO_PUBLIC_SUPABASE_ANON_KEY
+
+  2. npm install
+
+  3. npm run start        (dev server)
+     npm run web          (browser)
+     npm run android      (emulador / device)
+     npm run typecheck    (TS check)
+     npm run lint         (ESLint)
+
+--------------------------------------------------------------------------------
+DESPLIEGUES
+--------------------------------------------------------------------------------
+
+WEB (Vercel):
+  Push a `main` → auto-deploy.
+  Variables EXPO_PUBLIC_* configuradas en el dashboard de Vercel.
+  Config: vercel.json en la raíz.
+
+ANDROID (EAS):
+  Manual con: eas build --profile production --platform android
+  Perfiles en eas.json: preview (APK interno), production (AAB Play Store).
+
+EDGE FUNCTION (Supabase):
+  send-notification se despliega con: supabase functions deploy send-notification
+  Necesita secrets: EXPO_ACCESS_TOKEN, SUPABASE_SERVICE_ROLE_KEY
+
+--------------------------------------------------------------------------------
+SEGURIDAD
+--------------------------------------------------------------------------------
+
+- Todas las tablas tienen RLS habilitado (Row Level Security en Supabase).
+- usersApi.getById solo devuelve campos públicos (no dni, no verification_status).
+- usersApi.updateProfile tiene whitelist de campos editables: nunca permite
+  cambiar is_verified, verification_status, dni desde el cliente.
+- google-services.json está commiteado: contiene solo config Firebase (sender ID,
+  API key restringida por aplicación), no claves privadas.
+- .env NO se commitea.
+
+--------------------------------------------------------------------------------
+CONVENCIONES
+--------------------------------------------------------------------------------
+
+- UI en castellano rioplatense (con tildes y eñes).
+- Solo dark theme. Colores siempre desde COLORS en lib/constants.ts.
+- Si se modifica el schema SQL en supabase/migrations/, actualizar lib/types.ts.
+- Todo acceso a datos pasa por *Api objects en lib/supabase.ts.
+- supabase/functions/ corre en Deno, excluido del tsconfig principal.
+
+--------------------------------------------------------------------------------
+ESTADO ACTUAL Y PRÓXIMOS PASOS
+--------------------------------------------------------------------------------
+
+Hecho:
+  [x] MVP funcional: auth, eventos, viajes, reservas, chat, ratings, push.
+  [x] Onboarding 3 slides (refactor a control por estado para que ande en web).
+  [x] Web deploy en Vercel (con guard SSR para window).
+  [x] Android EAS configurado (preview + production).
+  [x] Typecheck verde, lint funcionando, CI en GitHub Actions.
+  [x] README + CLAUDE.md + PROYECTO.txt (este archivo).
+  [x] Default branch en `main`.
+
+Pendiente:
+  [ ] QA real end-to-end en device Android (login, crear viaje, reservar,
+      chat, push notification).
+  [ ] QA web Vercel completo.
+  [ ] Confirmar que la edge function send-notification está deployada con
+      sus secrets en Supabase.
+  [ ] Bump a Expo SDK 55 para cerrar las 5 vulnerabilidades restantes
+      del árbol de Expo (npm audit).
+  [ ] Tag v0.1.0 + primer release en Play Store.
+
+--------------------------------------------------------------------------------
+GLOSARIO RÁPIDO
+--------------------------------------------------------------------------------
+
+EAS         Expo Application Services. Plataforma de Expo para builds en la
+            nube, submits a stores, OTA updates. Reemplaza tener Android Studio
+            o Xcode instalados.
+
+Expo Go     App de Expo para probar tu app sin compilarla. Limitaciones: push
+            notifications no funcionan en SDK 54 (por eso el código las skipea
+            cuando detecta Expo Go).
+
+RLS         Row Level Security de Postgres. Reglas a nivel fila que dicen
+            quién puede leer/escribir qué. En Supabase es la primera línea
+            de defensa.
+
+Edge function   Mini-servidor que corre en Deno en la infraestructura de
+                Supabase. Se invoca desde la app, ejecuta lógica con permisos
+                elevados (service_role), responde.
+
+Zustand     Librería minimalista de estado global. Cada dominio tiene su
+            store (authStore, tripsStore, etc.).
+
+================================================================================
