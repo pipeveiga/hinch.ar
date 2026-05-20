@@ -1,13 +1,11 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  FlatList, Dimensions, Animated,
+  useWindowDimensions,
 } from 'react-native'
 import { router } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { COLORS, SPACING } from '@/lib/constants'
-
-const { width } = Dimensions.get('window')
 
 const SLIDES = [
   {
@@ -31,81 +29,60 @@ const SLIDES = [
 ]
 
 export default function OnboardingScreen() {
+  const { width } = useWindowDimensions()
   const [currentIndex, setCurrentIndex] = useState(0)
-  const flatListRef = useRef<FlatList>(null)
-  const scrollX = useRef(new Animated.Value(0)).current
 
-  const handleNext = async () => {
-    if (currentIndex < SLIDES.length - 1) {
-      flatListRef.current?.scrollToIndex({ index: currentIndex + 1 })
-    } else {
-      await AsyncStorage.setItem('onboarding_done', 'true')
-      router.replace('/(auth)/login')
-    }
-  }
-
-  const handleSkip = async () => {
+  const finish = async () => {
     await AsyncStorage.setItem('onboarding_done', 'true')
     router.replace('/(auth)/login')
   }
 
+  const handleNext = () => {
+    if (currentIndex < SLIDES.length - 1) {
+      setCurrentIndex(currentIndex + 1)
+    } else {
+      finish()
+    }
+  }
+
   const isLast = currentIndex === SLIDES.length - 1
+  const slide  = SLIDES[currentIndex]
 
   return (
     <View style={styles.container}>
       {/* Skip */}
       {!isLast && (
-        <TouchableOpacity style={styles.skipBtn} onPress={handleSkip} activeOpacity={0.6}>
+        <TouchableOpacity style={styles.skipBtn} onPress={finish} activeOpacity={0.6}>
           <Text style={styles.skipText}>Saltar</Text>
         </TouchableOpacity>
       )}
 
-      {/* Slides */}
-      <Animated.FlatList
-        ref={flatListRef}
-        data={SLIDES}
-        keyExtractor={(item) => item.key}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: false },
-        )}
-        onMomentumScrollEnd={(e) => {
-          setCurrentIndex(Math.round(e.nativeEvent.contentOffset.x / width))
-        }}
-        renderItem={({ item }) => (
-          <View style={styles.slide}>
-            <Text style={styles.icon}>{item.icon}</Text>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.subtitle}>{item.subtitle}</Text>
-          </View>
-        )}
-      />
+      {/* Slide actual */}
+      <View style={styles.slide}>
+        <Text style={styles.icon}>{slide.icon}</Text>
+        <Text style={styles.title}>{slide.title}</Text>
+        <Text style={styles.subtitle}>{slide.subtitle}</Text>
+      </View>
 
       {/* Dots */}
       <View style={styles.dots}>
-        {SLIDES.map((_, i) => {
-          const opacity = scrollX.interpolate({
-            inputRange: [(i - 1) * width, i * width, (i + 1) * width],
-            outputRange: [0.3, 1, 0.3],
-            extrapolate: 'clamp',
-          })
-          const w = scrollX.interpolate({
-            inputRange: [(i - 1) * width, i * width, (i + 1) * width],
-            outputRange: [8, 24, 8],
-            extrapolate: 'clamp',
-          })
-          return (
-            <Animated.View key={i} style={[styles.dot, { opacity, width: w }]} />
-          )
-        })}
+        {SLIDES.map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.dot,
+              { width: i === currentIndex ? 24 : 8, opacity: i === currentIndex ? 1 : 0.3 },
+            ]}
+          />
+        ))}
       </View>
 
       {/* Botón */}
-      <TouchableOpacity style={styles.btn} onPress={handleNext} activeOpacity={0.85}>
+      <TouchableOpacity
+        style={[styles.btn, { width: width - SPACING.lg * 2 }]}
+        onPress={handleNext}
+        activeOpacity={0.85}
+      >
         <Text style={styles.btnText}>
           {isLast ? 'Empezar →' : 'Siguiente →'}
         </Text>
@@ -114,7 +91,7 @@ export default function OnboardingScreen() {
       {/* Footer */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>¿Ya tenés cuenta? </Text>
-        <TouchableOpacity onPress={handleSkip}>
+        <TouchableOpacity onPress={finish}>
           <Text style={styles.footerLink}>Iniciá sesión</Text>
         </TouchableOpacity>
       </View>
@@ -139,7 +116,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   slide: {
-    width,
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -179,7 +155,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.xxl,
-    width: width - SPACING.lg * 2,
     alignItems: 'center',
     marginBottom: SPACING.md,
   },

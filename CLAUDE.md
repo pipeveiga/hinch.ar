@@ -10,6 +10,21 @@ npm run typecheck
 npm run lint
 ```
 
+## Mantener PROYECTO.txt al día
+
+`PROYECTO.txt` en la raíz es un resumen en castellano del proyecto pensado para
+que el usuario (no-dev) lo entienda. Cada vez que un cambio toque alguno de
+estos puntos, actualizar el .txt en el mismo commit:
+
+- Funcionalidad visible al usuario (nuevas features, flujos, pantallas).
+- Stack técnico, dependencias mayores o targets.
+- Estructura de carpetas (mover/agregar/borrar directorios principales).
+- Convenciones, despliegues, secrets requeridos.
+- Estado actual / próximos pasos (marcar items como hechos, agregar pendientes).
+
+Actualizar también la línea "Última actualización del documento" con la fecha
+del día.
+
 ## Convenciones del proyecto
 
 - **Idioma UI**: castellano rioplatense. Tildes y eñes incluidas.
@@ -44,5 +59,4 @@ npm run lint
 
 ## Branches activas
 
-- `claude/review-project-status-LXTR1`: rama actual de trabajo.
-- `claude/hinchar-carpool-mvp-eq1Ol`: rama vieja, candidata a eliminar si no tiene cambios pendientes.
+- `main`: branch principal. CI corre acá en cada push y PR.
