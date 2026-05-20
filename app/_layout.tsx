@@ -5,6 +5,7 @@ import { View, Platform } from 'react-native'
 import { useAuthStore } from '@/stores/authStore'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { COLORS } from '@/lib/constants'
+import LoadingScreen from '@/components/LoadingScreen'
 
 // GestureHandlerRootView no existe en web
 const GestureWrapper = Platform.OS !== 'web'
@@ -19,7 +20,7 @@ export default function RootLayout() {
     initialize()
   }, [])
 
-  if (!isHydrated) return null
+  if (!isHydrated) return <LoadingScreen />
 
   return (
     <GestureWrapper style={{ flex: 1 }}>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Redirect } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useAuthStore } from '@/stores/authStore'
+import LoadingScreen from '@/components/LoadingScreen'
 
 export default function Index() {
   const { session, isHydrated }           = useAuthStore()
@@ -13,7 +14,7 @@ export default function Index() {
     })
   }, [])
 
-  if (!isHydrated || onboardingDone === null) return null
+  if (!isHydrated || onboardingDone === null) return <LoadingScreen />
   if (session)           return <Redirect href="/(tabs)" />
   if (!onboardingDone)   return <Redirect href="/onboarding" />
   return <Redirect href="/(auth)/login" />

@@ -50,7 +50,8 @@ app/                Pantallas (routing por archivos con expo-router)
   onboarding.tsx      3 slides de bienvenida
   verificacion.tsx    subir DNI
 
-components/         EventCard, TripCard, UserAvatar, VerificationBadge
+components/         EventCard, TripCard, UserAvatar, VerificationBadge,
+                    LoadingScreen (pantalla de carga con fondo)
 
 hooks/              usePushNotifications (registrar token Expo Push)
 
@@ -137,6 +138,8 @@ Hecho:
   [x] Typecheck verde, lint funcionando, CI en GitHub Actions.
   [x] README + CLAUDE.md + PROYECTO.txt (este archivo).
   [x] Default branch en `main`.
+  [x] Pantalla de carga con imagen de fondo (auto + estadio al atardecer)
+      en lugar de fondo negro liso.
 
 Pendiente:
   [ ] QA real end-to-end en device Android (login, crear viaje, reservar,
