@@ -195,3 +195,14 @@ export const BUSINESS_RULES = {
   RATING_WINDOW_DAYS: 3,  // días post-evento para calificar
   MAX_BOOKING_SEATS:  4,  // máximo de asientos por reserva
 } as const
+
+// =============================================================================
+// AdMob — IDs públicos de unidades de anuncios
+// =============================================================================
+// Estos IDs no son secretos: van compilados en el cliente.
+// El componente AdBanner usa los TestIds del SDK en __DEV__ para evitar
+// invalidar tráfico real (regla de AdMob).
+export const ADS = {
+  ANDROID_APP_ID: 'ca-app-pub-3757996476091054~8200328336',
+  BANNER_UNIT_ID: 'ca-app-pub-3757996476091054/2603248654',
+} as const

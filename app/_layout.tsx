@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { View, Platform } from 'react-native'
+import Constants from 'expo-constants'
 import { useAuthStore } from '@/stores/authStore'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { COLORS } from '@/lib/constants'
@@ -12,12 +13,26 @@ const GestureWrapper = Platform.OS !== 'web'
   ? require('react-native-gesture-handler').GestureHandlerRootView
   : View
 
+function initializeMobileAds() {
+  if (Platform.OS === 'web') return
+  if (Constants.appOwnership === 'expo') return // Expo Go no soporta el módulo nativo
+  try {
+    const ads = require('react-native-google-mobile-ads').default
+    ads().initialize().catch((err: unknown) => {
+      if (__DEV__) console.warn('AdMob initialize failed', err)
+    })
+  } catch {
+    // SDK no disponible en este build
+  }
+}
+
 export default function RootLayout() {
   const { initialize, isHydrated, user } = useAuthStore()
   usePushNotifications(user?.id)
 
   useEffect(() => {
     initialize()
+    initializeMobileAds()
   }, [])
 
   if (!isHydrated) return <LoadingScreen />

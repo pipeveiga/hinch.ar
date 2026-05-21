@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useTripsStore } from '@/stores/tripsStore'
 import { COLORS, SPACING, RADIUS, BOOKING_STATUS_COLORS, BOOKING_STATUS_LABELS, TRIP_TYPE_LABELS } from '@/lib/constants'
 import { TripCard } from '@/components/TripCard'
+import { AdBanner } from '@/components/AdBanner'
 import type { Booking } from '@/lib/types'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -127,6 +128,7 @@ export default function MisViajesScreen() {
           keyExtractor={(b) => b.id}
           renderItem={({ item }) => <BookingItem booking={item} />}
           contentContainerStyle={styles.list}
+          ListFooterComponent={myBookings.length > 0 ? <AdBanner /> : null}
           ListEmptyComponent={
             <View style={styles.center}>
               <Text style={styles.emptyIcon}>🎟️</Text>
@@ -150,6 +152,7 @@ export default function MisViajesScreen() {
             />
           )}
           contentContainerStyle={styles.list}
+          ListFooterComponent={myTrips.length > 0 ? <AdBanner /> : null}
           ListEmptyComponent={
             <View style={styles.center}>
               <Text style={styles.emptyIcon}>🚗</Text>

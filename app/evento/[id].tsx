@@ -15,6 +15,7 @@ import {
 } from '@/lib/constants'
 import type { Event, TripSearchFilters } from '@/lib/types'
 import { TripCard } from '@/components/TripCard'
+import { AdBanner } from '@/components/AdBanner'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -147,6 +148,7 @@ export default function EventoScreen() {
               />
             )}
             contentContainerStyle={styles.list}
+            ListHeaderComponent={eventTrips.length > 0 ? <AdBanner /> : null}
             ListEmptyComponent={
               <View style={styles.emptyState}>
                 <Text style={styles.emptyIcon}>🚗</Text>

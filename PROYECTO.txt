@@ -6,7 +6,7 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-05-20
+Última actualización del documento: 2026-05-21
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -22,6 +22,9 @@ QUÉ HACE LA APP
    seguridad, comunicación, etc.).
 7. Verificación de identidad de usuarios (DNI) para que viajes tranquilo.
 8. Push notifications cuando te reservan, te confirman o te mandan chat.
+9. Monetización con anuncios (AdMob): banner abajo de la lista de eventos,
+   de mis viajes y dentro del detalle de evento. No hay anuncios en chat,
+   creación de viaje, verificación ni login.
 
 --------------------------------------------------------------------------------
 STACK TÉCNICO
@@ -33,6 +36,7 @@ STACK TÉCNICO
 - Estado en cliente: Zustand
 - Idioma: TypeScript
 - Targets: Android (Google Play vía EAS) + Web (Vercel)
+- Ads: AdMob vía react-native-google-mobile-ads (solo Android, no web)
 
 --------------------------------------------------------------------------------
 ESTRUCTURA DEL CÓDIGO
@@ -51,7 +55,8 @@ app/                Pantallas (routing por archivos con expo-router)
   verificacion.tsx    subir DNI
 
 components/         EventCard, TripCard, UserAvatar, VerificationBadge,
-                    LoadingScreen (pantalla de carga con fondo)
+                    LoadingScreen (pantalla de carga con fondo),
+                    AdBanner (banner AdMob, no se renderiza en web ni Expo Go)
 
 hooks/              usePushNotifications (registrar token Expo Push)
 
@@ -140,6 +145,9 @@ Hecho:
   [x] Default branch en `main`.
   [x] Pantalla de carga con imagen de fondo (auto + estadio al atardecer)
       en lugar de fondo negro liso.
+  [x] AdMob: cuenta creada, App ID y unit de banner configurados.
+      Integración del banner en home, mis viajes y detalle de evento.
+      En __DEV__ se muestran los TestIds del SDK (regla obligatoria de AdMob).
 
 Pendiente:
   [ ] QA real end-to-end en device Android (login, crear viaje, reservar,
@@ -149,6 +157,13 @@ Pendiente:
       sus secrets en Supabase.
   [ ] Bump a Expo SDK 55 para cerrar las 5 vulnerabilidades restantes
       del árbol de Expo (npm audit).
+  [ ] Build EAS production con AdMob integrado y verificar que el banner
+      carga en device real (no funciona en Expo Go ni con OTA updates).
+  [ ] Declarar "Contiene anuncios = Sí" en Google Play Console al subir
+      la versión que ya trae AdMob compilado.
+  [ ] Implementar UMP / consent banner GDPR antes de habilitar tráfico
+      a usuarios de UE.
+  [ ] Evaluar intersticiales y rewarded después de medir CTR del banner.
   [ ] Tag v0.1.0 + primer release en Play Store.
 
 --------------------------------------------------------------------------------

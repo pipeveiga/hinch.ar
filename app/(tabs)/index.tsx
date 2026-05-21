@@ -8,6 +8,7 @@ import { eventsApi } from '@/lib/supabase'
 import { COLORS, SPACING } from '@/lib/constants'
 import type { Event, EventType } from '@/lib/types'
 import { EventCard } from '@/components/EventCard'
+import { AdBanner } from '@/components/AdBanner'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import { useUserCity } from '@/hooks/useUserCity'
 
@@ -139,6 +140,7 @@ export default function HomeScreen() {
           data={filtered}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={ListHeader}
+          ListFooterComponent={<AdBanner />}
           renderItem={({ item }) => (
             <EventCard event={item} onPress={() => router.push(`/evento/${item.id}`)} />
           )}
