@@ -19,10 +19,20 @@
     "production": {
       "android": {
         "buildType": "app-bundle"
+      },
+      "ios": {
+        "distribution": "store",
+        "autoIncrement": "buildNumber"
       }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "REEMPLAZAR_CON_TU_APPLE_ID@example.com",
+        "ascAppId": "REEMPLAZAR_CON_APP_STORE_CONNECT_APP_ID",
+        "appleTeamId": "REEMPLAZAR_CON_APPLE_TEAM_ID"
+      }
+    }
   }
 }

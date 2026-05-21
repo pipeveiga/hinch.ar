@@ -15,6 +15,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "ar.hinch.app",
+      "buildNumber": "1",
       "infoPlist": {
         "NSCameraUsageDescription": "Necesitamos acceso a tu cámara para verificar tu identidad y subir fotos de tu auto.",
         "NSPhotoLibraryUsageDescription": "Necesitamos acceso a tus fotos para tu foto de perfil y del auto.",

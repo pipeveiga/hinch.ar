@@ -6,7 +6,7 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-05-20
+Última actualización del documento: 2026-05-21
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -32,7 +32,7 @@ STACK TÉCNICO
 - Backend: Supabase (Postgres + Auth + Realtime + Edge Functions + Storage)
 - Estado en cliente: Zustand
 - Idioma: TypeScript
-- Targets: Android (Google Play vía EAS) + Web (Vercel)
+- Targets: Android (Google Play vía EAS) + iOS (App Store vía EAS) + Web (Vercel)
 
 --------------------------------------------------------------------------------
 ESTRUCTURA DEL CÓDIGO
@@ -100,6 +100,22 @@ ANDROID (EAS):
   Manual con: eas build --profile production --platform android
   Perfiles en eas.json: preview (APK interno), production (AAB Play Store).
 
+iOS (EAS):
+  Bundle ID: ar.hinch.app
+  Perfiles en eas.json:
+    preview      → .ipa firmado para distribución interna (Ad Hoc, solo UDIDs
+                   registrados). Comando:
+                     eas build --profile preview --platform ios
+    production   → .ipa para App Store / TestFlight (distribution: "store",
+                   autoIncrement de buildNumber). Comando:
+                     eas build --profile production --platform ios
+  Submit a App Store Connect:
+    eas submit -p ios --latest
+  Antes de submit, completar en eas.json los placeholders REEMPLAZAR_CON_*:
+    appleId, ascAppId, appleTeamId.
+  Requisitos previos: cuenta Apple Developer paga, app creada en
+  App Store Connect con bundle ID ar.hinch.app.
+
 EDGE FUNCTION (Supabase):
   send-notification se despliega con: supabase functions deploy send-notification
   Necesita secrets: EXPO_ACCESS_TOKEN, SUPABASE_SERVICE_ROLE_KEY
@@ -140,16 +156,24 @@ Hecho:
   [x] Default branch en `main`.
   [x] Pantalla de carga con imagen de fondo (auto + estadio al atardecer)
       en lugar de fondo negro liso.
+  [x] Primer build iOS (.ipa) con perfil preview (distribución interna).
+  [x] Perfil production iOS configurado en eas.json (distribution: store,
+      autoIncrement de buildNumber). buildNumber inicial en app.json.
 
 Pendiente:
   [ ] QA real end-to-end en device Android (login, crear viaje, reservar,
       chat, push notification).
+  [ ] QA equivalente en device iOS con el .ipa preview ya buildeado.
   [ ] QA web Vercel completo.
   [ ] Confirmar que la edge function send-notification está deployada con
       sus secrets en Supabase.
   [ ] Bump a Expo SDK 55 para cerrar las 5 vulnerabilidades restantes
       del árbol de Expo (npm audit).
-  [ ] Tag v0.1.0 + primer release en Play Store.
+  [ ] Crear app en App Store Connect (bundle ID ar.hinch.app) y completar
+      en eas.json los placeholders appleId / ascAppId / appleTeamId.
+  [ ] Preparar metadata App Store: descripción, screenshots, privacy,
+      categoría, edad mínima.
+  [ ] Tag v0.1.0 + primer release en Play Store + TestFlight.
 
 --------------------------------------------------------------------------------
 GLOSARIO RÁPIDO
