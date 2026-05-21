@@ -10,5 +10,8 @@ web-build/
 *.mobileprovision
 *.orig.*
 web-build/
+# Credenciales de stores (no commitear)
+play-store-key.json
+AuthKey_*.p8
 # macOS
 .DS_Store

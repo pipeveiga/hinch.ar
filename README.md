@@ -3,7 +3,7 @@
 App de carpool para hinchas: viajes compartidos a partidos, recitales y otros eventos en Argentina.
 
 Stack: **Expo SDK 54 + React Native 0.81 + expo-router 6 + Supabase + Zustand**.
-Targets: Android (EAS), Web (Vercel).
+Targets: Android (EAS), iOS (EAS), Web (Vercel).
 
 ## Quickstart
 
@@ -87,7 +87,7 @@ psql "$SUPABASE_DB_URL" -f scripts/seed-events.sql
 
 Perfiles en `eas.json`:
 - `preview`: APK interno
-- `production`: AAB para Play Store
+- `production`: AAB para Play Store (autoincrementa `versionCode`)
 
 ```bash
 eas build --profile preview --platform android
@@ -98,6 +98,46 @@ eas build --profile production --platform android
 sensibles** (solo configuración del proyecto Firebase), pero conviene
 revisar antes de hacer el repo público — si en algún momento se agregan
 claves, moverlo a EAS secrets.
+
+**Submit a Play Store**: generar un service account JSON en Google Cloud
+con permisos en Play Console, guardarlo como `play-store-key.json` en la
+raíz (ya está gitignored) y correr:
+
+```bash
+eas submit --profile production --platform android
+```
+
+Por defecto sube a track `internal` con `releaseStatus: draft` (configurado
+en `eas.json`).
+
+### iOS (EAS)
+
+Perfiles en `eas.json`:
+- `preview`: build interno para device (no simulador)
+- `production`: build para App Store / TestFlight (autoincrementa `buildNumber`)
+
+```bash
+eas build --profile preview --platform ios
+eas build --profile production --platform ios
+```
+
+En el primer build EAS pide las credenciales de Apple Developer (Apple ID
++ contraseña / app-specific password) y se encarga solo del certificado
+de distribución y los provisioning profiles.
+
+**Submit a App Store / TestFlight**: completar en `eas.json` los campos
+`submit.production.ios`:
+
+- `appleId`: email de la cuenta Apple Developer
+- `ascAppId`: ID numérico de la app en App Store Connect (lo ves al crear
+  la app en https://appstoreconnect.apple.com)
+- `appleTeamId`: ID del equipo en https://developer.apple.com/account
+
+Después:
+
+```bash
+eas submit --profile production --platform ios
+```
 
 ### Web (Vercel)
 

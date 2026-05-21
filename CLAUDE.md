@@ -1,6 +1,6 @@
 # Guía para Claude
 
-App de carpool para eventos en Argentina. Stack: **Expo SDK 54 + React Native 0.81 + expo-router + Supabase + Zustand**. Targets: Android (EAS) y web (Vercel).
+App de carpool para eventos en Argentina. Stack: **Expo SDK 54 + React Native 0.81 + expo-router + Supabase + Zustand**. Targets: Android (EAS), iOS (EAS) y web (Vercel).
 
 ## Antes de modificar código
 
@@ -37,7 +37,8 @@ del día.
 ## Plataformas
 
 - **Web (Vercel)**: build estático. `supabase.ts` ya tiene guard SSR para `window`. Cualquier nueva referencia a APIs de browser necesita `typeof window !== 'undefined'`.
-- **Android (EAS)**: `eas.json` con perfiles `preview` (APK) y `production` (AAB).
+- **Android (EAS)**: `eas.json` con perfiles `preview` (APK) y `production` (AAB). Bundle id: `ar.hinch.app`.
+- **iOS (EAS)**: mismo `bundleIdentifier` `ar.hinch.app`. `production` deja que EAS autoincremente `buildNumber`. Para subir a TestFlight / App Store: `eas submit --platform ios`.
 - **Expo Go**: push notifications **no** funcionan en SDK 54 — el código las skipea con `Platform.OS === 'web'` y try/catch dinámico en `hooks/usePushNotifications.ts`.
 
 ## Seguridad
@@ -49,7 +50,8 @@ del día.
 ## Despliegues
 
 - **Web**: push a `main` → Vercel.
-- **Android**: manual con `eas build --profile production --platform android`.
+- **Android**: build con `eas build --profile production --platform android`, submit con `eas submit --platform android` (requiere `play-store-key.json` en la raíz — gitignored).
+- **iOS**: build con `eas build --profile production --platform ios`, submit con `eas submit --platform ios` (requiere completar `appleId`, `ascAppId` y `appleTeamId` en `eas.json`).
 
 ## Cosas que no hay que hacer
 

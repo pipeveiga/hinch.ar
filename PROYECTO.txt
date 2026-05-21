@@ -6,7 +6,7 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-05-20
+Última actualización del documento: 2026-05-21
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -32,7 +32,7 @@ STACK TÉCNICO
 - Backend: Supabase (Postgres + Auth + Realtime + Edge Functions + Storage)
 - Estado en cliente: Zustand
 - Idioma: TypeScript
-- Targets: Android (Google Play vía EAS) + Web (Vercel)
+- Targets: Android (Google Play vía EAS) + iOS (App Store vía EAS) + Web (Vercel)
 
 --------------------------------------------------------------------------------
 ESTRUCTURA DEL CÓDIGO
@@ -99,6 +99,18 @@ WEB (Vercel):
 ANDROID (EAS):
   Manual con: eas build --profile production --platform android
   Perfiles en eas.json: preview (APK interno), production (AAB Play Store).
+  Submit a Play Store: eas submit --profile production --platform android
+  (requiere play-store-key.json en la raíz — gitignored — generado desde
+  Google Cloud / Play Console).
+
+IOS (EAS):
+  Manual con: eas build --profile production --platform ios
+  Perfiles en eas.json: preview (build interno para device, no simulador),
+  production (build para TestFlight / App Store).
+  En el primer build EAS pide credenciales de la cuenta Apple Developer y
+  maneja solo certificado de distribución + provisioning profiles.
+  Submit a App Store / TestFlight: eas submit --profile production --platform ios
+  (requiere completar appleId, ascAppId y appleTeamId en eas.json).
 
 EDGE FUNCTION (Supabase):
   send-notification se despliega con: supabase functions deploy send-notification
@@ -135,6 +147,10 @@ Hecho:
   [x] Onboarding 3 slides (refactor a control por estado para que ande en web).
   [x] Web deploy en Vercel (con guard SSR para window).
   [x] Android EAS configurado (preview + production).
+  [x] iOS EAS configurado (preview + production, autoincrement de buildNumber).
+  [x] Submit profiles en eas.json para Play Store y App Store (placeholders
+      a completar con los IDs reales de cada cuenta).
+  [x] Cuentas Apple Developer + Google Play Developer obtenidas.
   [x] Typecheck verde, lint funcionando, CI en GitHub Actions.
   [x] README + CLAUDE.md + PROYECTO.txt (este archivo).
   [x] Default branch en `main`.
@@ -142,14 +158,22 @@ Hecho:
       en lugar de fondo negro liso.
 
 Pendiente:
+  [ ] Completar eas.json con appleId / ascAppId / appleTeamId reales.
+  [ ] Generar service account JSON en Google Cloud y guardarlo como
+      play-store-key.json en la raíz (ya gitignored).
+  [ ] Crear la app en App Store Connect y en Google Play Console
+      (bundle id / package: ar.hinch.app).
+  [ ] Primer build de producción iOS + Android y submit a TestFlight /
+      track internal de Play.
   [ ] QA real end-to-end en device Android (login, crear viaje, reservar,
       chat, push notification).
+  [ ] QA real end-to-end en device iOS.
   [ ] QA web Vercel completo.
   [ ] Confirmar que la edge function send-notification está deployada con
       sus secrets en Supabase.
   [ ] Bump a Expo SDK 55 para cerrar las 5 vulnerabilidades restantes
       del árbol de Expo (npm audit).
-  [ ] Tag v0.1.0 + primer release en Play Store.
+  [ ] Tag v0.1.0 + primer release en Play Store + TestFlight.
 
 --------------------------------------------------------------------------------
 GLOSARIO RÁPIDO
