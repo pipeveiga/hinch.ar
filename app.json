@@ -18,8 +18,10 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Necesitamos acceso a tu cámara para verificar tu identidad y subir fotos de tu auto.",
         "NSPhotoLibraryUsageDescription": "Necesitamos acceso a tus fotos para tu foto de perfil y del auto.",
-        "NSLocationWhenInUseUsageDescription": "Usamos tu ubicación para mostrarte viajes cercanos a vos."
-      }
+        "NSLocationWhenInUseUsageDescription": "Usamos tu ubicación para mostrarte viajes cercanos a vos.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "buildNumber": "3"
     },
     "android": {
       "adaptiveIcon": {
@@ -33,7 +35,9 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "CAMERA",
-        "READ_EXTERNAL_STORAGE"
+        "READ_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "web": {
