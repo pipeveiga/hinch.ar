@@ -56,6 +56,14 @@
         {
           "locationWhenInUsePermission": "Usamos tu ubicación para mostrarte eventos cerca tuyo."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1D4ED8",
+          "sounds": []
+        }
       ]
     ],
     "experiments": {

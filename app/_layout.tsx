@@ -3,7 +3,7 @@ import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { View, Platform } from 'react-native'
 import { useAuthStore } from '@/stores/authStore'
-// import { usePushNotifications } from '@/hooks/usePushNotifications'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { COLORS } from '@/lib/constants'
 
 // GestureHandlerRootView no existe en web
@@ -13,7 +13,7 @@ const GestureWrapper = Platform.OS !== 'web'
 
 export default function RootLayout() {
   const { initialize, isHydrated, user } = useAuthStore()
-  // usePushNotifications(user?.id)  // TEMP: deshabilitado para descartar crash iOS
+  usePushNotifications(user?.id)
 
   useEffect(() => {
     initialize()
