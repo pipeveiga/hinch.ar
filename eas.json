@@ -20,7 +20,8 @@
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://nrpkqiuypxcvwxfnslqh.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ycGtxaXV5cHhjdnd4Zm5zbHFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMTM1NzgsImV4cCI6MjA5MDU4OTU3OH0.7wUe0XcE66wFIz4ogCHjaCDRnYu8jv2UN0XKLk0o3Ho"
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ycGtxaXV5cHhjdnd4Zm5zbHFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMTM1NzgsImV4cCI6MjA5MDU4OTU3OH0.7wUe0XcE66wFIz4ogCHjaCDRnYu8jv2UN0XKLk0o3Ho",
+        "EXPO_PUBLIC_GOOGLE_MAPS_KEY": "AIzaSyCRwA4WNHRsWfbpOxX7OcsX8HsyGm7TCkk"
       },
       "android": {
         "buildType": "app-bundle"

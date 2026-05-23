@@ -284,6 +284,8 @@ export const tripsApi = {
         origin_address:  form.origin_address,
         origin_city:     form.origin_city,
         origin_province: form.origin_province,
+        origin_lat:      form.origin_lat,
+        origin_lng:      form.origin_lng,
         trip_type:       form.trip_type,
         seats_total:     form.seats_total,
         seats_available: form.seats_total,  // empieza lleno de disponibilidad
