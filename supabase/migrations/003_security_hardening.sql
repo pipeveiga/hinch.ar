@@ -117,6 +117,10 @@ CREATE POLICY "Chat: enviar si participo"
 -- -----------------------------------------------------------------------------
 
 DROP POLICY IF EXISTS "Reservas: conductor puede confirmar/cancelar" ON public.bookings;
+-- Policy permisiva preexistente (no estaba en las migraciones del repo): tenía
+-- WITH CHECK NULL => usaba el USING como check, dejando que el pasajero pusiera
+-- su reserva en cualquier estado (incluido 'confirmed'). Hay que eliminarla.
+DROP POLICY IF EXISTS "bookings_update_participant" ON public.bookings;
 DROP POLICY IF EXISTS "Reservas: pasajero cancela" ON public.bookings;
 DROP POLICY IF EXISTS "Reservas: conductor gestiona" ON public.bookings;
 
