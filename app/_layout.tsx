@@ -24,7 +24,7 @@ export default function RootLayout() {
 
   return (
     <GestureWrapper style={{ flex: 1 }}>
-      <StatusBar style="light" backgroundColor={COLORS.background} />
+      <StatusBar style="dark" backgroundColor={COLORS.background} />
       <Stack
         screenOptions={{
           headerShown:        false,

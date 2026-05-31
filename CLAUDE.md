@@ -28,7 +28,7 @@ del día.
 ## Convenciones del proyecto
 
 - **Idioma UI**: castellano rioplatense. Tildes y eñes incluidas.
-- **Tema**: solo dark. Paleta en `lib/constants.ts` (`COLORS`). Usar siempre las constantes, nunca hardcodear colores.
+- **Tema**: solo light. Paleta en `lib/constants.ts` (`COLORS`), espejo de la landing (`landing/styles.css`). Usar siempre las constantes, nunca hardcodear colores.
 - **Tipos**: en `lib/types.ts`, espejo del schema. Actualizar acá si se cambia la DB en `supabase/migrations/`.
 - **Routing**: file-based con expo-router 6. Pantallas en `app/`, layouts con `_layout.tsx`.
 - **Estado**: Zustand. Un store por dominio en `stores/`.

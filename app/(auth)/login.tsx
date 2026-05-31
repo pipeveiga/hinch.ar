@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   },
   inputFlex: {
     flex: 1, padding: SPACING.md,
-    color: '#F1F5F9', fontSize: 16,
+    color: COLORS.textPrimary, fontSize: 16,
   },
   eyeBtn: { paddingHorizontal: SPACING.md },
   eyeIcon: { fontSize: 18 },
@@ -209,14 +209,14 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   errorBox: {
-    backgroundColor: '#450a0a',
+    backgroundColor: COLORS.errorBg,
     borderWidth: 1,
-    borderColor: '#b91c1c',
+    borderColor: COLORS.error,
     borderRadius: RADIUS.md,
     padding: SPACING.sm,
   },
   errorText: {
-    color: '#fca5a5',
+    color: COLORS.error,
     fontSize: 14,
     textAlign: 'center',
   },

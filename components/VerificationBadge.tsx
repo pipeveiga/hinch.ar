@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   badgeVerified: {
-    backgroundColor: '#14532D',
+    backgroundColor: COLORS.successBg,
     borderColor: COLORS.success,
   },
   badgeUnverified: {

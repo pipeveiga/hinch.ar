@@ -179,7 +179,8 @@ CONVENCIONES
 --------------------------------------------------------------------------------
 
 - UI en castellano rioplatense (con tildes y eñes).
-- Solo dark theme. Colores siempre desde COLORS en lib/constants.ts.
+- Solo light theme (fondo claro), espejo de la landing. Colores siempre
+  desde COLORS en lib/constants.ts.
 - Si se modifica el schema SQL en supabase/migrations/, actualizar lib/types.ts.
 - Todo acceso a datos pasa por *Api objects en lib/supabase.ts.
 - supabase/functions/ corre en Deno, excluido del tsconfig principal.
@@ -204,12 +205,12 @@ Hecho:
   [x] Landing institucional (landing/) estática, tema claro/minimalista.
       La app va a vivir en el subdominio app.hinch.ar y la landing en el
       dominio raíz.
+  [x] Landing y app desplegadas: hinch.ar (landing) + app.hinch.ar (app),
+      dos proyectos Vercel sobre el mismo repo, DNS configurado.
+  [x] App migrada a tema light, espejo de la landing (fondo claro, azul de
+      marca como acento). Paleta invertida en lib/constants.ts.
 
 Pendiente:
-  [ ] Crear el 2º proyecto Vercel para la landing (Root Directory=landing/)
-      y configurar DNS: raíz → landing, CNAME app → app actual.
-  [ ] Confirmar el subdominio final de la app (asumido app.hinch.ar) y
-      ajustar los href data-app-link en landing/index.html si cambia.
   [ ] QA real end-to-end en device Android (login, crear viaje, reservar,
       chat, push notification).
   [ ] QA equivalente en device iOS con el .ipa preview ya buildeado.

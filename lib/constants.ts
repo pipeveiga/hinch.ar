@@ -4,41 +4,44 @@ import type { RateeRole } from './types'
 // HINCH.AR — Constantes globales
 // =============================================================================
 
-// Paleta de colores — dark theme, tribuna argentina
+// Paleta de colores — light theme, espejo de la landing (landing/styles.css)
 export const COLORS = {
   // Fondos
-  background:   '#080808',
-  surface:      '#111111',
-  card:         '#1A1A1A',
-  cardElevated: '#222222',
-  border:       '#2C2C2C',
-  borderLight:  '#383838',
+  background:   '#FFFFFF',
+  surface:      '#F6F7F9',
+  card:         '#FFFFFF',
+  cardElevated: '#F6F7F9',
+  border:       '#E7E9EE',
+  borderLight:  '#D7DBE3',
 
   // Marca
-  primary:      '#1D4ED8',   // azul fuerte
+  primary:      '#1D4ED8',   // azul de marca
   primaryLight: '#3B82F6',
-  primaryDark:  '#1E3A8A',
-  accent:       '#EAB308',   // amarillo cancha
-  accentDark:   '#A16207',
+  primaryDark:  '#1843B8',
+  accent:       '#1D4ED8',   // acento único = azul de marca (como la landing)
+  accentDark:   '#1843B8',
 
   // Textos
-  textPrimary:   '#F1F5F9',
-  textSecondary: '#94A3B8',
-  textMuted:     '#475569',
-  textInverse:   '#080808',
+  textPrimary:   '#0B1220',
+  textSecondary: '#5B6472',
+  textMuted:     '#98A1AD',
+  textInverse:   '#FFFFFF',
 
   // Neutros
   white:         '#FFFFFF',
   black:         '#000000',
 
+  // Marca — tinte claro para fondos suaves (chips, íconos)
+  brandTint:     '#EEF3FF',
+
   // Semánticos
-  success:  '#22C55E',
-  successBg:'#14532D',
-  error:    '#EF4444',
-  errorBg:  '#450A0A',
-  warning:  '#F59E0B',
-  warningBg:'#451A03',
-  info:     '#38BDF8',
+  success:  '#16A34A',
+  successBg:'#DCFCE7',
+  error:    '#DC2626',
+  errorBg:  '#FEE2E2',
+  warning:  '#D97706',
+  warningBg:'#FEF3C7',
+  info:     '#0EA5E9',
 
   // Equipos (para theming contextual)
   bocaBlue:     '#003DA5',
