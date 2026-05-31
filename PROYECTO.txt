@@ -6,7 +6,7 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-05-22
+Última actualización del documento: 2026-05-31
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -70,6 +70,16 @@ supabase/
 assets/             logo, splash, íconos
 scripts/            seeds SQL, sync-events.mjs
 
+landing/            Landing institucional (web pública). HTML/CSS estático,
+                    SIN build ni framework — vive aparte del bundle Expo a
+                    propósito (carga rápido, buen SEO). Da info de la plataforma
+                    y manda a la app vía botones "Ir a la plataforma".
+  index.html          la página completa
+  styles.css          estilos (tema claro/minimalista propio de la landing)
+  assets/             logo, ícono, imágenes
+  vercel.json         config del proyecto Vercel de la landing
+  README.md           cómo editar y desplegar la landing
+
 --------------------------------------------------------------------------------
 CÓMO CORRERLO
 --------------------------------------------------------------------------------
@@ -91,10 +101,22 @@ Requisitos: Node 20+, cuenta Supabase, cuenta Expo (para builds Android).
 DESPLIEGUES
 --------------------------------------------------------------------------------
 
-WEB (Vercel):
-  Push a `main` → auto-deploy.
-  Variables EXPO_PUBLIC_* configuradas en el dashboard de Vercel.
-  Config: vercel.json en la raíz.
+WEB (Vercel) — DOS proyectos sobre el mismo repo:
+
+  1. LANDING (dominio raíz hinch.ar):
+     Proyecto Vercel con Root Directory = landing/. Es estático, sin build
+     command (Framework Preset = Other). Sirve la página institucional.
+     Dominios: hinch.ar y www.hinch.ar.
+
+  2. PLATAFORMA / APP (subdominio app.hinch.ar):
+     Proyecto Vercel con Root Directory = raíz del repo. Build estático de
+     Expo (npx expo export --platform web → dist), config en vercel.json de
+     la raíz. Variables EXPO_PUBLIC_* en el dashboard de Vercel.
+     Push a `main` → auto-deploy.
+
+  DNS: hinch.ar → proyecto LANDING; CNAME `app` → proyecto APP.
+  Los botones de la landing apuntan a https://app.hinch.ar (buscar
+  data-app-link en landing/index.html para cambiar el destino).
 
 ANDROID (EAS):
   Manual con: eas build --profile production --platform android
@@ -179,8 +201,15 @@ Hecho:
   [x] Primer build iOS (.ipa) con perfil preview (distribución interna).
   [x] Perfil production iOS configurado en eas.json (distribution: store,
       autoIncrement de buildNumber). buildNumber inicial en app.json.
+  [x] Landing institucional (landing/) estática, tema claro/minimalista.
+      La app va a vivir en el subdominio app.hinch.ar y la landing en el
+      dominio raíz.
 
 Pendiente:
+  [ ] Crear el 2º proyecto Vercel para la landing (Root Directory=landing/)
+      y configurar DNS: raíz → landing, CNAME app → app actual.
+  [ ] Confirmar el subdominio final de la app (asumido app.hinch.ar) y
+      ajustar los href data-app-link en landing/index.html si cambia.
   [ ] QA real end-to-end en device Android (login, crear viaje, reservar,
       chat, push notification).
   [ ] QA equivalente en device iOS con el .ipa preview ya buildeado.
