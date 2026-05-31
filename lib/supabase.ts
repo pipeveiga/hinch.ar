@@ -61,6 +61,26 @@ export const auth = {
     return supabase.auth.signOut()
   },
 
+  // Manda el mail de recuperación. redirectTo es la URL a la que vuelve el link.
+  async resetPassword(email: string, redirectTo?: string) {
+    return supabase.auth.resetPasswordForEmail(email, redirectTo ? { redirectTo } : undefined)
+  },
+
+  // Fija una nueva contraseña (requiere sesión activa, p.ej. la del link de recuperación)
+  async updatePassword(newPassword: string) {
+    return supabase.auth.updateUser({ password: newPassword })
+  },
+
+  // Establece sesión a partir de los tokens que trae el link de recuperación
+  async setSession(accessToken: string, refreshToken: string) {
+    return supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+  },
+
+  // Flujo PKCE: intercambia el ?code= del link por una sesión
+  async exchangeCodeForSession(code: string) {
+    return supabase.auth.exchangeCodeForSession(code)
+  },
+
   async getSession() {
     return supabase.auth.getSession()
   },

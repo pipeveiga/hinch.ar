@@ -116,6 +116,12 @@ export default function LoginScreen() {
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Text>
           </TouchableOpacity>
+
+          <Link href="/(auth)/recuperar" asChild>
+            <TouchableOpacity style={styles.forgot}>
+              <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
+            </TouchableOpacity>
+          </Link>
         </View>
 
         {/* Footer */}
@@ -207,6 +213,15 @@ const styles = StyleSheet.create({
   },
   btnDisabled: {
     opacity: 0.6,
+  },
+  forgot: {
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+  },
+  forgotText: {
+    color: COLORS.primaryLight,
+    fontSize: 14,
+    fontWeight: '600',
   },
   errorBox: {
     backgroundColor: COLORS.errorBg,
