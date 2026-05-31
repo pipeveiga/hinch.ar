@@ -191,7 +191,9 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
     marginTop: SPACING.xs,
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     borderRadius: 12,
     paddingHorizontal: SPACING.md,
     paddingVertical: 10,
@@ -216,7 +218,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: '#1C1C1E',
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   chipActive: {
     backgroundColor: COLORS.primary,
@@ -227,7 +231,7 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   chipTextActive: {
-    color: '#fff',
+    color: COLORS.white,
     fontWeight: '600',
   },
 
