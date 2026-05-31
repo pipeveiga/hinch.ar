@@ -6,7 +6,7 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-05-31
+Última actualización del documento: 2026-05-31 (reset de contraseña + hardening de seguridad)
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -209,8 +209,19 @@ Hecho:
       dos proyectos Vercel sobre el mismo repo, DNS configurado.
   [x] App migrada a tema light, espejo de la landing (fondo claro, azul de
       marca como acento). Paleta invertida en lib/constants.ts.
+  [x] Recuperación de contraseña: link "¿Olvidaste tu contraseña?" en login,
+      pantalla para pedir el mail (recuperar) y pantalla para fijar la clave
+      nueva desde el link (restablecer). Funciona en web y nativo.
 
 Pendiente:
+  [ ] SEGURIDAD: correr la migración 003_security_hardening.sql en Supabase
+      (mueve a RLS reglas que hoy solo valida el cliente: auto-verificación,
+      auto-calificación, inyección en chats, auto-confirmación de reservas).
+      Testear después de aplicar. Re-deployar la edge function send-notification
+      (ahora exige usuario autenticado y que comparta reserva con el destino).
+  [ ] CONFIG Supabase para el reset de contraseña: en Authentication → URL
+      Configuration agregar a "Redirect URLs": https://app.hinch.ar/restablecer
+      y hinchar://restablecer. Verificar el remitente/SMTP de los mails.
   [ ] QA real end-to-end en device Android (login, crear viaje, reservar,
       chat, push notification).
   [ ] QA equivalente en device iOS con el .ipa preview ya buildeado.
