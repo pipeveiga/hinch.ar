@@ -7,8 +7,11 @@ const PROJECT_ID = Constants.expoConfig?.extra?.eas?.projectId as string | undef
 
 export function usePushNotifications(userId: string | undefined) {
   useEffect(() => {
+    // Temporalmente desactivado: en iOS 26 expo-notifications 0.32 crashea
+    // al pedir el push token (excepcion Obj-C no atrapable desde JS).
+    // Re-habilitar cuando haya version compatible con iOS 26.
     if (!userId || isExpoGo) return
-    registerForPushNotifications(userId)
+    // registerForPushNotifications(userId)
   }, [userId])
 }
 
