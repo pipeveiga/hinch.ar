@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hinch.ar — Página no encontrada</title>
+  <meta name="robots" content="noindex" />
+
+  <link rel="icon" href="/assets/icon.png" />
+  <link rel="apple-touch-icon" href="/assets/icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
+  <link rel="stylesheet" href="/styles.css" />
+
+  <style>
+    .nf {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 32px 20px;
+      gap: 8px;
+    }
+    .nf__brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .nf__brand img { width: 40px; height: 40px; border-radius: 10px; }
+    .nf__brand span { font-weight: 900; font-size: 22px; letter-spacing: -.5px; }
+    .nf__dot { color: var(--brand); }
+    .nf__code {
+      font-size: clamp(96px, 22vw, 180px);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -4px;
+      color: var(--brand);
+      margin: 0;
+    }
+    .nf__title {
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 800;
+      letter-spacing: -.5px;
+      margin-top: 8px;
+    }
+    .nf__text {
+      color: var(--ink-soft);
+      max-width: 480px;
+      margin: 12px auto 0;
+      font-size: 17px;
+    }
+    .nf__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 28px;
+    }
+  </style>
+</head>
+<body>
+  <main class="nf">
+    <a class="nf__brand" href="/">
+      <img src="/assets/icon.png" alt="" />
+      <span>Hinch<span class="nf__dot">.</span>ar</span>
+    </a>
+
+    <p class="nf__code">404</p>
+    <h1 class="nf__title">Esta página se fue para otro lado 🚗💨</h1>
+    <p class="nf__text">
+      No encontramos lo que buscabas. Capaz el link está mal o la página ya no existe.
+      Volvé al inicio o pegá una vuelta por la app.
+    </p>
+
+    <div class="nf__actions">
+      <a class="btn btn--primary btn--lg" href="/">Volver al inicio</a>
+      <a class="btn btn--ghost btn--lg" href="https://app.hinch.ar">Ir a la app</a>
+    </div>
+  </main>
+</body>
+</html>
