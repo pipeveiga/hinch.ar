@@ -6,7 +6,7 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-05-31 (reset de contraseña + hardening de seguridad)
+Última actualización del documento: 2026-06-02 (auditoría completa de seguridad + hardening DB/edge function)
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -212,23 +212,38 @@ Hecho:
   [x] Recuperación de contraseña: link "¿Olvidaste tu contraseña?" en login,
       pantalla para pedir el mail (recuperar) y pantalla para fijar la clave
       nueva desde el link (restablecer). Funciona en web y nativo.
+  [x] Auditoría de seguridad + endurecimiento (migración 003 completa):
+      - Trigger BEFORE UPDATE en users que impide auto-verificarse,
+        inflar ratings, modificar DNI o reactivar cuentas desactivadas.
+      - Edge function send-notification valida JWT y exige que el
+        invocador comparta un booking con el destinatario.
+      - Policy de chat ya no permite mandar mensajes a bookings ajenos
+        (cambio OR → AND).
+      - Columnas verification_status / verification_submitted_at agregadas
+        al schema (necesarias para el flujo de verificación).
+      - total_amount de bookings se calcula server-side (trigger).
+      - Resta atómica de seats_available (sin race conditions).
+      - RLS consolidada en un solo archivo (la migración 003 es la
+        fuente de verdad; scripts/rls-policies.sql quedó obsoleto).
+      - Rate limit básico en chat (20 mensajes/min por user).
+      - Security headers (CSP, X-Frame-Options, HSTS, etc.) en vercel.json.
+      - Tokens de sesión en mobile pasan de AsyncStorage a expo-secure-store.
+      - Whitelist de extensiones + MIME en uploads de verificación.
+      - Whitelist de trip_type en filtros (no más .or() con interpolación).
 
 Pendiente:
-  [ ] SEGURIDAD: correr la migración 003_security_hardening.sql en Supabase
-      (mueve a RLS reglas que hoy solo valida el cliente: auto-verificación,
-      auto-calificación, inyección en chats, auto-confirmación de reservas).
-      Testear después de aplicar. Re-deployar la edge function send-notification
-      (ahora exige usuario autenticado y que comparta reserva con el destino).
+  [ ] Aplicar la migración 003_security_hardening.sql en Supabase prod.
+  [ ] Redeploy de la edge function send-notification.
   [ ] CONFIG Supabase para el reset de contraseña: en Authentication → URL
       Configuration agregar a "Redirect URLs": https://app.hinch.ar/restablecer
       y hinchar://restablecer. Verificar el remitente/SMTP de los mails.
   [ ] QA real end-to-end en device Android (login, crear viaje, reservar,
-      chat, push notification).
+      chat, push notification, verificación).
   [ ] QA equivalente en device iOS con el .ipa preview ya buildeado.
-  [ ] QA web Vercel completo.
+  [ ] QA web Vercel completo (validar CSP no bloquee nada inesperado).
   [ ] Confirmar que la edge function send-notification está deployada con
       sus secrets en Supabase.
-  [ ] Bump a Expo SDK 55 para cerrar las 5 vulnerabilidades restantes
+  [ ] Bump a Expo SDK 55 para cerrar las vulnerabilidades restantes
       del árbol de Expo (npm audit).
   [x] App creada en App Store Connect (bundle ID ar.hinch.app).
   [ ] Generar API Key en App Store Connect (Users and Access →
