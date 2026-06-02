@@ -322,11 +322,13 @@ CREATE POLICY bookings_update_participant ON public.bookings
     )
   )
   WITH CHECK (
-    passenger_id = auth.uid()
-    OR EXISTS (
+    -- el conductor del viaje puede gestionar la reserva (confirmar/cancelar)
+    EXISTS (
       SELECT 1 FROM public.trips t
       WHERE t.id = bookings.trip_id AND t.driver_id = auth.uid()
     )
+    -- el pasajero SOLO puede cancelar su propia reserva (no auto-confirmarse)
+    OR (passenger_id = auth.uid() AND status = 'cancelled')
   );
 
 CREATE POLICY bookings_delete_disabled ON public.bookings
