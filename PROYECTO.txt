@@ -6,7 +6,7 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-05-31 (reset de contraseña + hardening de seguridad)
+Última actualización del documento: 2026-06-02 (pantalla 404 para rutas inexistentes)
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -49,6 +49,7 @@ app/                Pantallas (routing por archivos con expo-router)
   calificar/          flujo de calificación post-viaje
   onboarding.tsx      3 slides de bienvenida
   verificacion.tsx    subir DNI
+  +not-found.tsx      pantalla 404 (rutas inexistentes)
 
 components/         EventCard, TripCard, UserAvatar, VerificationBadge,
                     LoadingScreen (pantalla de carga con fondo)
