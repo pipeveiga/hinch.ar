@@ -21,7 +21,7 @@
         "NSLocationWhenInUseUsageDescription": "Usamos tu ubicación para mostrarte viajes cercanos a vos.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "buildNumber": "7"
+      "buildNumber": "9"
     },
     "android": {
       "adaptiveIcon": {
