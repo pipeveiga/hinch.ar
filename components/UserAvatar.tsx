@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Image, StyleSheet } from 'react-native'
-import { COLORS, RADIUS } from '@/lib/constants'
+import { COLORS } from '@/lib/constants'
 
 interface UserAvatarProps {
   uri?:  string | null

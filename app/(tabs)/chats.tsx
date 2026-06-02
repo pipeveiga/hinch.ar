@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useChatsStore } from '@/stores/chatsStore'
 import { bookingsApi } from '@/lib/supabase'
 import { useState } from 'react'
-import { COLORS, SPACING, RADIUS, BOOKING_STATUS_COLORS } from '@/lib/constants'
+import { COLORS, SPACING } from '@/lib/constants'
 import type { Booking } from '@/lib/types'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
   },
   itemUnread: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.brandTint,
   },
   info: { flex: 1, gap: 2 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -161,5 +161,5 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     paddingHorizontal: 5,
   },
-  unreadBadgeText: { fontSize: 11, fontWeight: '800', color: '#fff' },
+  unreadBadgeText: { fontSize: 11, fontWeight: '800', color: COLORS.white },
 })

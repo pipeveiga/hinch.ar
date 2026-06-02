@@ -27,7 +27,8 @@
         "buildType": "app-bundle"
       },
       "ios": {
-        "distribution": "store"
+        "distribution": "store",
+        "autoIncrement": "buildNumber"
       }
     }
   },

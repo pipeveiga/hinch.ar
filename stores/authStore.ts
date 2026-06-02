@@ -77,10 +77,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signIn: async (email, password) => {
     set({ isLoading: true })
     try {
-      const { error } = await auth.signInWithEmail(email, password)
+      const { data, error } = await auth.signInWithEmail(email, password)
       if (error) throw error
       const user = await usersApi.getMe()
-      set({ user })
+      set({ user, session: data.session })
     } finally {
       set({ isLoading: false })
     }

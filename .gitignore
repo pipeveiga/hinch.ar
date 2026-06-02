@@ -10,6 +10,7 @@ web-build/
 *.mobileprovision
 secrets/*
 !secrets/.gitkeep
+credentials/
 *.orig.*
 web-build/
 # macOS

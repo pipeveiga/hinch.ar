@@ -1,0 +1,284 @@
+================================================================================
+                              HINCH.AR — PROYECTO
+================================================================================
+
+App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
+o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
+Si no tenés auto, reservás un lugar en el viaje de alguien más.
+
+Última actualización del documento: 2026-05-31 (reset de contraseña + hardening de seguridad)
+
+--------------------------------------------------------------------------------
+QUÉ HACE LA APP
+--------------------------------------------------------------------------------
+
+1. Lista eventos (partidos de fútbol, recitales, etc.) en Argentina.
+2. Para cada evento, muestra los viajes que la gente publicó.
+3. Si tenés auto: publicás un viaje con origen, asientos disponibles, precio
+   y tipo (solo ida / solo vuelta / ida y vuelta).
+4. Si no: reservás un asiento en un viaje. El conductor confirma o rechaza.
+5. Chat por reserva entre conductor y pasajero.
+6. Después del viaje, ambos se califican (sistema 5x5: puntualidad,
+   seguridad, comunicación, etc.).
+7. Verificación de identidad de usuarios (DNI) para que viajes tranquilo.
+8. Push notifications cuando te reservan, te confirman o te mandan chat.
+
+--------------------------------------------------------------------------------
+STACK TÉCNICO
+--------------------------------------------------------------------------------
+
+- Framework: Expo SDK 54 + React Native 0.81
+- Routing: expo-router 6 (file-based)
+- Backend: Supabase (Postgres + Auth + Realtime + Edge Functions + Storage)
+- Estado en cliente: Zustand
+- Idioma: TypeScript
+- Targets: Android (Google Play vía EAS) + iOS (App Store vía EAS) + Web (Vercel)
+
+--------------------------------------------------------------------------------
+ESTRUCTURA DEL CÓDIGO
+--------------------------------------------------------------------------------
+
+app/                Pantallas (routing por archivos con expo-router)
+  (auth)/             login + registro
+  (tabs)/             home, mis viajes, chats, notificaciones, perfil
+  evento/[id]         detalle de evento + lista de viajes
+  viaje/[id]          detalle de viaje + reservar
+  viaje/nuevo         crear viaje (drivers)
+  chat/[bookingId]    chat por reserva
+  usuario/[id]        perfil público + ratings
+  calificar/          flujo de calificación post-viaje
+  onboarding.tsx      3 slides de bienvenida
+  verificacion.tsx    subir DNI
+
+components/         EventCard, TripCard, UserAvatar, VerificationBadge,
+                    LoadingScreen (pantalla de carga con fondo)
+
+hooks/              usePushNotifications (registrar token Expo Push)
+
+stores/             zustand: authStore, tripsStore, chatsStore, notificationsStore
+
+lib/
+  supabase.ts         cliente + APIs (usersApi, tripsApi, etc.)
+  types.ts            tipos TS espejo del schema SQL
+  constants.ts        paleta de colores, spacing, reglas de negocio
+
+supabase/
+  migrations/         schema SQL (001_initial_schema, 002_chat)
+  functions/
+    send-notification   Edge function (Deno) que manda push via Expo
+
+assets/             logo, splash, íconos
+scripts/            seeds SQL, sync-events.mjs
+
+landing/            Landing institucional (web pública). HTML/CSS estático,
+                    SIN build ni framework — vive aparte del bundle Expo a
+                    propósito (carga rápido, buen SEO). Da info de la plataforma
+                    y manda a la app vía botones "Ir a la plataforma".
+  index.html          la página completa
+  styles.css          estilos (tema claro/minimalista propio de la landing)
+  assets/             logo, ícono, imágenes
+  vercel.json         config del proyecto Vercel de la landing
+  README.md           cómo editar y desplegar la landing
+
+--------------------------------------------------------------------------------
+CÓMO CORRERLO
+--------------------------------------------------------------------------------
+
+Requisitos: Node 20+, cuenta Supabase, cuenta Expo (para builds Android).
+
+  1. cp .env.example .env
+     Llenar EXPO_PUBLIC_SUPABASE_URL y EXPO_PUBLIC_SUPABASE_ANON_KEY
+
+  2. npm install
+
+  3. npm run start        (dev server)
+     npm run web          (browser)
+     npm run android      (emulador / device)
+     npm run typecheck    (TS check)
+     npm run lint         (ESLint)
+
+--------------------------------------------------------------------------------
+DESPLIEGUES
+--------------------------------------------------------------------------------
+
+WEB (Vercel) — DOS proyectos sobre el mismo repo:
+
+  1. LANDING (dominio raíz hinch.ar):
+     Proyecto Vercel con Root Directory = landing/. Es estático, sin build
+     command (Framework Preset = Other). Sirve la página institucional.
+     Dominios: hinch.ar y www.hinch.ar.
+
+  2. PLATAFORMA / APP (subdominio app.hinch.ar):
+     Proyecto Vercel con Root Directory = raíz del repo. Build estático de
+     Expo (npx expo export --platform web → dist), config en vercel.json de
+     la raíz. Variables EXPO_PUBLIC_* en el dashboard de Vercel.
+     Push a `main` → auto-deploy.
+
+  DNS: hinch.ar → proyecto LANDING; CNAME `app` → proyecto APP.
+  Los botones de la landing apuntan a https://app.hinch.ar (buscar
+  data-app-link en landing/index.html para cambiar el destino).
+
+ANDROID (EAS):
+  Manual con: eas build --profile production --platform android
+  Perfiles en eas.json: preview (APK interno), production (AAB Play Store).
+
+iOS (EAS):
+  Bundle ID: ar.hinch.app
+  Perfiles en eas.json:
+    preview      → .ipa firmado para distribución interna (Ad Hoc, solo UDIDs
+                   registrados). Comando:
+                     eas build --profile preview --platform ios
+    production   → .ipa para App Store / TestFlight (distribution: "store",
+                   autoIncrement de buildNumber). Comando:
+                     eas build --profile production --platform ios
+
+  Submit a App Store Connect:
+    eas submit -p ios --latest
+
+  Credenciales para submit (NO se commitean):
+    Las variables van en .env local (ver .env.example) o como EAS Secrets:
+      ASC_APP_ID            ID numérico de la app en App Store Connect
+      APPLE_TEAM_ID         Team ID (10 chars) de Apple Developer
+      ASC_API_KEY_ID        Key ID de la API Key generada en ASC
+      ASC_API_KEY_ISSUER_ID Issuer ID (UUID) de la cuenta ASC
+    Y el archivo:
+      credentials/AuthKey.p8   API Key descargada de ASC (única descarga)
+
+  Cómo generar la API Key:
+    App Store Connect → Users and Access → Integrations → Keys → "+"
+    Access: App Manager. Descargar el .p8 y guardarlo en credentials/AuthKey.p8
+    (la carpeta credentials/ está gitignoreada).
+
+  Para CI o builds remotos, alternativa más prolija que .env:
+    eas secret:create --name ASC_APP_ID --value ...
+    eas secret:create --name APPLE_TEAM_ID --value ...
+    (etc — los secrets viven encriptados en los servers de Expo).
+
+  Requisitos previos: cuenta Apple Developer paga ✓ ya hecho.
+                      App creada en App Store Connect con bundle ID
+                      ar.hinch.app ✓ ya hecho.
+
+EDGE FUNCTION (Supabase):
+  send-notification se despliega con: supabase functions deploy send-notification
+  Necesita secrets: EXPO_ACCESS_TOKEN, SUPABASE_SERVICE_ROLE_KEY
+
+--------------------------------------------------------------------------------
+SEGURIDAD
+--------------------------------------------------------------------------------
+
+- Todas las tablas tienen RLS habilitado (Row Level Security en Supabase).
+- usersApi.getById solo devuelve campos públicos (no dni, no verification_status).
+- usersApi.updateProfile tiene whitelist de campos editables: nunca permite
+  cambiar is_verified, verification_status, dni desde el cliente.
+- google-services.json está commiteado: contiene solo config Firebase (sender ID,
+  API key restringida por aplicación), no claves privadas.
+- .env NO se commitea.
+
+--------------------------------------------------------------------------------
+CONVENCIONES
+--------------------------------------------------------------------------------
+
+- UI en castellano rioplatense (con tildes y eñes).
+- Solo light theme (fondo claro), espejo de la landing. Colores siempre
+  desde COLORS en lib/constants.ts.
+- Si se modifica el schema SQL en supabase/migrations/, actualizar lib/types.ts.
+- Todo acceso a datos pasa por *Api objects en lib/supabase.ts.
+- supabase/functions/ corre en Deno, excluido del tsconfig principal.
+
+--------------------------------------------------------------------------------
+ESTADO ACTUAL Y PRÓXIMOS PASOS
+--------------------------------------------------------------------------------
+
+Hecho:
+  [x] MVP funcional: auth, eventos, viajes, reservas, chat, ratings, push.
+  [x] Onboarding 3 slides (refactor a control por estado para que ande en web).
+  [x] Web deploy en Vercel (con guard SSR para window).
+  [x] Android EAS configurado (preview + production).
+  [x] Typecheck verde, lint funcionando, CI en GitHub Actions.
+  [x] README + CLAUDE.md + PROYECTO.txt (este archivo).
+  [x] Default branch en `main`.
+  [x] Pantalla de carga con imagen de fondo (auto + estadio al atardecer)
+      en lugar de fondo negro liso.
+  [x] Primer build iOS (.ipa) con perfil preview (distribución interna).
+  [x] Perfil production iOS configurado en eas.json (distribution: store,
+      autoIncrement de buildNumber). buildNumber inicial en app.json.
+  [x] Landing institucional (landing/) estática, tema claro/minimalista.
+      La app va a vivir en el subdominio app.hinch.ar y la landing en el
+      dominio raíz.
+  [x] Landing y app desplegadas: hinch.ar (landing) + app.hinch.ar (app),
+      dos proyectos Vercel sobre el mismo repo, DNS configurado.
+  [x] App migrada a tema light, espejo de la landing (fondo claro, azul de
+      marca como acento). Paleta invertida en lib/constants.ts.
+  [x] Recuperación de contraseña: link "¿Olvidaste tu contraseña?" en login,
+      pantalla para pedir el mail (recuperar) y pantalla para fijar la clave
+      nueva desde el link (restablecer). Funciona en web y nativo.
+
+Pendiente:
+  [ ] SEGURIDAD: correr la migración 003_security_hardening.sql en Supabase
+      (mueve a RLS reglas que hoy solo valida el cliente: auto-verificación,
+      auto-calificación, inyección en chats, auto-confirmación de reservas).
+      Testear después de aplicar. Re-deployar la edge function send-notification
+      (ahora exige usuario autenticado y que comparta reserva con el destino).
+  [ ] CONFIG Supabase para el reset de contraseña: en Authentication → URL
+      Configuration agregar a "Redirect URLs": https://app.hinch.ar/restablecer
+      y hinchar://restablecer. Verificar el remitente/SMTP de los mails.
+  [ ] QA real end-to-end en device Android (login, crear viaje, reservar,
+      chat, push notification).
+  [ ] QA equivalente en device iOS con el .ipa preview ya buildeado.
+  [ ] QA web Vercel completo.
+  [ ] Confirmar que la edge function send-notification está deployada con
+      sus secrets en Supabase.
+  [ ] Bump a Expo SDK 55 para cerrar las 5 vulnerabilidades restantes
+      del árbol de Expo (npm audit).
+  [x] App creada en App Store Connect (bundle ID ar.hinch.app).
+  [ ] Generar API Key en App Store Connect (Users and Access →
+      Integrations → Keys) y guardar el .p8 en credentials/AuthKey.p8.
+  [ ] Completar variables iOS en .env local: ASC_APP_ID, APPLE_TEAM_ID,
+      ASC_API_KEY_ID, ASC_API_KEY_ISSUER_ID.
+  [ ] Hostear Privacy Policy URL pública (obligatoria para submit).
+  [ ] Hostear Support URL pública (obligatoria).
+  [ ] App Store Connect → App Information:
+        - Subtitle (≤30 chars)
+        - Categoría primaria: Travel. Secundaria: Sports.
+        - Privacy Policy URL + Support URL.
+  [ ] App Store Connect → Pricing and Availability: Free, Argentina.
+  [ ] App Store Connect → App Privacy: declarar Contact Info, Sensitive
+      Info (DNI), User Content (fotos, chats), Location, Identifiers
+      (User ID, push token). Marcar usos.
+  [ ] App Store Connect → Age Rating: completar cuestionario (resultado
+      esperado 4+).
+  [ ] App Store Connect → versión 1.0 "Prepare for Submission":
+        - Description, Keywords (≤100 chars), Promotional Text.
+        - Screenshots iPhone 6.9" o 6.5" (mínimo 1 size obligatorio).
+        - Copyright.
+        - Demo account para App Review (user verificado en Supabase) +
+          notas explicando carpooling y que pagos van fuera de la app.
+        - Version Release: "Manually release this version".
+  [ ] Subir build con `eas submit -p ios --latest` y responder en ASC
+      "Encryption Export Compliance" → YES, standard encryption (HTTPS).
+  [ ] Tag v0.1.0 + primer release en Play Store + TestFlight.
+
+--------------------------------------------------------------------------------
+GLOSARIO RÁPIDO
+--------------------------------------------------------------------------------
+
+EAS         Expo Application Services. Plataforma de Expo para builds en la
+            nube, submits a stores, OTA updates. Reemplaza tener Android Studio
+            o Xcode instalados.
+
+Expo Go     App de Expo para probar tu app sin compilarla. Limitaciones: push
+            notifications no funcionan en SDK 54 (por eso el código las skipea
+            cuando detecta Expo Go).
+
+RLS         Row Level Security de Postgres. Reglas a nivel fila que dicen
+            quién puede leer/escribir qué. En Supabase es la primera línea
+            de defensa.
+
+Edge function   Mini-servidor que corre en Deno en la infraestructura de
+                Supabase. Se invoca desde la app, ejecuta lógica con permisos
+                elevados (service_role), responde.
+
+Zustand     Librería minimalista de estado global. Cada dominio tiene su
+            store (authStore, tripsStore, etc.).
+
+================================================================================
