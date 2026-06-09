@@ -6,7 +6,7 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-06-02 (auditoría completa de seguridad + hardening DB/edge function)
+Última actualización del documento: 2026-06-09 (rediseño del hero de la landing: celular con tarjeta de viaje, íconos flotantes, adornos; falta incrustar la ilustración 3D)
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -77,6 +77,8 @@ landing/            Landing institucional (web pública). HTML/CSS estático,
   index.html          la página completa
   styles.css          estilos (tema claro/minimalista propio de la landing)
   assets/             logo, ícono, imágenes
+                      (pendiente: hero-scene.png = ilustración 3D del hero,
+                       auto + ruta + estadio; va detrás del celular del hero)
   vercel.json         config del proyecto Vercel de la landing
   README.md           cómo editar y desplegar la landing
 
