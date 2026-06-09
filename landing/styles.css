@@ -113,40 +113,60 @@ img { display: block; max-width: 100%; }
 /* ===================== HERO ===================== */
 .hero {
   position: relative;
-  overflow: hidden;
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 80px 24px 96px;
-  display: grid;
-  grid-template-columns: 1.02fr .98fr;
-  gap: 48px;
-  align-items: center;
-  background:
-    radial-gradient(120% 100% at 100% 0%, var(--brand-tint) 0%, transparent 55%),
-    linear-gradient(180deg, #fbfcff 0%, #ffffff 60%);
+  padding: 18px 24px 64px;
 }
 
-/* Adornos de fondo del hero */
-.hero__deco { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-.deco-ring {
+/* Utilidad accesible (texto solo para lectores de pantalla / SEO) */
+.sr-only {
   position: absolute;
-  border-radius: 50%;
-  border: 2px solid rgba(59, 130, 246, .18);
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
-.deco-ring--lg { width: 220px; height: 220px; top: -70px; left: -80px; background: rgba(59,130,246,.06); border: none; }
-.deco-ring--sm { width: 120px; height: 120px; top: 60px; left: 90px; }
-.deco-dots {
-  position: absolute;
-  width: 120px;
-  height: 80px;
-  background-image: radial-gradient(rgba(59,130,246,.35) 1.6px, transparent 1.6px);
-  background-size: 18px 18px;
-  opacity: .6;
-}
-.deco-dots--top { top: 70px; left: 42%; }
-.deco-dots--bottom { bottom: 60px; left: 30px; }
 
-.hero__text { position: relative; z-index: 2; }
+/* --- Desktop: el diseño completo como imagen, pixel-perfect --- */
+.hero-shot {
+  position: relative;
+  display: block;
+  width: 100%;
+  line-height: 0;
+}
+.hero-shot__img {
+  width: 100%;
+  height: auto;
+  border-radius: 24px;
+}
+/* Links transparentes clavados sobre los botones de la imagen */
+.hero-shot__hit {
+  position: absolute;
+  top: 65.4%;
+  height: 8.2%;
+  border-radius: 999px;
+  z-index: 2;
+}
+.hero-shot__hit--app { left: 8.9%;  width: 13.7%; }
+.hero-shot__hit--how { left: 23.1%; width: 12.0%; }
+.hero-shot__hit:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 3px;
+}
+
+/* --- Mobile: versión apilada y legible --- */
+.hero-mobile { display: none; text-align: center; }
+.hero-mobile .eyebrow { margin-top: 8px; }
+.hero-mobile .hero__subtitle { margin-left: auto; margin-right: auto; }
+.hero-mobile .hero__cta { justify-content: center; }
+.hero-mobile__shot {
+  margin: 32px auto 0;
+  max-width: 420px;
+}
+.hero-mobile__shot img { width: 100%; height: auto; }
+
 .eyebrow {
   display: inline-flex;
   align-items: center;
@@ -159,196 +179,23 @@ img { display: block; max-width: 100%; }
   font-weight: 700;
   margin-bottom: 22px;
 }
-.eyebrow small {
-  font-size: .72rem;
-  font-weight: 800;
-  letter-spacing: .02em;
-  opacity: .75;
-}
+.eyebrow small { font-size: .72rem; font-weight: 800; letter-spacing: .02em; opacity: .75; }
 .hero__title {
-  font-size: clamp(2.6rem, 5.4vw, 4rem);
+  font-size: clamp(2.4rem, 9vw, 3rem);
   line-height: 1.05;
   letter-spacing: -.035em;
   font-weight: 900;
 }
 .hero__title .accent { color: var(--brand); }
 .hero__subtitle {
-  margin-top: 22px;
-  max-width: 520px;
+  margin-top: 20px;
+  max-width: 460px;
   color: var(--ink-soft);
-  font-size: clamp(1.05rem, 2vw, 1.2rem);
+  font-size: 1.08rem;
 }
 .hero__subtitle strong { color: var(--ink); font-weight: 700; }
-.hero__cta { margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap; }
-.hero__note { margin-top: 20px; color: var(--muted); font-size: .9rem; }
-
-/* ===================== ESCENA / VISUAL ===================== */
-.hero__visual {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 520px;
-}
-/* Capa para la ilustración 3D (auto + ruta + estadio) */
-.hero__scene { position: absolute; inset: -6% -8%; z-index: 0; }
-.hero__scene img { width: 100%; height: 100%; object-fit: contain; }
-
-/* Íconos flotantes (auto / entrada) */
-.float-tile {
-  position: absolute;
-  z-index: 3;
-  width: 88px;
-  height: 88px;
-  border-radius: 22px;
-  background: #fff;
-  box-shadow: 0 18px 40px rgba(11, 18, 32, .14);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--brand);
-}
-.float-tile svg { width: 46px; height: 46px; }
-.float-tile--car    { top: 40px;  right: 6px;  animation: float 5.5s ease-in-out infinite; }
-.float-tile--ticket { bottom: 46px; right: 78px; animation: float 6.5s ease-in-out infinite .8s; }
-@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-
-/* ===================== CELULAR ===================== */
-.phone {
-  position: relative;
-  z-index: 2;
-  width: 300px;
-  max-width: 78vw;
-  background: #fff;
-  border-radius: 42px;
-  padding: 12px;
-  box-shadow:
-    0 2px 0 rgba(11,18,32,.04),
-    0 30px 70px rgba(11, 18, 32, .22);
-  border: 1px solid #eef0f5;
-}
-.phone__notch {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 110px;
-  height: 26px;
-  background: #fff;
-  border-radius: 0 0 16px 16px;
-  z-index: 3;
-}
-.phone__screen {
-  background: linear-gradient(180deg, #f7f9fc 0%, #ffffff 28%);
-  border-radius: 32px;
-  padding: 18px 16px 16px;
-}
-.phone__status {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 8px 12px;
-  color: var(--ink);
-}
-.phone__time { font-weight: 700; font-size: .82rem; }
-.phone__sysicons { display: inline-flex; align-items: center; gap: 6px; }
-.phone__sysicons svg { height: 11px; width: auto; fill: var(--ink); color: var(--ink); }
-.phone__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 6px 16px;
-}
-.phone__brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1rem; letter-spacing: -.02em; }
-.phone__brand img { width: 26px; height: 26px; border-radius: 8px; }
-.phone__menu { display: inline-flex; flex-direction: column; gap: 3.5px; }
-.phone__menu i { width: 18px; height: 2px; border-radius: 2px; background: var(--ink); display: block; }
-.phone__reserve {
-  display: block;
-  margin-top: 18px;
-  text-align: center;
-  background: var(--brand);
-  color: #fff;
-  font-weight: 700;
-  font-size: .98rem;
-  padding: 14px;
-  border-radius: 14px;
-  box-shadow: 0 8px 18px rgba(29, 78, 216, .28);
-}
-
-/* ===================== TARJETA DE VIAJE ===================== */
-.trip-card {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 18px;
-  box-shadow: 0 10px 30px rgba(11, 18, 32, .06);
-}
-.trip-card__top { display: flex; align-items: center; justify-content: space-between; }
-.trip-card__tag {
-  font-size: .78rem;
-  font-weight: 700;
-  color: var(--brand);
-  background: var(--brand-tint);
-  padding: 5px 11px;
-  border-radius: 999px;
-}
-.trip-card__price { font-size: 1.3rem; font-weight: 900; letter-spacing: -.02em; }
-.trip-card__event { margin-top: 14px; font-size: 1.25rem; font-weight: 800; letter-spacing: -.02em; }
-.trip-card__venue { color: var(--ink-soft); font-size: .85rem; }
-
-.route { display: flex; align-items: center; margin: 18px 0 8px; }
-.route__dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
-.route__dot--from { background: var(--brand); }
-.route__dot--to { background: #fff; border: 3px solid var(--brand); }
-.route__line {
-  flex: 1;
-  height: 0;
-  border-top: 2px dashed #c9d3e6;
-  margin: 0 8px;
-}
-.route__labels {
-  display: flex;
-  justify-content: space-between;
-  color: var(--ink-soft);
-  font-size: .88rem;
-  font-weight: 600;
-}
-.trip-card__bottom {
-  margin-top: 20px;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.driver { display: flex; align-items: center; gap: 11px; }
-.driver__avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--brand);
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-}
-.driver strong { display: block; font-size: .95rem; }
-.driver__meta { color: var(--ink-soft); font-size: .82rem; }
-.seats {
-  font-size: .85rem;
-  font-weight: 700;
-  color: var(--ink);
-  background: var(--bg-soft);
-  border: 1px solid var(--line);
-  padding: 6px 12px;
-  border-radius: 999px;
-}
+.hero__cta { margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap; }
+.hero__note { margin-top: 18px; color: var(--muted); font-size: .9rem; }
 
 /* ===================== SECCIONES ===================== */
 .section { max-width: var(--maxw); margin: 0 auto; padding: 88px 24px; }
@@ -507,19 +354,14 @@ img { display: block; max-width: 100%; }
 .footer__copy { color: var(--muted); font-size: .85rem; }
 
 /* ===================== RESPONSIVE ===================== */
-@media (max-width: 880px) {
-  .hero { grid-template-columns: 1fr; gap: 40px; padding-top: 56px; }
-  .hero__visual { order: -1; min-height: 480px; }
-  .hero__text { text-align: center; }
-  .hero__subtitle { margin-left: auto; margin-right: auto; }
-  .hero__cta { justify-content: center; }
-  .float-tile--car { right: 4%; }
-  .float-tile--ticket { right: 16%; }
-  .split { grid-template-columns: 1fr; gap: 36px; }
+/* Punto de quiebre del hero: arriba de 760px va la imagen completa
+   (pixel-perfect); abajo, la versión apilada y legible. */
+@media (max-width: 760px) {
+  .hero-shot { display: none; }
+  .hero-mobile { display: block; }
 }
-@media (max-width: 440px) {
-  .float-tile { width: 64px; height: 64px; border-radius: 18px; }
-  .float-tile svg { width: 34px; height: 34px; }
+@media (max-width: 880px) {
+  .split { grid-template-columns: 1fr; gap: 36px; }
 }
 @media (max-width: 760px) {
   .nav__links { gap: 14px; }
