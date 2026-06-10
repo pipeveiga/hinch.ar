@@ -30,7 +30,7 @@
   -->
 
   <!-- ===================== NAV ===================== -->
-  <header class="nav">
+  <header class="nav" id="nav">
     <a class="brand" href="/">
       <img src="/assets/icon.png" alt="" class="brand__tile" />
       <span class="brand__name">Hinch<span class="brand__dot">.</span>ar</span>
@@ -81,19 +81,20 @@
 
   <!-- ===================== BENEFICIOS ===================== -->
   <section id="beneficios" class="section">
-    <h2 class="section__title">Por qué viajar con Hinch.ar</h2>
+    <span class="kicker reveal">Beneficios</span>
+    <h2 class="section__title reveal">Por qué viajar con Hinch.ar</h2>
     <div class="grid">
-      <article class="card">
+      <article class="card reveal">
         <div class="card__icon">🏟️</div>
         <h3>Llegá sin complicaciones</h3>
         <p>Olvidate del micro lleno o el estacionamiento imposible. Coordinás tu viaje al evento y listo.</p>
       </article>
-      <article class="card">
+      <article class="card reveal">
         <div class="card__icon">💸</div>
         <h3>Compartí los gastos</h3>
         <p>Nafta y peajes divididos entre todos. Viajar al partido sale mucho más barato.</p>
       </article>
-      <article class="card">
+      <article class="card reveal">
         <div class="card__icon">🤝</div>
         <h3>Gente como vos</h3>
         <p>Una comunidad de hinchas. Verificamos la identidad de cada usuario para que viajes tranquilo.</p>
@@ -103,24 +104,25 @@
 
   <!-- ===================== CÓMO FUNCIONA ===================== -->
   <section id="como-funciona" class="section section--alt">
-    <h2 class="section__title">Cómo funciona</h2>
+    <span class="kicker reveal">Paso a paso</span>
+    <h2 class="section__title reveal">Cómo funciona</h2>
     <div class="steps">
-      <div class="step">
+      <div class="step reveal">
         <span class="step__num">1</span>
         <h3>Elegí el evento</h3>
         <p>Buscá tu partido, recital o evento en la lista y mirá los viajes disponibles.</p>
       </div>
-      <div class="step">
+      <div class="step reveal">
         <span class="step__num">2</span>
         <h3>Publicá o reservá</h3>
         <p>Con auto: publicás origen, asientos, precio y horario. Sin auto: reservás un lugar.</p>
       </div>
-      <div class="step">
+      <div class="step reveal">
         <span class="step__num">3</span>
         <h3>Coordiná por chat</h3>
         <p>El conductor confirma tu reserva y arreglan los detalles por el chat de la app.</p>
       </div>
-      <div class="step">
+      <div class="step reveal">
         <span class="step__num">4</span>
         <h3>Viajá y calificá</h3>
         <p>Después del viaje se califican mutuamente. La comunidad se cuida sola.</p>
@@ -131,7 +133,8 @@
   <!-- ===================== SEGURIDAD ===================== -->
   <section id="seguridad" class="section">
     <div class="split">
-      <div class="split__text">
+      <div class="split__text reveal">
+        <span class="kicker kicker--left">Seguridad</span>
         <h2 class="section__title section__title--left">Viajá tranquilo</h2>
         <ul class="checklist">
           <li>Identidad verificada con DNI para cada usuario.</li>
@@ -140,7 +143,7 @@
           <li>Perfiles públicos con historial de viajes y reputación.</li>
         </ul>
       </div>
-      <div class="split__media">
+      <div class="split__media reveal">
         <div class="badge-tile">
           <img src="/assets/icon.png" alt="Hinch.ar" />
           <span class="badge-tile__check">✓</span>
@@ -151,7 +154,7 @@
 
   <!-- ===================== CTA FINAL ===================== -->
   <section class="cta-final">
-    <div class="cta-final__box">
+    <div class="cta-final__box reveal">
       <h2>Tu próximo partido te espera</h2>
       <p>Sumate a la comunidad de hinchas que ya comparten viaje.</p>
       <a class="btn btn--primary btn--lg" data-app-link href="https://app.hinch.ar">Ir a la plataforma</a>
@@ -174,6 +177,34 @@
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Nav de vidrio: se vuelve más opaco al scrollear
+    var nav = document.getElementById('nav');
+    var onScroll = function () { nav.classList.toggle('is-scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Aparición suave de secciones al entrar en pantalla
+    var reveals = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.12 });
+      reveals.forEach(function (el) { io.observe(el); });
+    } else {
+      reveals.forEach(function (el) { el.classList.add('in'); });
+    }
+
+    // Brillo que sigue al puntero en las tarjetas de vidrio
+    document.querySelectorAll('.card, .step').forEach(function (el) {
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
   </script>
 </body>
 </html>
