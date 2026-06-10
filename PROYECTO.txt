@@ -6,9 +6,9 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-06-10 (rediseño visual estilo Apple
-con efecto "liquid glass" en landing y app: tab bar flotante de vidrio,
-paleta de colores Apple, animaciones suaves en la landing)
+Última actualización del documento: 2026-06-10 (rediseño estético estilo Apple
+también en la app: tab bar flotante de vidrio con blur real, tarjetas con
+sombras suaves, buscador y chips estilo iOS; la landing ya lo tenía)
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -77,10 +77,11 @@ landing/            Landing institucional (web pública). HTML/CSS estático,
                     propósito (carga rápido, buen SEO). Da info de la plataforma
                     y manda a la app vía botones "Ir a la plataforma".
   index.html          la página completa
-  styles.css          estilos (tema claro/minimalista propio de la landing)
+  styles.css          estilos (tema claro estilo Apple: nav de vidrio flotante,
+                       tarjetas con efecto "liquid glass", animaciones al scroll)
   assets/             logo, ícono, imágenes
-                      (pendiente: hero-scene.png = ilustración 3D del hero,
-                       auto + ruta + estadio; va detrás del celular del hero)
+                      (hero-scene.png = render completo del hero para desktop;
+                       hero-scene-mobile.png = recorte del celular para mobile)
   vercel.json         config del proyecto Vercel de la landing
   README.md           cómo editar y desplegar la landing
 
@@ -213,16 +214,10 @@ Hecho:
       dos proyectos Vercel sobre el mismo repo, DNS configurado.
   [x] App migrada a tema light, espejo de la landing (fondo claro, azul de
       marca como acento). Paleta invertida en lib/constants.ts.
-  [x] Rediseño visual estilo Apple con efecto "liquid glass" (vidrio
-      translúcido con desenfoque):
-      - App: paleta de colores estilo Apple (azul sistema #0071E3, grises
-        neutros de apple.com), tab bar flotante tipo "pastilla" de vidrio
-        con blur real (expo-blur), tarjetas con sombras suaves y bordes
-        más redondeados, buscador y chips estilo iOS.
-      - Landing: barra de navegación flotante de vidrio, blobs de gradiente
-        desenfocados en el hero, título con gradiente, tiles y tarjeta de
-        viaje con efecto vidrio, animaciones de aparición al hacer scroll
-        (estilo apple.com), botones con gradiente y hover con rebote.
+  [x] Rediseño visual estilo Apple con "liquid glass" en la app (la landing
+      ya lo tenía): tab bar flotante tipo pastilla de vidrio con blur real
+      (expo-blur), tintas frías espejo de la landing, sombras suaves y
+      radios más redondeados en las tarjetas, buscador y chips estilo iOS.
   [x] Recuperación de contraseña: link "¿Olvidaste tu contraseña?" en login,
       pantalla para pedir el mail (recuperar) y pantalla para fijar la clave
       nueva desde el link (restablecer). Funciona en web y nativo.
