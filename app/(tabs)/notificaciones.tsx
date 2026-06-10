@@ -6,7 +6,7 @@ import {
 import { router } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useNotificationsStore } from '@/stores/notificationsStore'
-import { COLORS, SPACING } from '@/lib/constants'
+import { COLORS, SPACING, TAB_BAR_SPACE } from '@/lib/constants'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import type { NotificationType } from '@/lib/types'
@@ -98,7 +98,7 @@ export default function NotificacionesScreen() {
           </View>
         )}
 
-        <View style={{ height: SPACING.xxl }} />
+        <View style={{ height: TAB_BAR_SPACE }} />
       </ScrollView>
     </View>
   )

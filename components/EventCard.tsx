@@ -1,13 +1,13 @@
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { COLORS, SPACING, EVENT_TYPE_ICONS } from '@/lib/constants'
+import { COLORS, SPACING, RADIUS, SHADOWS, EVENT_TYPE_ICONS } from '@/lib/constants'
 import type { Event } from '@/lib/types'
 
-const ACCENT: Record<string, string> = {
-  partido: COLORS.primary,
-  recital: COLORS.accent,
-  otro:    COLORS.textMuted,
+const TILE_BG: Record<string, string> = {
+  partido: COLORS.brandTint,
+  recital: '#F3EAFF',
+  otro:    COLORS.surface,
 }
 
 interface EventCardProps {
@@ -22,7 +22,6 @@ export function EventCard({ event, onPress }: EventCardProps) {
     ? `Hoy · ${format(date, 'HH:mm')}`
     : format(date, "EEE d MMM · HH:mm", { locale: es })
   const tripsCount = (event.trips_count as unknown as { count: number }[])?.[0]?.count ?? 0
-  const accent     = ACCENT[event.type] ?? COLORS.primary
 
   return (
     <TouchableOpacity
@@ -30,12 +29,14 @@ export function EventCard({ event, onPress }: EventCardProps) {
       onPress={onPress}
       activeOpacity={0.7}
     >
-      <View style={[styles.accentBar, { backgroundColor: accent }]} />
+      <View style={[styles.iconTile, { backgroundColor: TILE_BG[event.type] ?? COLORS.surface }]}>
+        <Text style={styles.iconEmoji}>{EVENT_TYPE_ICONS[event.type]}</Text>
+      </View>
 
       <View style={styles.body}>
         <View style={styles.topRow}>
-          <Text style={styles.competition}>
-            {EVENT_TYPE_ICONS[event.type]}  {event.subtitle ?? event.competition ?? ''}
+          <Text style={styles.competition} numberOfLines={1}>
+            {event.subtitle ?? event.competition ?? ''}
           </Text>
           {event.is_featured && (
             <View style={styles.featuredBadge}>
@@ -66,16 +67,24 @@ export function EventCard({ event, onPress }: EventCardProps) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.card,
-    borderRadius: 14,
+    borderRadius: RADIUS.lg,
     flexDirection: 'row',
     alignItems: 'center',
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.glassEdge,
+    paddingLeft: SPACING.md,
+    ...SHADOWS.card,
   },
-  accentBar: {
-    width: 4,
-    alignSelf: 'stretch',
+  iconTile: {
+    width: 48,
+    height: 48,
+    borderRadius: RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconEmoji: {
+    fontSize: 24,
   },
   body: {
     flex: 1,
@@ -98,12 +107,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   featuredBadge: {
-    backgroundColor: COLORS.accent + '1A',
-    paddingHorizontal: 7,
+    backgroundColor: COLORS.brandTint,
+    paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: COLORS.accent + '44',
+    borderRadius: RADIUS.full,
   },
   featuredText: {
     fontSize: 10,
@@ -111,11 +118,11 @@ const styles = StyleSheet.create({
     color: COLORS.accent,
   },
   title: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    letterSpacing: -0.3,
-    lineHeight: 23,
+    letterSpacing: -0.4,
+    lineHeight: 22,
   },
   meta: {
     flexDirection: 'row',
@@ -129,7 +136,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   metaToday: {
-    color: COLORS.primaryLight,
+    color: COLORS.accent,
     fontWeight: '600',
   },
   dot: {
@@ -140,12 +147,10 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   tripsBadge: {
-    backgroundColor: COLORS.success + '1A',
-    paddingHorizontal: 7,
+    backgroundColor: COLORS.successBg,
+    paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: COLORS.success + '44',
+    borderRadius: RADIUS.full,
   },
   tripsText: {
     fontSize: 11,
@@ -153,9 +158,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   chevron: {
-    fontSize: 22,
-    color: COLORS.textMuted,
+    fontSize: 24,
+    color: COLORS.borderLight,
     paddingHorizontal: SPACING.md,
-    lineHeight: 26,
+    lineHeight: 28,
+    fontWeight: '400',
   },
 })

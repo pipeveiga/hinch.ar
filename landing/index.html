@@ -242,6 +242,25 @@
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Aparición suave de secciones al hacer scroll (estilo apple.com).
+    // Si no hay IntersectionObserver, los elementos quedan visibles.
+    if ('IntersectionObserver' in window) {
+      const targets = document.querySelectorAll('.card, .step, .section__title, .checklist li, .badge-tile, .cta-final__box');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      targets.forEach((el, i) => {
+        el.classList.add('reveal');
+        el.style.transitionDelay = `${(i % 4) * 70}ms`;
+        io.observe(el);
+      });
+    }
   </script>
 </body>
 </html>
