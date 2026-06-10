@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import {
@@ -8,6 +8,7 @@ import {
 import type { Trip } from '@/lib/types'
 import { UserAvatar } from './UserAvatar'
 import { VerificationBadge } from './VerificationBadge'
+import { ScalePress } from './ScalePress'
 
 interface TripCardProps {
   trip:       Trip
@@ -23,14 +24,13 @@ export function TripCard({ trip, onPress, showEvent = false }: TripCardProps) {
   const isCancelled = trip.status === 'cancelled'
 
   return (
-    <TouchableOpacity
+    <ScalePress
       style={[
         styles.card,
         isFull      && styles.cardFull,
         isCancelled && styles.cardCancelled,
       ]}
       onPress={onPress}
-      activeOpacity={0.85}
       disabled={isCancelled}
     >
       {/* Si mostramos el evento (en mis viajes) */}
@@ -132,7 +132,7 @@ export function TripCard({ trip, onPress, showEvent = false }: TripCardProps) {
           {trip.accepts_pets    && <Text style={styles.extra}>🐾</Text>}
         </View>
       )}
-    </TouchableOpacity>
+    </ScalePress>
   )
 }
 

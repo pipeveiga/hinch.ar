@@ -1,8 +1,9 @@
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { COLORS, SPACING, RADIUS, SHADOWS, EVENT_TYPE_ICONS } from '@/lib/constants'
 import type { Event } from '@/lib/types'
+import { ScalePress } from './ScalePress'
 
 const TILE_BG: Record<string, string> = {
   partido: COLORS.brandTint,
@@ -24,11 +25,7 @@ export function EventCard({ event, onPress }: EventCardProps) {
   const tripsCount = (event.trips_count as unknown as { count: number }[])?.[0]?.count ?? 0
 
   return (
-    <TouchableOpacity
-      style={[styles.card, Platform.OS === 'web' && ({ cursor: 'pointer' } as object)]}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
+    <ScalePress style={styles.card} onPress={onPress}>
       <View style={[styles.iconTile, { backgroundColor: TILE_BG[event.type] ?? COLORS.surface }]}>
         <Text style={styles.iconEmoji}>{EVENT_TYPE_ICONS[event.type]}</Text>
       </View>
@@ -60,7 +57,7 @@ export function EventCard({ event, onPress }: EventCardProps) {
       </View>
 
       <Text style={styles.chevron}>›</Text>
-    </TouchableOpacity>
+    </ScalePress>
   )
 }
 

@@ -29,6 +29,11 @@
     ============================================================
   -->
 
+  <!-- Fondo vivo: manchas de color que derivan lento + progreso de scroll -->
+  <div class="blob blob--a" aria-hidden="true"></div>
+  <div class="blob blob--b" aria-hidden="true"></div>
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
   <!-- ===================== NAV ===================== -->
   <header class="nav" id="nav">
     <a class="brand" href="/">
@@ -78,6 +83,21 @@
       </div>
     </div>
   </section>
+
+  <!-- ===================== MARQUEE ===================== -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track" id="marquee-track">
+      <span class="marquee__item">⚽ River – Boca · Monumental</span>
+      <span class="marquee__item">🚗 Rosario → Buenos Aires</span>
+      <span class="marquee__item">🎸 Recital en Vélez</span>
+      <span class="marquee__item">🏟️ La Bombonera</span>
+      <span class="marquee__item">🚗 Córdoba → Santiago del Estero</span>
+      <span class="marquee__item">🪪 Identidad verificada</span>
+      <span class="marquee__item">🎟️ Copa Argentina</span>
+      <span class="marquee__item">🚗 La Plata → Avellaneda</span>
+      <span class="marquee__item">⭐ Calificaciones 5x5</span>
+    </div>
+  </div>
 
   <!-- ===================== BENEFICIOS ===================== -->
   <section id="beneficios" class="section">
@@ -176,35 +196,134 @@
   </footer>
 
   <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
+    (function () {
+      'use strict';
 
-    // Nav de vidrio: se vuelve más opaco al scrollear
-    var nav = document.getElementById('nav');
-    var onScroll = function () { nav.classList.toggle('is-scrolled', window.scrollY > 8); };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+      var finePointer   = window.matchMedia('(pointer: fine)').matches;
+      var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Aparición suave de secciones al entrar en pantalla
-    var reveals = document.querySelectorAll('.reveal');
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      // El marquee duplica su contenido para loopear sin costura
+      // (la animación CSS recorre el 50% del track)
+      var track = document.getElementById('marquee-track');
+      if (track) track.innerHTML += track.innerHTML;
+
+      // Nav de vidrio: se vuelve más opaco al scrollear.
+      // Barra de progreso: scaleX según cuánto se scrolleó.
+      var nav = document.getElementById('nav');
+      var progress = document.getElementById('scroll-progress');
+      var onScroll = function () {
+        nav.classList.toggle('is-scrolled', window.scrollY > 8);
+        var max = document.documentElement.scrollHeight - window.innerHeight;
+        progress.style.transform = 'scaleX(' + (max > 0 ? window.scrollY / max : 0) + ')';
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      // Aparición suave de secciones al entrar en pantalla
+      var reveals = document.querySelectorAll('.reveal');
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+          });
+        }, { threshold: 0.12 });
+        reveals.forEach(function (el) { io.observe(el); });
+      } else {
+        reveals.forEach(function (el) { el.classList.add('in'); });
+      }
+
+      // Brillo que sigue al puntero + tilt 3D en las tarjetas de vidrio
+      document.querySelectorAll('.card, .step').forEach(function (el) {
+        el.addEventListener('pointermove', function (e) {
+          var r = el.getBoundingClientRect();
+          var x = e.clientX - r.left;
+          var y = e.clientY - r.top;
+          el.style.setProperty('--mx', x + 'px');
+          el.style.setProperty('--my', y + 'px');
+          if (finePointer && !reducedMotion) {
+            el.style.setProperty('--ry', ((x / r.width) - .5) * 7 + 'deg');
+            el.style.setProperty('--rx', ((y / r.height) - .5) * -7 + 'deg');
+          }
         });
-      }, { threshold: 0.12 });
-      reveals.forEach(function (el) { io.observe(el); });
-    } else {
-      reveals.forEach(function (el) { el.classList.add('in'); });
-    }
-
-    // Brillo que sigue al puntero en las tarjetas de vidrio
-    document.querySelectorAll('.card, .step').forEach(function (el) {
-      el.addEventListener('pointermove', function (e) {
-        var r = el.getBoundingClientRect();
-        el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-        el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        el.addEventListener('pointerleave', function () {
+          el.style.setProperty('--rx', '0deg');
+          el.style.setProperty('--ry', '0deg');
+        });
       });
-    });
+
+      // Todo lo que sigue es solo para desktop con mouse y sin
+      // preferencia de movimiento reducido.
+      if (!finePointer || reducedMotion) return;
+
+      // ---- Tilt + parallax del hero ----
+      var heroShot = document.querySelector('.hero-shot');
+      if (heroShot) {
+        heroShot.addEventListener('pointermove', function (e) {
+          var r = heroShot.getBoundingClientRect();
+          heroShot.style.setProperty('--ry', (((e.clientX - r.left) / r.width) - .5) * 4 + 'deg');
+          heroShot.style.setProperty('--rx', (((e.clientY - r.top) / r.height) - .5) * -4 + 'deg');
+        });
+        heroShot.addEventListener('pointerleave', function () {
+          heroShot.style.setProperty('--rx', '0deg');
+          heroShot.style.setProperty('--ry', '0deg');
+        });
+        window.addEventListener('scroll', function () {
+          heroShot.style.setProperty('--py', Math.min(window.scrollY * .06, 40) + 'px');
+        }, { passive: true });
+      }
+
+      // ---- Botones magnéticos: se inclinan hacia el cursor ----
+      document.querySelectorAll('.btn').forEach(function (btn) {
+        btn.addEventListener('pointermove', function (e) {
+          var r = btn.getBoundingClientRect();
+          btn.style.setProperty('--mag-x', (e.clientX - r.left - r.width / 2) * .22 + 'px');
+          btn.style.setProperty('--mag-y', (e.clientY - r.top - r.height / 2) * .22 + 'px');
+        });
+        btn.addEventListener('pointerleave', function () {
+          btn.style.setProperty('--mag-x', '0px');
+          btn.style.setProperty('--mag-y', '0px');
+        });
+      });
+
+      // ---- Cursor custom: punto 1:1 + anillo que lo persigue ----
+      document.documentElement.classList.add('cursor-on');
+      var dot  = document.createElement('div');
+      var ring = document.createElement('div');
+      dot.className  = 'cursor-dot';
+      ring.className = 'cursor-ring';
+      document.body.appendChild(dot);
+      document.body.appendChild(ring);
+
+      var mx = -100, my = -100;   // mouse real
+      var rx = -100, ry = -100;   // posición del anillo (con inercia)
+      var ringScale = 1, targetScale = 1;
+      var seen = false;
+
+      document.addEventListener('pointermove', function (e) {
+        mx = e.clientX; my = e.clientY;
+        if (!seen) { seen = true; rx = mx; ry = my; dot.classList.add('is-active'); ring.classList.add('is-active'); }
+        // ¿Está sobre algo clickeable?
+        var link = e.target.closest && e.target.closest('a, button, .btn');
+        ring.classList.toggle('is-link', !!link);
+        targetScale = link ? 1.55 : 1;
+      }, { passive: true });
+
+      document.addEventListener('pointerdown', function () { targetScale = .75; });
+      document.addEventListener('pointerup',   function () { targetScale = ring.classList.contains('is-link') ? 1.55 : 1; });
+      document.addEventListener('mouseleave',  function () { dot.classList.remove('is-active'); ring.classList.remove('is-active'); });
+      document.addEventListener('mouseenter',  function () { if (seen) { dot.classList.add('is-active'); ring.classList.add('is-active'); } });
+
+      (function loop() {
+        rx += (mx - rx) * .16;
+        ry += (my - ry) * .16;
+        ringScale += (targetScale - ringScale) * .18;
+        dot.style.transform  = 'translate3d(' + mx + 'px,' + my + 'px,0)';
+        ring.style.transform = 'translate3d(' + rx + 'px,' + ry + 'px,0) scale(' + ringScale.toFixed(3) + ')';
+        requestAnimationFrame(loop);
+      })();
+    })();
   </script>
 </body>
 </html>

@@ -6,9 +6,10 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-06-10 (rediseño estético estilo Apple
-también en la app: tab bar flotante de vidrio con blur real, tarjetas con
-sombras suaves, buscador y chips estilo iOS; la landing ya lo tenía)
+Última actualización del documento: 2026-06-10 (más movimiento en la landing:
+cursor custom con anillo que persigue al mouse, botones magnéticos, tilt 3D
+en hero y tarjetas, blobs animados, marquee de eventos, barra de progreso;
+en la app las tarjetas se hunden con resorte al tocarlas)
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -218,6 +219,17 @@ Hecho:
       ya lo tenía): tab bar flotante tipo pastilla de vidrio con blur real
       (expo-blur), tintas frías espejo de la landing, sombras suaves y
       radios más redondeados en las tarjetas, buscador y chips estilo iOS.
+  [x] Capa de dinamismo en la landing (solo desktop con mouse, respeta
+      "movimiento reducido" del sistema operativo):
+      - Cursor custom: punto azul + anillo que persigue al mouse con
+        inercia; crece sobre los links y se achica al hacer click.
+      - Botones magnéticos que se inclinan hacia el cursor + destello
+        periódico en los CTA azules.
+      - Tilt 3D del hero y de las tarjetas siguiendo el mouse.
+      - Blobs de color que derivan lento de fondo, marquee de eventos y
+        rutas debajo del hero, barra de progreso de scroll arriba de todo.
+  [x] Micro-interacción en la app: las tarjetas (eventos y viajes) se
+      hunden con física de resorte al tocarlas (componente ScalePress).
   [x] Recuperación de contraseña: link "¿Olvidaste tu contraseña?" en login,
       pantalla para pedir el mail (recuperar) y pantalla para fijar la clave
       nueva desde el link (restablecer). Funciona en web y nativo.

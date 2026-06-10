@@ -73,13 +73,14 @@ img { display: block; max-width: 100%; }
   border: 0;
 }
 
-/* Aparición al scrollear (JS agrega .in con IntersectionObserver) */
+/* Aparición al scrollear (JS agrega .in con IntersectionObserver).
+   Usa la propiedad `translate` (no `transform`) para no pisar el tilt 3D. */
 .reveal {
   opacity: 0;
-  transform: translateY(26px);
-  transition: opacity .9s var(--ease), transform .9s var(--ease);
+  translate: 0 26px;
+  transition: opacity .9s var(--ease), translate .9s var(--ease);
 }
-.reveal.in { opacity: 1; transform: none; }
+.reveal.in { opacity: 1; translate: 0 0; }
 .grid  > *:nth-child(2), .steps > *:nth-child(2) { transition-delay: .08s; }
 .grid  > *:nth-child(3), .steps > *:nth-child(3) { transition-delay: .16s; }
 .steps > *:nth-child(4) { transition-delay: .24s; }
@@ -91,11 +92,15 @@ img { display: block; max-width: 100%; }
   height: 34px;
   border-radius: 10px;
   box-shadow: var(--shadow-sm);
+  transition: transform .5s var(--ease);
 }
+.brand:hover .brand__tile { transform: rotate(-8deg) scale(1.1); }
 .brand__name { font-weight: 800; font-size: 1.12rem; letter-spacing: -.02em; }
 .brand__dot { color: var(--brand); }
 
 /* ===================== BOTONES ===================== */
+/* El transform se compone con variables: el imán del cursor (JS setea
+   --mag-x/--mag-y) y la escala de hover/press conviven sin pisarse. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -106,13 +111,16 @@ img { display: block; max-width: 100%; }
   border-radius: 999px;
   cursor: pointer;
   letter-spacing: -.01em;
+  transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0) scale(var(--btn-s, 1));
   transition: transform .45s var(--ease), background .3s ease, box-shadow .45s var(--ease), border-color .3s ease;
   white-space: nowrap;
 }
-.btn:hover  { transform: translateY(-1px) scale(1.02); }
-.btn:active { transform: scale(.97); }
+.btn:hover  { --btn-s: 1.04; }
+.btn:active { --btn-s: .96; }
 
 .btn--primary {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(180deg, #2b62e8, var(--brand));
   color: #fff;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 6px 18px rgba(29, 78, 216, .30);
@@ -120,6 +128,21 @@ img { display: block; max-width: 100%; }
 .btn--primary:hover {
   background: linear-gradient(180deg, #2456d6, var(--brand-dark));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 12px 30px rgba(29, 78, 216, .38);
+}
+/* Destello que cruza el botón cada tanto */
+.btn--primary::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, .35) 50%, transparent 68%);
+  transform: translateX(-130%);
+  animation: sheen 6s ease-in-out 2s infinite;
+  pointer-events: none;
+}
+@keyframes sheen {
+  0%   { transform: translateX(-130%); }
+  26%  { transform: translateX(130%); }
+  100% { transform: translateX(130%); }
 }
 
 .btn--ghost {
@@ -189,6 +212,10 @@ img { display: block; max-width: 100%; }
   width: 100%;
   line-height: 0;
   animation: rise 1s var(--ease) both;
+  /* Tilt 3D que sigue al mouse (JS setea --rx/--ry) + parallax de scroll (--py) */
+  transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--py, 0px));
+  transition: transform .25s ease-out;
+  will-change: transform;
 }
 .hero-shot__img {
   width: 100%;
@@ -301,10 +328,12 @@ img { display: block; max-width: 100%; }
   border-radius: var(--radius);
   padding: 32px 28px;
   box-shadow: var(--glass-shine), 0 8px 30px rgba(11, 18, 32, .06);
-  transition: transform .5s var(--ease), box-shadow .5s var(--ease);
+  /* Tilt 3D con el mouse (JS setea --rx/--ry); la escala de hover va por var */
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--zoom, 1));
+  transition: transform .25s ease-out, box-shadow .5s var(--ease);
 }
 .card:hover, .step:hover {
-  transform: translateY(-6px) scale(1.01);
+  --zoom: 1.02;
   box-shadow: var(--glass-shine), 0 24px 60px rgba(11, 18, 32, .12);
 }
 /* Brillo que sigue al puntero (JS setea --mx / --my) */
@@ -457,6 +486,136 @@ img { display: block; max-width: 100%; }
 .footer__links a:hover { color: var(--ink); }
 .footer__copy { color: var(--muted); font-size: .85rem; }
 
+/* ===================== CURSOR CUSTOM ===================== */
+/* Solo en desktop con mouse: JS agrega .cursor-on al <html> cuando
+   pointer:fine y sin prefers-reduced-motion. El punto sigue al mouse
+   1:1 y el anillo lo persigue con inercia (lerp en rAF). */
+html.cursor-on,
+html.cursor-on a,
+html.cursor-on button,
+html.cursor-on .btn { cursor: none; }
+
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+}
+.cursor-dot {
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  background: var(--brand);
+  transition: opacity .25s ease;
+}
+.cursor-ring {
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border: 1.5px solid rgba(29, 78, 216, .55);
+  background: rgba(29, 78, 216, 0);
+  transition: opacity .25s ease, background .25s ease, border-color .25s ease;
+}
+.cursor-on .cursor-dot.is-active,
+.cursor-on .cursor-ring.is-active { opacity: 1; }
+/* Sobre un link/botón: el anillo se agranda y se llena apenas */
+.cursor-ring.is-link {
+  border-color: rgba(29, 78, 216, .9);
+  background: rgba(29, 78, 216, .08);
+}
+
+/* ===================== BLOBS ANIMADOS DE FONDO ===================== */
+/* Manchas de color que derivan lento detrás del vidrio. Solo transform,
+   gradientes pre-suavizados (sin filter: blur, que es caro). */
+.blob {
+  position: fixed;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform;
+}
+.blob--a {
+  width: 56vmax;
+  height: 56vmax;
+  top: -24vmax;
+  left: -16vmax;
+  background: radial-gradient(circle at 40% 40%, rgba(59, 130, 246, .14), transparent 62%);
+  animation: drift-a 26s ease-in-out infinite alternate;
+}
+.blob--b {
+  width: 48vmax;
+  height: 48vmax;
+  right: -18vmax;
+  bottom: -20vmax;
+  background: radial-gradient(circle at 55% 45%, rgba(29, 78, 216, .12), transparent 62%);
+  animation: drift-b 32s ease-in-out infinite alternate;
+}
+@keyframes drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(10vmax, 7vmax, 0) scale(1.18); }
+}
+@keyframes drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.1); }
+  to   { transform: translate3d(-9vmax, -6vmax, 0) scale(.94); }
+}
+
+/* ===================== BARRA DE PROGRESO DE SCROLL ===================== */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 200;
+  background: linear-gradient(90deg, var(--brand), var(--accent-blue));
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+/* ===================== MARQUEE (eventos / rutas) ===================== */
+.marquee {
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, .55);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  padding: 13px 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee__track {
+  display: flex;
+  align-items: center;
+  gap: 44px;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+.marquee:hover .marquee__track { animation-play-state: paused; }
+.marquee__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 44px;
+  color: var(--ink-soft);
+  font-weight: 600;
+  font-size: .95rem;
+  white-space: nowrap;
+}
+.marquee__item::after {
+  content: "·";
+  color: var(--brand);
+  font-weight: 900;
+}
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+
 /* ===================== RESPONSIVE ===================== */
 /* Punto de quiebre del hero: arriba de 760px va la imagen completa
    (pixel-perfect); abajo, la versión apilada y legible. */
@@ -479,6 +638,11 @@ img { display: block; max-width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .hero-shot, .hero-mobile { animation: none; }
-  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal { opacity: 1; translate: none; transition: none; }
   .btn, .card, .step { transition: none; }
+  .btn--primary::after { animation: none; }
+  .blob { animation: none; }
+  .marquee__track { animation: none; }
+  .brand__tile { transition: none; }
+  .cursor-dot, .cursor-ring { display: none; }
 }
