@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useChatsStore } from '@/stores/chatsStore'
 import { bookingsApi } from '@/lib/supabase'
 import { useState } from 'react'
-import { COLORS, SPACING } from '@/lib/constants'
+import { COLORS, SPACING, TAB_BAR_SPACE } from '@/lib/constants'
 import type { Booking } from '@/lib/types'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -110,6 +110,7 @@ export default function ChatsScreen() {
             />
           )}
           refreshControl={<RefreshControl refreshing={false} onRefresh={load} tintColor={COLORS.primary} />}
+          contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
             <View style={styles.empty}>
@@ -131,6 +132,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface, borderBottomWidth: 1, borderBottomColor: COLORS.border,
   },
   headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.textPrimary },
+  list: { paddingBottom: TAB_BAR_SPACE },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   item: {
     flexDirection: 'row', alignItems: 'center', gap: SPACING.md,

@@ -5,7 +5,7 @@ import {
 } from 'react-native'
 import { router } from 'expo-router'
 import { eventsApi } from '@/lib/supabase'
-import { COLORS, SPACING } from '@/lib/constants'
+import { COLORS, SPACING, RADIUS, TAB_BAR_SPACE } from '@/lib/constants'
 import type { Event, EventType } from '@/lib/types'
 import { EventCard } from '@/components/EventCard'
 import { useNotificationsStore } from '@/stores/notificationsStore'
@@ -192,11 +192,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     marginTop: SPACING.xs,
     backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
     paddingHorizontal: SPACING.md,
-    paddingVertical: 10,
+    paddingVertical: 11,
     gap: 8,
   },
   searchIcon: { fontSize: 15 },
@@ -215,12 +213,10 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: RADIUS.full,
     backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
   },
   chipActive: {
     backgroundColor: COLORS.primary,
@@ -237,10 +233,10 @@ const styles = StyleSheet.create({
 
   list: {
     paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.xxl + SPACING.lg,
+    paddingBottom: TAB_BAR_SPACE,
   },
   separator: {
-    height: SPACING.sm,
+    height: SPACING.md,
   },
 
   center: {

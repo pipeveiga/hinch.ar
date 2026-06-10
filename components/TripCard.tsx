@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import {
-  COLORS, SPACING, RADIUS,
+  COLORS, SPACING, RADIUS, SHADOWS,
   TRIP_TYPE_LABELS, TRIP_TYPE_COLORS, TRIP_TYPE_ICONS,
 } from '@/lib/constants'
 import type { Trip } from '@/lib/types'
@@ -142,8 +142,9 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.glassEdge,
     gap: SPACING.sm,
+    ...SHADOWS.card,
   },
   cardFull: {
     opacity: 0.7,

@@ -8,7 +8,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { router } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
 import { usersApi } from '@/lib/supabase'
-import { COLORS, SPACING, RADIUS } from '@/lib/constants'
+import { COLORS, SPACING, RADIUS, TAB_BAR_SPACE } from '@/lib/constants'
 import { UserAvatar } from '@/components/UserAvatar'
 import { VerificationBadge } from '@/components/VerificationBadge'
 
@@ -190,7 +190,11 @@ export default function PerfilScreen() {
 
   return (
     <>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header del perfil */}
         <View style={styles.profileHeader}>
           <TouchableOpacity onPress={handlePickAvatar} activeOpacity={0.8} style={styles.avatarWrapper}>

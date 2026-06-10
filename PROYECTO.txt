@@ -6,7 +6,9 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-06-10 (rediseño estético de la landing estilo Apple: nav flotante de vidrio líquido, tarjetas glass con brillo al pasar el mouse, secciones que aparecen al scrollear, CTA oscuro premium)
+Última actualización del documento: 2026-06-10 (rediseño estético estilo Apple
+también en la app: tab bar flotante de vidrio con blur real, tarjetas con
+sombras suaves, buscador y chips estilo iOS; la landing ya lo tenía)
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -212,6 +214,10 @@ Hecho:
       dos proyectos Vercel sobre el mismo repo, DNS configurado.
   [x] App migrada a tema light, espejo de la landing (fondo claro, azul de
       marca como acento). Paleta invertida en lib/constants.ts.
+  [x] Rediseño visual estilo Apple con "liquid glass" en la app (la landing
+      ya lo tenía): tab bar flotante tipo pastilla de vidrio con blur real
+      (expo-blur), tintas frías espejo de la landing, sombras suaves y
+      radios más redondeados en las tarjetas, buscador y chips estilo iOS.
   [x] Recuperación de contraseña: link "¿Olvidaste tu contraseña?" en login,
       pantalla para pedir el mail (recuperar) y pantalla para fijar la clave
       nueva desde el link (restablecer). Funciona en web y nativo.
