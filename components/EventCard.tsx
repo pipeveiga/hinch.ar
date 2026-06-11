@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet } from 'react-native'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { COLORS, SPACING, RADIUS, SHADOWS, EVENT_TYPE_ICONS } from '@/lib/constants'
+import { COLORS, SPACING, RADIUS, SHADOWS } from '@/lib/constants'
 import type { Event } from '@/lib/types'
 import { ScalePress } from './ScalePress'
+import { Icon, EVENT_TYPE_ICON_NAME } from './Icon'
 
 interface EventCardProps {
   event:   Event
@@ -34,9 +35,12 @@ export function EventCard({ event, onPress }: EventCardProps) {
 
       <View style={styles.body}>
         <View style={styles.topRow}>
-          <Text style={styles.competition} numberOfLines={1}>
-            {EVENT_TYPE_ICONS[event.type]}  {event.subtitle ?? event.competition ?? ''}
-          </Text>
+          <View style={styles.competitionRow}>
+            <Icon name={EVENT_TYPE_ICON_NAME[event.type] ?? 'pin'} size={13} color={COLORS.textMuted} strokeWidth={1.8} />
+            <Text style={styles.competition} numberOfLines={1}>
+              {event.subtitle ?? event.competition ?? ''}
+            </Text>
+          </View>
           {event.is_featured && (
             <View style={styles.featuredBadge}>
               <Text style={styles.featuredText}>✦ Destacado</Text>
@@ -54,7 +58,8 @@ export function EventCard({ event, onPress }: EventCardProps) {
           <Text style={[styles.metaText, styles.venueText]} numberOfLines={1}>{event.venue_city}</Text>
           {tripsCount > 0 && (
             <View style={styles.tripsBadge}>
-              <Text style={styles.tripsText}>🚗 {tripsCount} {tripsCount === 1 ? 'viaje' : 'viajes'}</Text>
+              <Icon name="car" size={12} color={COLORS.success} strokeWidth={1.8} />
+              <Text style={styles.tripsText}>{tripsCount} {tripsCount === 1 ? 'viaje' : 'viajes'}</Text>
             </View>
           )}
         </View>
@@ -126,6 +131,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: SPACING.sm,
   },
+  competitionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    flex: 1,
+  },
   competition: {
     fontSize: 11,
     fontWeight: '600',
@@ -173,9 +184,12 @@ const styles = StyleSheet.create({
     textTransform: 'none',
   },
   tripsBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     backgroundColor: COLORS.successBg,
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: RADIUS.full,
   },
   tripsText: {

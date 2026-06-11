@@ -13,10 +13,10 @@ import { haversineKm } from '@/lib/distance'
 import {
   COLORS, SPACING, RADIUS,
   TRIP_TYPE_LABELS, TRIP_TYPE_COLORS,
-  EVENT_TYPE_ICONS,
 } from '@/lib/constants'
 import type { Event, Trip, TripSearchFilters } from '@/lib/types'
 import { TripCard } from '@/components/TripCard'
+import { Icon, EVENT_TYPE_ICON_NAME } from '@/components/Icon'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -115,20 +115,29 @@ export default function EventoScreen() {
       <View style={{ flex: 1 }}>
         {/* Banner del evento */}
         <View style={styles.eventBanner}>
-          <Text style={styles.eventType}>
-            {EVENT_TYPE_ICONS[event.type]} {event.type === 'partido' ? 'Partido' : 'Recital'}
-          </Text>
+          <View style={styles.eventTypeRow}>
+            <Icon name={EVENT_TYPE_ICON_NAME[event.type] ?? 'pin'} size={14} color={COLORS.primary} strokeWidth={1.9} />
+            <Text style={styles.eventType}>
+              {event.type === 'partido' ? 'Partido' : event.type === 'recital' ? 'Recital' : 'Evento'}
+            </Text>
+          </View>
           <Text style={styles.eventTitle}>{event.title}</Text>
           {event.subtitle && (
             <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
           )}
           <View style={styles.eventMeta}>
-            <Text style={styles.eventMetaText}>
-              📅 {format(eventDate, "EEEE d 'de' MMMM · HH:mm", { locale: es })}
-            </Text>
-            <Text style={styles.eventMetaText}>
-              📍 {event.venue_name}, {event.venue_city}
-            </Text>
+            <View style={styles.eventMetaRow}>
+              <Icon name="calendar" size={15} color={COLORS.textSecondary} strokeWidth={1.7} />
+              <Text style={styles.eventMetaText}>
+                {format(eventDate, "EEEE d 'de' MMMM · HH:mm", { locale: es })}
+              </Text>
+            </View>
+            <View style={styles.eventMetaRow}>
+              <Icon name="pin" size={15} color={COLORS.textSecondary} strokeWidth={1.7} />
+              <Text style={styles.eventMetaText}>
+                {event.venue_name}, {event.venue_city}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -180,7 +189,9 @@ export default function EventoScreen() {
             contentContainerStyle={styles.list}
             ListEmptyComponent={
               <View style={styles.emptyState}>
-                <Text style={styles.emptyIcon}>🚗</Text>
+                <View style={styles.emptyIconWrap}>
+                  <Icon name="car" size={38} color={COLORS.textMuted} strokeWidth={1.5} />
+                </View>
                 <Text style={styles.emptyTitle}>No hay viajes todavía</Text>
                 <Text style={styles.emptySubtext}>
                   Sé el primero en publicar un viaje para este evento
@@ -197,7 +208,8 @@ export default function EventoScreen() {
           onPress={handlePublicar}
           activeOpacity={0.85}
         >
-          <Text style={styles.fabText}>🚗 Publicar viaje</Text>
+          <Icon name="plus" size={18} color={COLORS.white} strokeWidth={2.2} />
+          <Text style={styles.fabText}>Publicar viaje</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -222,11 +234,13 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.border,
     gap: SPACING.xs,
   },
-  eventType: { fontSize: 12, fontWeight: '700', color: COLORS.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
+  eventTypeRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  eventType: { fontSize: 12, fontWeight: '700', color: COLORS.primary, textTransform: 'uppercase', letterSpacing: 1 },
   eventTitle: { fontSize: 22, fontWeight: '900', color: COLORS.textPrimary, lineHeight: 28 },
   eventSubtitle: { fontSize: 13, color: COLORS.textSecondary },
-  eventMeta: { gap: 4, marginTop: SPACING.xs },
-  eventMetaText: { fontSize: 13, color: COLORS.textSecondary },
+  eventMeta: { gap: 6, marginTop: SPACING.xs },
+  eventMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  eventMetaText: { fontSize: 13, color: COLORS.textSecondary, flex: 1 },
   filterRow: {
     flexDirection: 'row', alignItems: 'center', gap: SPACING.xs,
     paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md,
@@ -240,13 +254,18 @@ const styles = StyleSheet.create({
   filterChipText: { fontSize: 12, color: COLORS.textMuted, fontWeight: '600' },
   list: { padding: SPACING.lg, gap: SPACING.md, paddingBottom: 100 },
   emptyState: { alignItems: 'center', gap: SPACING.sm, paddingTop: SPACING.xxl },
-  emptyIcon: { fontSize: 48 },
+  emptyIconWrap: {
+    width: 84, height: 84, borderRadius: RADIUS.full,
+    backgroundColor: COLORS.surface,
+    alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.xs,
+  },
   emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary },
   emptySubtext: { fontSize: 13, color: COLORS.textSecondary, textAlign: 'center' },
   fab: {
     position: 'absolute', bottom: SPACING.xl, right: SPACING.lg, left: SPACING.lg,
-    backgroundColor: COLORS.primary, borderRadius: RADIUS.lg,
-    padding: SPACING.md, alignItems: 'center',
+    backgroundColor: COLORS.primary, borderRadius: RADIUS.full,
+    padding: SPACING.md, alignItems: 'center', justifyContent: 'center',
+    flexDirection: 'row', gap: SPACING.sm,
     shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4, shadowRadius: 12, elevation: 8,
   },

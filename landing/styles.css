@@ -348,19 +348,33 @@ img { display: block; max-width: 100%; }
 }
 .card:hover::after, .step:hover::after { opacity: 1; }
 
+/* Íconos propios (line icons). Escalan con font-size y heredan el color. */
+.ic {
+  width: 1em;
+  height: 1em;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: -0.14em;
+}
+
 .card__icon {
-  font-size: 1.6rem;
-  width: 56px;
-  height: 56px;
+  width: 54px;
+  height: 54px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  color: var(--brand);
   background: linear-gradient(145deg, #ffffff, var(--brand-tint));
   border: 1px solid rgba(255, 255, 255, .8);
   border-radius: 16px;
   box-shadow: var(--shadow-sm);
   margin-bottom: 18px;
 }
+.card__icon .ic { width: 27px; height: 27px; stroke-width: 1.6; }
 .card h3 { font-size: 1.18rem; margin-bottom: 8px; letter-spacing: -.01em; }
 .card p { color: var(--ink-soft); }
 
@@ -601,16 +615,25 @@ html.cursor-on .btn { cursor: none; }
 .marquee__item {
   display: inline-flex;
   align-items: center;
-  gap: 44px;
+  gap: 10px;
   color: var(--ink-soft);
   font-weight: 600;
   font-size: .95rem;
   white-space: nowrap;
 }
-.marquee__item::after {
-  content: "·";
+.marquee__item .ic {
+  width: 18px;
+  height: 18px;
   color: var(--brand);
-  font-weight: 900;
+}
+.marquee__item::after {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--brand);
+  opacity: .45;
+  margin-left: 34px;
 }
 @keyframes marquee {
   to { transform: translateX(-50%); }

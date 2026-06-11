@@ -6,18 +6,20 @@ import {
 import { router } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useNotificationsStore } from '@/stores/notificationsStore'
-import { COLORS, SPACING, TAB_BAR_SPACE } from '@/lib/constants'
+import { COLORS, SPACING, RADIUS, TAB_BAR_SPACE } from '@/lib/constants'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import type { NotificationType } from '@/lib/types'
+import { Icon, type IconName } from '@/components/Icon'
 
-const NOTIFICATION_ICONS: Record<NotificationType, string> = {
-  booking_request:    '🔔',
-  booking_confirmed:  '✅',
-  booking_cancelled:  '❌',
-  trip_cancelled:     '🚫',
-  rate_reminder:      '⭐',
-  payment_reminder:   '💸',
+// Cada tipo: ícono + color de acento (para el círculo tintado)
+const NOTIFICATION_ICONS: Record<NotificationType, { icon: IconName; color: string }> = {
+  booking_request:    { icon: 'bell',  color: COLORS.primary },
+  booking_confirmed:  { icon: 'check', color: COLORS.success },
+  booking_cancelled:  { icon: 'x',     color: COLORS.error },
+  trip_cancelled:     { icon: 'ban',   color: COLORS.error },
+  rate_reminder:      { icon: 'star',  color: COLORS.warning },
+  payment_reminder:   { icon: 'coins', color: COLORS.primary },
 }
 
 function handleNotificationPress(type: NotificationType, data: Record<string, unknown>) {
@@ -71,7 +73,9 @@ export default function NotificacionesScreen() {
           </View>
         ) : notifications.length === 0 ? (
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>🔕</Text>
+            <View style={styles.emptyIconWrap}>
+              <Icon name="bellOff" size={38} color={COLORS.textMuted} strokeWidth={1.5} />
+            </View>
             <Text style={styles.emptyTitle}>Todo tranquilo</Text>
             <Text style={styles.emptyText}>Acá vas a ver cuando alguien solicite un viaje tuyo o te confirmen/rechacen una reserva.</Text>
           </View>
@@ -84,7 +88,14 @@ export default function NotificacionesScreen() {
                 onPress={() => handleNotificationPress(n.type, n.data)}
                 activeOpacity={0.75}
               >
-                <Text style={styles.notifIcon}>{NOTIFICATION_ICONS[n.type] ?? '🔔'}</Text>
+                {(() => {
+                  const meta = NOTIFICATION_ICONS[n.type] ?? { icon: 'bell' as IconName, color: COLORS.primary }
+                  return (
+                    <View style={[styles.notifIcon, { backgroundColor: meta.color + '1A' }]}>
+                      <Icon name={meta.icon} size={20} color={meta.color} strokeWidth={1.9} />
+                    </View>
+                  )
+                })()}
                 <View style={styles.notifContent}>
                   <Text style={styles.notifTitle}>{n.title}</Text>
                   <Text style={styles.notifBody}>{n.body}</Text>
@@ -110,10 +121,8 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: SPACING.lg, paddingTop: SPACING.xxl + SPACING.md, paddingBottom: SPACING.md,
-    backgroundColor: COLORS.surface,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border,
   },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.textPrimary },
+  headerTitle: { fontSize: 32, fontWeight: '800', color: COLORS.textPrimary, letterSpacing: -1 },
   markRead:    { fontSize: 13, color: COLORS.primary, fontWeight: '600' },
 
   scroll: { flex: 1 },
@@ -121,7 +130,11 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80 },
 
   empty: { alignItems: 'center', paddingTop: 80, paddingHorizontal: SPACING.xl, gap: SPACING.sm },
-  emptyIcon:  { fontSize: 48 },
+  emptyIconWrap: {
+    width: 84, height: 84, borderRadius: RADIUS.full,
+    backgroundColor: COLORS.surface,
+    alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.xs,
+  },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: COLORS.textPrimary },
   emptyText:  { fontSize: 14, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 20 },
 
@@ -133,7 +146,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md,
     borderBottomWidth: 1, borderBottomColor: COLORS.border,
   },
-  notifIcon:    { fontSize: 24, marginTop: 2 },
+  notifIcon: {
+    width: 40, height: 40, borderRadius: RADIUS.full,
+    alignItems: 'center', justifyContent: 'center',
+  },
   notifContent: { flex: 1, gap: 3 },
   notifTitle:   { fontSize: 14, fontWeight: '700', color: COLORS.textPrimary },
   notifBody:    { fontSize: 13, color: COLORS.textSecondary, lineHeight: 18 },

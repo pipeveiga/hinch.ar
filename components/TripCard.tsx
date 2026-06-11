@@ -10,6 +10,7 @@ import { formatDistance } from '@/lib/distance'
 import { UserAvatar } from './UserAvatar'
 import { VerificationBadge } from './VerificationBadge'
 import { ScalePress } from './ScalePress'
+import { Icon } from './Icon'
 
 interface TripCardProps {
   trip:        Trip
@@ -37,9 +38,10 @@ export function TripCard({ trip, onPress, showEvent = false, distanceKm }: TripC
     >
       {/* Si mostramos el evento (en mis viajes) */}
       {showEvent && event && (
-        <Text style={styles.eventTitle} numberOfLines={1}>
-          ⚽ {event.title}
-        </Text>
+        <View style={styles.eventTitleRow}>
+          <Icon name="ball" size={13} color={COLORS.textSecondary} strokeWidth={1.8} />
+          <Text style={styles.eventTitle} numberOfLines={1}>{event.title}</Text>
+        </View>
       )}
 
       {/* Header: tramo + estado */}
@@ -113,9 +115,12 @@ export function TripCard({ trip, onPress, showEvent = false, distanceKm }: TripC
 
       {/* Horario */}
       {trip.departure_time && (
-        <Text style={styles.time}>
-          ⏰ Salida: {format(new Date(trip.departure_time), "HH:mm · d MMM", { locale: es })}
-        </Text>
+        <View style={styles.timeRow}>
+          <Icon name="clock" size={13} color={COLORS.accent} strokeWidth={1.8} />
+          <Text style={styles.time}>
+            Salida: {format(new Date(trip.departure_time), "HH:mm · d MMM", { locale: es })}
+          </Text>
+        </View>
       )}
 
       {/* Conductor */}
@@ -125,9 +130,10 @@ export function TripCard({ trip, onPress, showEvent = false, distanceKm }: TripC
           <Text style={styles.driverName}>{driver.full_name}</Text>
           <VerificationBadge verified={driver.is_verified} compact />
           {driver.total_trips_as_driver > 0 && (
-            <Text style={styles.driverRating}>
-              ⭐ {driver.avg_rating_as_driver.toFixed(1)}
-            </Text>
+            <View style={styles.ratingRow}>
+              <Icon name="star" size={13} color={COLORS.accent} strokeWidth={1.8} />
+              <Text style={styles.driverRating}>{driver.avg_rating_as_driver.toFixed(1)}</Text>
+            </View>
           )}
         </View>
       )}
@@ -135,8 +141,8 @@ export function TripCard({ trip, onPress, showEvent = false, distanceKm }: TripC
       {/* Extras */}
       {(trip.accepts_luggage || trip.accepts_pets) && (
         <View style={styles.extras}>
-          {trip.accepts_luggage && <Text style={styles.extra}>🧳</Text>}
-          {trip.accepts_pets    && <Text style={styles.extra}>🐾</Text>}
+          {trip.accepts_luggage && <Icon name="luggage" size={16} color={COLORS.textSecondary} />}
+          {trip.accepts_pets    && <Icon name="paw" size={16} color={COLORS.textSecondary} />}
         </View>
       )}
     </ScalePress>
@@ -159,12 +165,18 @@ const styles = StyleSheet.create({
   cardCancelled: {
     opacity: 0.4,
   },
+  eventTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
   eventTitle: {
     fontSize: 12,
     fontWeight: '700',
     color: COLORS.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
@@ -221,6 +233,7 @@ const styles = StyleSheet.create({
   price: { fontSize: 14 },
   priceDirection: { color: COLORS.textSecondary },
   priceAmount: { fontWeight: '800', color: COLORS.textPrimary },
+  timeRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   time: { fontSize: 12, color: COLORS.accent, fontWeight: '600' },
   driverRow: {
     flexDirection: 'row',
@@ -231,7 +244,7 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.border,
   },
   driverName: { fontSize: 13, fontWeight: '600', color: COLORS.textPrimary, flex: 1 },
+  ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   driverRating: { fontSize: 13, color: COLORS.accent, fontWeight: '700' },
-  extras: { flexDirection: 'row', gap: SPACING.xs },
-  extra: { fontSize: 16 },
+  extras: { flexDirection: 'row', gap: SPACING.sm },
 })

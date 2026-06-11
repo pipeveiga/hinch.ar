@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
+import { Icon } from './Icon'
 
 interface VerificationBadgeProps {
   verified: boolean
@@ -8,17 +9,19 @@ interface VerificationBadgeProps {
 
 export function VerificationBadge({ verified, compact = false }: VerificationBadgeProps) {
   if (compact) {
+    if (!verified) return null
     return (
-      <Text style={verified ? styles.checkmark : styles.unverifiedCompact}>
-        {verified ? '✓' : ''}
-      </Text>
+      <View style={styles.checkCircle}>
+        <Icon name="check" size={9} color={COLORS.white} strokeWidth={2.6} />
+      </View>
     )
   }
 
   return (
     <View style={[styles.badge, verified ? styles.badgeVerified : styles.badgeUnverified]}>
+      {verified && <Icon name="check" size={12} color={COLORS.success} strokeWidth={2.4} />}
       <Text style={[styles.badgeText, verified ? styles.badgeTextVerified : styles.badgeTextUnverified]}>
-        {verified ? '✓ Verificado' : 'Sin verificar'}
+        {verified ? 'Verificado' : 'Sin verificar'}
       </Text>
     </View>
   )
@@ -26,8 +29,11 @@ export function VerificationBadge({ verified, compact = false }: VerificationBad
 
 const styles = StyleSheet.create({
   badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: RADIUS.full,
     borderWidth: 1,
   },
@@ -49,13 +55,12 @@ const styles = StyleSheet.create({
   badgeTextUnverified: {
     color: COLORS.textMuted,
   },
-  checkmark: {
-    fontSize: 12,
-    color: COLORS.success,
-    fontWeight: '900',
-  },
-  unverifiedCompact: {
-    fontSize: 12,
-    color: 'transparent',
+  checkCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: COLORS.success,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 })

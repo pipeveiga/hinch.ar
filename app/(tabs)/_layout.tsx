@@ -7,11 +7,12 @@ import { useAuthStore } from '@/stores/authStore'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import { useChatsStore } from '@/stores/chatsStore'
 import { COLORS, SPACING, RADIUS, SHADOWS } from '@/lib/constants'
+import { Icon, type IconName } from '@/components/Icon'
 
-function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focused: boolean }) {
+function TabIcon({ icon, label, focused }: { icon: IconName; label: string; focused: boolean }) {
   return (
     <View style={[styles.tabIcon, focused && styles.tabIconFocused]}>
-      <Text style={[styles.tabEmoji, focused && styles.tabEmojiFocused]}>{emoji}</Text>
+      <Icon name={icon} size={22} color={focused ? COLORS.accent : COLORS.textMuted} strokeWidth={focused ? 2 : 1.7} />
       <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]} numberOfLines={1}>{label}</Text>
     </View>
   )
@@ -22,7 +23,7 @@ function ChatsTabIcon({ focused }: { focused: boolean }) {
   return (
     <View style={[styles.tabIcon, focused && styles.tabIconFocused]}>
       <View>
-        <Text style={[styles.tabEmoji, focused && styles.tabEmojiFocused]}>💬</Text>
+        <Icon name="chat" size={22} color={focused ? COLORS.accent : COLORS.textMuted} strokeWidth={focused ? 2 : 1.7} />
         {totalUnread > 0 && (
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{totalUnread > 9 ? '9+' : totalUnread}</Text>
@@ -86,7 +87,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="🏟️" label="Eventos" focused={focused} />
+            <TabIcon icon="stadium" label="Eventos" focused={focused} />
           ),
         }}
       />
@@ -94,7 +95,7 @@ export default function TabsLayout() {
         name="mis-viajes"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="🚗" label="Viajes" focused={focused} />
+            <TabIcon icon="car" label="Viajes" focused={focused} />
           ),
         }}
       />
@@ -112,7 +113,7 @@ export default function TabsLayout() {
         name="perfil"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="👤" label="Perfil" focused={focused} />
+            <TabIcon icon="user" label="Perfil" focused={focused} />
           ),
         }}
       />
@@ -160,13 +161,6 @@ const styles = StyleSheet.create({
   },
   tabIconFocused: {
     backgroundColor: COLORS.brandTint,
-  },
-  tabEmoji: {
-    fontSize: 21,
-    opacity: 0.45,
-  },
-  tabEmojiFocused: {
-    opacity: 1,
   },
   tabLabel: {
     fontSize: 10,

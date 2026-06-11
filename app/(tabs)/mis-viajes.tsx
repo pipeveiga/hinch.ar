@@ -9,6 +9,7 @@ import { useTripsStore } from '@/stores/tripsStore'
 import { COLORS, SPACING, RADIUS, TAB_BAR_SPACE, BOOKING_STATUS_COLORS, BOOKING_STATUS_LABELS, TRIP_TYPE_LABELS } from '@/lib/constants'
 import { TripCard } from '@/components/TripCard'
 import { FadeInUp } from '@/components/FadeInUp'
+import { Icon } from '@/components/Icon'
 import type { Booking } from '@/lib/types'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -53,9 +54,12 @@ function BookingItem({ booking }: { booking: Booking }) {
       )}
 
       <View style={styles.bookingFooter}>
-        <Text style={styles.bookingAmount}>
-          💵 ${booking.total_amount.toLocaleString('es-AR')}
-        </Text>
+        <View style={styles.bookingAmountRow}>
+          <Icon name="coins" size={15} color={COLORS.textPrimary} strokeWidth={1.8} />
+          <Text style={styles.bookingAmount}>
+            ${booking.total_amount.toLocaleString('es-AR')}
+          </Text>
+        </View>
         <View style={styles.bookingActions}>
           {booking.status === 'confirmed' && (
             <TouchableOpacity
@@ -63,7 +67,8 @@ function BookingItem({ booking }: { booking: Booking }) {
               onPress={(e) => { e.stopPropagation?.(); router.push(`/chat/${booking.id}`) }}
               activeOpacity={0.8}
             >
-              <Text style={styles.chatBtnText}>💬 Chat</Text>
+              <Icon name="chat" size={14} color={COLORS.primary} strokeWidth={1.9} />
+              <Text style={styles.chatBtnText}>Chat</Text>
             </TouchableOpacity>
           )}
           {needsRating && (
@@ -71,7 +76,8 @@ function BookingItem({ booking }: { booking: Booking }) {
               style={styles.rateBtn}
               onPress={(e) => { e.stopPropagation?.(); router.push(`/calificar/${booking.id}`) }}
             >
-              <Text style={styles.rateBtnText}>⭐ Calificar</Text>
+              <Icon name="star" size={14} color={COLORS.accent} strokeWidth={1.9} />
+              <Text style={styles.rateBtnText}>Calificar</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -111,8 +117,14 @@ export default function MisViajesScreen() {
             style={[styles.tab, tab === t && styles.tabActive]}
             onPress={() => setTab(t)}
           >
+            <Icon
+              name={t === 'reservas' ? 'ticket' : 'car'}
+              size={16}
+              color={tab === t ? COLORS.primary : COLORS.textSecondary}
+              strokeWidth={1.8}
+            />
             <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
-              {t === 'reservas' ? '🎟️ Reservas' : '🚗 Conductor'}
+              {t === 'reservas' ? 'Reservas' : 'Conductor'}
             </Text>
           </TouchableOpacity>
         ))}
@@ -134,7 +146,9 @@ export default function MisViajesScreen() {
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <View style={styles.center}>
-              <Text style={styles.emptyIcon}>🎟️</Text>
+              <View style={styles.emptyIconWrap}>
+                <Icon name="ticket" size={38} color={COLORS.textMuted} strokeWidth={1.5} />
+              </View>
               <Text style={styles.emptyText}>Todavía no reservaste ningún viaje</Text>
               <TouchableOpacity style={styles.exploreBtn} onPress={() => router.push('/(tabs)')}>
                 <Text style={styles.exploreBtnText}>Ver eventos</Text>
@@ -159,7 +173,9 @@ export default function MisViajesScreen() {
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <View style={styles.center}>
-              <Text style={styles.emptyIcon}>🚗</Text>
+              <View style={styles.emptyIconWrap}>
+                <Icon name="car" size={38} color={COLORS.textMuted} strokeWidth={1.5} />
+              </View>
               <Text style={styles.emptyText}>Todavía no publicaste ningún viaje</Text>
               <TouchableOpacity style={styles.exploreBtn} onPress={() => router.push('/(tabs)')}>
                 <Text style={styles.exploreBtnText}>Ver eventos y publicar</Text>
@@ -185,14 +201,18 @@ const styles = StyleSheet.create({
   tab: {
     flex: 1, paddingVertical: SPACING.sm, borderRadius: RADIUS.md,
     backgroundColor: COLORS.cardElevated,
-    alignItems: 'center',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
   },
   tabActive: { backgroundColor: COLORS.primary },
   tabText: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '700' },
   tabTextActive: { color: '#FFFFFF' },
   list: { padding: SPACING.lg, gap: SPACING.md, paddingBottom: TAB_BAR_SPACE },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: SPACING.md, padding: SPACING.xl },
-  emptyIcon: { fontSize: 48 },
+  emptyIconWrap: {
+    width: 84, height: 84, borderRadius: RADIUS.full,
+    backgroundColor: COLORS.surface,
+    alignItems: 'center', justifyContent: 'center',
+  },
   emptyText: { fontSize: 15, color: COLORS.textSecondary, textAlign: 'center' },
   exploreBtn: {
     backgroundColor: COLORS.primary, borderRadius: RADIUS.md,
@@ -212,14 +232,17 @@ const styles = StyleSheet.create({
   bookingMeta: { fontSize: 13, color: COLORS.textSecondary },
   bookingDate: { fontSize: 12, color: COLORS.textMuted },
   bookingFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: SPACING.xs },
+  bookingAmountRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   bookingAmount: { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
   bookingActions: { flexDirection: 'row', gap: SPACING.sm },
   chatBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
     backgroundColor: COLORS.primary + '20', borderRadius: RADIUS.full,
     paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs,
   },
   chatBtnText: { fontSize: 12, fontWeight: '700', color: COLORS.primaryLight },
   rateBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
     backgroundColor: COLORS.accent + '20', borderRadius: RADIUS.full,
     paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs,
   },

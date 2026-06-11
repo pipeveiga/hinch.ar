@@ -7,10 +7,13 @@ o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
 Última actualización del documento: 2026-06-11 (rediseño visible de la app:
-login nuevo con tarjeta flotante y botón degradado, home con saludo
-personalizado y lista en cascada, tarjeta de evento con fecha estilo
-calendario; + pantalla 404 para rutas inexistentes; OJO: en iOS/Android se
-ve recién con un build nuevo de EAS)
+login con tarjeta flotante y botón degradado, home con saludo personalizado
+y lista en cascada, tarjeta de evento con fecha estilo calendario, pantalla
+404; + set de íconos propio en landing y app reemplazando los emojis
+(componente Icon con react-native-svg y sprite SVG en la landing); + push
+notifications: edge function redeployada con auth obligatorio; + bucket
+de verificación privado en Storage. En iOS/Android se ve recién con la
+build #13 de EAS — ya subida a TestFlight)
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
