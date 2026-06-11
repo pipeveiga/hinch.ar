@@ -40,6 +40,8 @@ QUÉ HACE LA APP
    o un chat de WhatsApp a +54 9 341 227-4850. Los datos viven en
    lib/constants.ts (CONTACT). Los textos legales (Términos y Privacidad)
    usan el mismo mail (antes decían hola@hinch.ar, casilla que no existe).
+   La landing (hinch.ar) también: links "Escribinos" y "WhatsApp" en el
+   footer + línea de contacto en el bloque azul final.
 
 --------------------------------------------------------------------------------
 STACK TÉCNICO
