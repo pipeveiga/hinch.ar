@@ -148,13 +148,16 @@ export const usersApi = {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
+    // Las columnas sensibles (dni, phone, push_token, etc.) no son legibles
+    // por la role authenticated ni siquiera para la propia fila (migración
+    // 004: privilegios por columna). El perfil propio completo se obtiene
+    // por la función SECURITY DEFINER get_my_profile, que solo devuelve la
+    // fila de auth.uid().
     const { data } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single()
+      .rpc('get_my_profile')
+      .maybeSingle()
 
-    return data
+    return data as User | null
   },
 
   async getById(id: string): Promise<Partial<User> | null> {
