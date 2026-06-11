@@ -26,6 +26,10 @@
     URL de la plataforma (app Expo en el subdominio).
     Los CTAs usan data-app-link; si cambia el subdominio,
     actualizá esos href.
+
+    Esos mismos data-app-link son los que, desde un celular, abren
+    la app nativa o mandan a la tienda. La config (flag LAUNCHED +
+    IDs de tienda) está en el bloque de scripts del final del archivo.
     ============================================================
   -->
 
@@ -208,6 +212,82 @@
       // (la animación CSS recorre el 50% del track)
       var track = document.getElementById('marquee-track');
       if (track) track.innerHTML += track.innerHTML;
+
+      // ============================================================
+      // Abrir la app nativa / mandar a la tienda (deferred deep link)
+      // ------------------------------------------------------------
+      // Al tocar "Ir a la plataforma" desde un celular: intenta abrir la
+      // app instalada (esquema hinchar://). Si no está, va a la tienda
+      // que corresponda. En desktop no cambia nada (va a la web app).
+      //
+      // ►► PRE-LANZAMIENTO: con LAUNCHED:false el mecanismo está dormido y
+      //    los botones siguen yendo a la web. Cuando publiques la app:
+      //      1) poné LAUNCHED: true
+      //      2) completá iosAppId con el ID numérico de App Store Connect
+      //    (el package de Android ya está; la URL de Play se arma sola).
+      // ============================================================
+      var APP = {
+        LAUNCHED:   false,
+        scheme:     'hinchar',                // app.json → expo.scheme
+        webApp:     'https://app.hinch.ar',
+        iosAppId:   '',                       // ← ID numérico de App Store (ej: 1234567890)
+        androidPkg: 'ar.hinch.app',           // app.json → android.package
+      };
+      APP.appStoreUrl  = 'https://apps.apple.com/app/id' + APP.iosAppId;
+      APP.playStoreUrl = 'https://play.google.com/store/apps/details?id=' + APP.androidPkg;
+
+      var ua        = navigator.userAgent || '';
+      var isIOS     = /iPhone|iPad|iPod/.test(ua) ||
+                      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      var isAndroid = /Android/.test(ua);
+      var isMobile  = isIOS || isAndroid;
+
+      // Mapea la ruta web (app.hinch.ar/terminos) a la ruta de la app
+      function appPath(href) {
+        try { return new URL(href, location.href).pathname.replace(/^\/+/, ''); }
+        catch (e) { return ''; }
+      }
+
+      function openInApp(href) {
+        var path = appPath(href);
+
+        if (isAndroid) {
+          // Intent URL: abre la app si está instalada; si no, va al fallback.
+          var aFallback = APP.LAUNCHED ? APP.playStoreUrl : APP.webApp;
+          window.location.href =
+            'intent://' + path + '#Intent;scheme=' + APP.scheme +
+            ';package=' + APP.androidPkg +
+            ';S.browser_fallback_url=' + encodeURIComponent(aFallback) + ';end';
+          return;
+        }
+
+        // iOS: probamos el esquema. Si la app abre, la pestaña se oculta y
+        // cancelamos. Si seguimos visibles, vamos a la tienda / web.
+        var iFallback = APP.LAUNCHED ? APP.appStoreUrl : APP.webApp;
+        var hidden = false;
+        var onHide = function () { hidden = true; };
+        document.addEventListener('visibilitychange', onHide);
+        window.addEventListener('pagehide', onHide);
+
+        window.location.href = APP.scheme + '://' + path;
+
+        setTimeout(function () {
+          document.removeEventListener('visibilitychange', onHide);
+          window.removeEventListener('pagehide', onHide);
+          if (!hidden && !document.hidden) window.location.href = iFallback;
+        }, 1200);
+      }
+
+      // Dormido hasta el lanzamiento: solo intercepta en mobile y con LAUNCHED.
+      if (isMobile && APP.LAUNCHED) {
+        document.querySelectorAll('a[data-app-link]').forEach(function (a) {
+          a.addEventListener('click', function (e) {
+            e.preventDefault();
+            openInApp(a.getAttribute('href'));
+          });
+        });
+      }
+
 
       // Nav de vidrio: se vuelve más opaco al scrollear.
       // Barra de progreso: scaleX según cuánto se scrolleó.
