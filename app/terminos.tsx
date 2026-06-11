@@ -1,8 +1,8 @@
 import { ScrollView, View, Text, StyleSheet } from 'react-native'
 import { Stack } from 'expo-router'
-import { COLORS, SPACING } from '@/lib/constants'
+import { COLORS, SPACING, CONTACT } from '@/lib/constants'
 
-const ULTIMA_ACTUALIZACION = '7 de abril de 2026'
+const ULTIMA_ACTUALIZACION = '11 de junio de 2026'
 
 export default function TerminosScreen() {
   return (
@@ -77,7 +77,7 @@ export default function TerminosScreen() {
         </Section>
 
         <Section title="12. Contacto">
-          Para consultas sobre estos términos: hola@hinch.ar
+          Para consultas sobre estos términos: {CONTACT.EMAIL}
         </Section>
       </ScrollView>
     </>

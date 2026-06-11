@@ -1,8 +1,8 @@
 import { ScrollView, View, Text, StyleSheet } from 'react-native'
 import { Stack } from 'expo-router'
-import { COLORS, SPACING } from '@/lib/constants'
+import { COLORS, SPACING, CONTACT } from '@/lib/constants'
 
-const ULTIMA_ACTUALIZACION = '7 de abril de 2026'
+const ULTIMA_ACTUALIZACION = '11 de junio de 2026'
 
 export default function PrivacidadScreen() {
   return (
@@ -41,7 +41,7 @@ export default function PrivacidadScreen() {
         </Section>
 
         <Section title="4. Fotos del DNI y verificación">
-          Las fotos del DNI y la selfie se almacenan de forma encriptada en servidores seguros (Supabase). Se usan exclusivamente para verificar tu identidad y solo son accesibles por el equipo de hinch.ar. Una vez verificado, podés solicitar la eliminación de las fotos enviando un email a hola@hinch.ar.
+          Las fotos del DNI y la selfie se almacenan de forma encriptada en servidores seguros (Supabase). Se usan exclusivamente para verificar tu identidad y solo son accesibles por el equipo de hinch.ar. Una vez verificado, podés solicitar la eliminación de las fotos enviando un email a {CONTACT.EMAIL}.
         </Section>
 
         <Section title="5. Ubicación">
@@ -74,7 +74,7 @@ export default function PrivacidadScreen() {
           • Rectificar datos incorrectos{'\n'}
           • Solicitar la eliminación de tu cuenta y datos{'\n'}
           • Oponerte al tratamiento de tus datos{'\n\n'}
-          Para ejercer estos derechos escribí a hola@hinch.ar con el asunto "Datos personales".
+          Para ejercer estos derechos escribí a {CONTACT.EMAIL} con el asunto "Datos personales".
         </Section>
 
         <Section title="11. Cookies y tracking">
@@ -82,7 +82,7 @@ export default function PrivacidadScreen() {
         </Section>
 
         <Section title="12. Contacto">
-          Para consultas sobre privacidad: hola@hinch.ar{'\n'}
+          Para consultas sobre privacidad: {CONTACT.EMAIL}{'\n'}
           Podés también escribirnos por cualquier medio de contacto disponible en la app.
         </Section>
       </ScrollView>
