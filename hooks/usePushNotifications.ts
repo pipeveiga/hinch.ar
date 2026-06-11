@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Platform } from 'react-native'
 import Constants from 'expo-constants'
 import { usersApi } from '@/lib/supabase'
 
@@ -7,20 +8,19 @@ const PROJECT_ID = Constants.expoConfig?.extra?.eas?.projectId as string | undef
 
 export function usePushNotifications(userId: string | undefined) {
   useEffect(() => {
-    // Temporalmente desactivado: en iOS 26 expo-notifications 0.32 crashea
-    // al pedir el push token (excepcion Obj-C no atrapable desde JS).
-    // Re-habilitar cuando haya version compatible con iOS 26.
-    if (!userId || isExpoGo) return
-    // registerForPushNotifications(userId)
+    // Registro habilitado SOLO en Android. En iOS 26 + SDK 54, una excepción
+    // nativa (NSException) durante el registro del token corrompe el heap de
+    // Hermes y mata la app antes de que el error llegue al try/catch de JS
+    // (ver expo/expo#44606) — fue lo que crasheaba el login en TestFlight.
+    // Re-evaluar iOS al migrar a SDK 55+.
+    if (!userId || isExpoGo || Platform.OS !== 'android') return
+    registerForPushNotifications(userId)
   }, [userId])
 }
 
 async function registerForPushNotifications(userId: string) {
   try {
     const Notifications = await import('expo-notifications')
-    const { Platform } = await import('react-native')
-
-    if (Platform.OS === 'web') return
 
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
