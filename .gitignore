@@ -11,6 +11,7 @@ web-build/
 secrets/*
 !secrets/.gitkeep
 credentials/
+supabase/.temp/
 *.orig.*
 web-build/
 # macOS
