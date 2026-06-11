@@ -12,6 +12,8 @@ export type IconName =
   | 'pin' | 'ball' | 'music' | 'star' | 'ticket' | 'shield'
   | 'people' | 'coins' | 'calendar' | 'grid' | 'luggage' | 'paw'
   | 'check' | 'plus' | 'logout' | 'edit' | 'id' | 'help'
+  | 'clock' | 'x' | 'ban' | 'camera' | 'trash' | 'warn'
+  | 'eye' | 'eyeOff' | 'card' | 'bellOff'
 
 interface IconProps {
   name:         IconName
@@ -166,6 +168,62 @@ const PATHS: Record<IconName, (c: string, sw: number) => React.ReactNode> = {
       <Circle cx={12} cy={12} r={8.4} stroke={c} strokeWidth={sw} />
       <Path d="M9.5 9.5a2.6 2.6 0 0 1 5 .8c0 1.7-2.5 2-2.5 3.7" stroke={c} strokeWidth={sw} strokeLinecap="round" />
       <Circle cx={12} cy={16.6} r={0.6} stroke={c} strokeWidth={sw} fill={c} />
+    </>
+  ),
+  clock: (c, sw) => (
+    <>
+      <Circle cx={12} cy={12} r={8.4} stroke={c} strokeWidth={sw} />
+      <Path d="M12 7.5V12l3 1.8" stroke={c} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  ),
+  x: (c, sw) => (
+    <Path d="M6 6l12 12M18 6L6 18" stroke={c} strokeWidth={sw} strokeLinecap="round" />
+  ),
+  ban: (c, sw) => (
+    <>
+      <Circle cx={12} cy={12} r={8.4} stroke={c} strokeWidth={sw} />
+      <Line x1={6.5} y1={6.5} x2={17.5} y2={17.5} stroke={c} strokeWidth={sw} strokeLinecap="round" />
+    </>
+  ),
+  camera: (c, sw) => (
+    <>
+      <Path d="M4 8.5h3l1.4-2h7.2L17 8.5h3a0 0 0 0 1 0 0v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" stroke={c} strokeWidth={sw} strokeLinejoin="round" />
+      <Circle cx={12} cy={13} r={3.2} stroke={c} strokeWidth={sw} />
+    </>
+  ),
+  trash: (c, sw) => (
+    <Path d="M5 7h14M10 7V5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V7m3 0l-.8 11a1.5 1.5 0 0 1-1.5 1.4H8.3a1.5 1.5 0 0 1-1.5-1.4L6 7M10 11v5M14 11v5"
+      stroke={c} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  warn: (c, sw) => (
+    <>
+      <Path d="M12 4.5l8.2 14.2a1 1 0 0 1-.9 1.5H4.7a1 1 0 0 1-.9-1.5L12 4.5z" stroke={c} strokeWidth={sw} strokeLinejoin="round" />
+      <Path d="M12 10v4" stroke={c} strokeWidth={sw} strokeLinecap="round" />
+      <Circle cx={12} cy={16.8} r={0.5} stroke={c} strokeWidth={sw} fill={c} />
+    </>
+  ),
+  eye: (c, sw) => (
+    <>
+      <Path d="M2.5 12S6 6 12 6s9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" stroke={c} strokeWidth={sw} strokeLinejoin="round" />
+      <Circle cx={12} cy={12} r={2.6} stroke={c} strokeWidth={sw} />
+    </>
+  ),
+  eyeOff: (c, sw) => (
+    <>
+      <Path d="M4 6c-1 1.4-1.5 6-1.5 6S6 18 12 18c1.6 0 3-.4 4.2-1M9.5 7c.8-.3 1.6-.4 2.5-.4 6 0 9.5 6 9.5 6s-.8 1.3-2.2 2.7" stroke={c} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M10 10a2.6 2.6 0 0 0 3.6 3.6M4 4l16 16" stroke={c} strokeWidth={sw} strokeLinecap="round" />
+    </>
+  ),
+  card: (c, sw) => (
+    <>
+      <Rect x={3} y={6} width={18} height={12} rx={2.4} stroke={c} strokeWidth={sw} />
+      <Path d="M3 10h18M7 14.5h4" stroke={c} strokeWidth={sw} strokeLinecap="round" />
+    </>
+  ),
+  bellOff: (c, sw) => (
+    <>
+      <Path d="M8.5 6.2A6 6 0 0 1 18 11c0 2.3.4 3.8.9 4.8M6.2 8.3A6 6 0 0 0 6 11c0 4-1.2 5.3-2 6h12.5" stroke={c} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M10 19.5a2.2 2.2 0 0 0 4 0M4 4l16 16" stroke={c} strokeWidth={sw} strokeLinecap="round" />
     </>
   ),
 }

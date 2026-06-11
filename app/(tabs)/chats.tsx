@@ -14,6 +14,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { UserAvatar } from '@/components/UserAvatar'
 import { FadeInUp } from '@/components/FadeInUp'
+import { Icon } from '@/components/Icon'
 
 function ChatItem({ booking, userId, unread }: { booking: Booking; userId: string; unread: number }) {
   const isDriver    = booking.trip?.driver?.id === userId || booking.trip?.driver_id === userId
@@ -44,7 +45,10 @@ function ChatItem({ booking, userId, unread }: { booking: Booking; userId: strin
           )}
         </View>
         <Text style={[styles.event, hasUnread && styles.eventUnread]} numberOfLines={1}>{eventTitle}</Text>
-        <Text style={styles.role}>{isDriver ? '🚗 Sos el conductor' : '🎟️ Reserva tuya'}</Text>
+        <View style={styles.roleRow}>
+          <Icon name={isDriver ? 'car' : 'ticket'} size={12} color={COLORS.textMuted} strokeWidth={1.8} />
+          <Text style={styles.role}>{isDriver ? 'Sos el conductor' : 'Reserva tuya'}</Text>
+        </View>
       </View>
 
       {hasUnread ? (
@@ -117,7 +121,9 @@ export default function ChatsScreen() {
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Text style={styles.emptyIcon}>💬</Text>
+              <View style={styles.emptyIconWrap}>
+                <Icon name="chat" size={38} color={COLORS.textMuted} strokeWidth={1.5} />
+              </View>
               <Text style={styles.emptyTitle}>Sin chats activos</Text>
               <Text style={styles.emptyText}>Los chats aparecen cuando el conductor confirma una reserva.</Text>
             </View>
@@ -152,11 +158,16 @@ const styles = StyleSheet.create({
   dateUnread: { color: COLORS.primary, fontWeight: '700' },
   event: { fontSize: 13, color: COLORS.textSecondary },
   eventUnread: { color: COLORS.textPrimary, fontWeight: '600' },
+  roleRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   role:  { fontSize: 11, color: COLORS.textMuted },
   arrow: { fontSize: 20, color: COLORS.textMuted },
   separator: { height: 1, backgroundColor: COLORS.border },
   empty: { alignItems: 'center', paddingTop: 80, paddingHorizontal: SPACING.xl, gap: SPACING.sm },
-  emptyIcon:  { fontSize: 48 },
+  emptyIconWrap: {
+    width: 84, height: 84, borderRadius: 42,
+    backgroundColor: COLORS.surface,
+    alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.xs,
+  },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: COLORS.textPrimary },
   emptyText:  { fontSize: 14, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 20 },
   unreadBadge: {

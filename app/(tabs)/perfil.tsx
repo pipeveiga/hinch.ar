@@ -11,22 +11,29 @@ import { usersApi } from '@/lib/supabase'
 import { COLORS, SPACING, RADIUS, TAB_BAR_SPACE } from '@/lib/constants'
 import { UserAvatar } from '@/components/UserAvatar'
 import { VerificationBadge } from '@/components/VerificationBadge'
+import { Icon, type IconName } from '@/components/Icon'
 
-function StatBox({ value, label }: { value: string | number; label: string }) {
+function StatBox({ value, label, star }: { value: string | number; label: string; star?: boolean }) {
   return (
     <View style={styles.statBox}>
-      <Text style={styles.statValue}>{value}</Text>
+      <View style={styles.statValueRow}>
+        {star && <Icon name="star" size={15} color={COLORS.accent} strokeWidth={1.9} />}
+        <Text style={styles.statValue}>{value}</Text>
+      </View>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   )
 }
 
 function MenuItem({ icon, label, onPress, danger }: {
-  icon: string; label: string; onPress: () => void; danger?: boolean
+  icon: IconName; label: string; onPress: () => void; danger?: boolean
 }) {
+  const tint = danger ? COLORS.error : COLORS.primary
   return (
     <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.7}>
-      <Text style={styles.menuIcon}>{icon}</Text>
+      <View style={[styles.menuIcon, { backgroundColor: tint + '14' }]}>
+        <Icon name={icon} size={19} color={tint} strokeWidth={1.8} />
+      </View>
       <Text style={[styles.menuLabel, danger && styles.menuLabelDanger]}>{label}</Text>
       <Text style={styles.menuChevron}>›</Text>
     </TouchableOpacity>
@@ -201,7 +208,7 @@ export default function PerfilScreen() {
             <UserAvatar uri={user.avatar_url} name={user.full_name} size={80} />
             {avatarLoading
               ? <View style={styles.avatarOverlay}><ActivityIndicator color="#fff" /></View>
-              : <View style={styles.avatarOverlay}><Text style={styles.avatarCam}>📷</Text></View>
+              : <View style={styles.avatarOverlay}><Icon name="camera" size={14} color={COLORS.white} strokeWidth={2} /></View>
             }
           </TouchableOpacity>
           <View style={styles.nameRow}>
@@ -211,10 +218,10 @@ export default function PerfilScreen() {
           {user.bio && <Text style={styles.bio}>{user.bio}</Text>}
           <View style={styles.stats}>
             {user.total_trips_as_driver > 0 && (
-              <StatBox value={`⭐ ${driverRating}`} label="Como conductor" />
+              <StatBox value={driverRating} label="Como conductor" star />
             )}
             {user.total_trips_as_passenger > 0 && (
-              <StatBox value={`⭐ ${passengerRating}`} label="Como pasajero" />
+              <StatBox value={passengerRating} label="Como pasajero" star />
             )}
             <StatBox value={user.total_trips_as_driver + user.total_trips_as_passenger} label="Viajes totales" />
           </View>
@@ -229,7 +236,9 @@ export default function PerfilScreen() {
               onPress={() => setAutoModal(true)}
               activeOpacity={0.8}
             >
-              <Text style={styles.carEmoji}>🚗</Text>
+              <View style={styles.carIconWrap}>
+                <Icon name="car" size={22} color={COLORS.primary} strokeWidth={1.8} />
+              </View>
               <View style={styles.carInfo}>
                 <Text style={styles.carName}>
                   {user.car_brand} {user.car_model} {user.car_year}
@@ -248,7 +257,7 @@ export default function PerfilScreen() {
           <Text style={styles.sectionTitle}>Cuenta</Text>
           <View style={styles.menuCard}>
             <MenuItem
-              icon="✏️"
+              icon="edit"
               label="Editar perfil"
               onPress={() => {
                 setEditForm({ full_name: user.full_name, bio: user.bio ?? '', phone: user.phone ?? '' })
@@ -257,16 +266,16 @@ export default function PerfilScreen() {
             />
             {!user.has_car && (
               <MenuItem
-                icon="🚗"
+                icon="car"
                 label="Registrar mi auto"
                 onPress={() => setAutoModal(true)}
               />
             )}
             <MenuItem
-              icon="🪪"
+              icon="id"
               label={
-                user.is_verified ? '✅ Identidad verificada'
-                : user.verification_status === 'pending' ? '⏳ Verificación pendiente'
+                user.is_verified ? 'Identidad verificada'
+                : user.verification_status === 'pending' ? 'Verificación pendiente'
                 : 'Verificar identidad'
               }
               onPress={() => {
@@ -275,7 +284,7 @@ export default function PerfilScreen() {
               }}
             />
             <MenuItem
-              icon="❓"
+              icon="help"
               label="Ayuda y soporte"
               onPress={() => Alert.alert('Soporte', 'Escribinos a hola@hinch.ar')}
             />
@@ -284,7 +293,7 @@ export default function PerfilScreen() {
 
         <View style={[styles.section, { marginBottom: SPACING.xxl }]}>
           <View style={styles.menuCard}>
-            <MenuItem icon="🚪" label="Cerrar sesión" onPress={handleSignOut} danger />
+            <MenuItem icon="logout" label="Cerrar sesión" onPress={handleSignOut} danger />
           </View>
         </View>
 
@@ -351,7 +360,10 @@ export default function PerfilScreen() {
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalSheet}>
-            <Text style={styles.modalTitle}>⚠️ Eliminar cuenta</Text>
+            <View style={styles.modalTitleRow}>
+              <Icon name="warn" size={20} color={COLORS.error} strokeWidth={1.9} />
+              <Text style={styles.modalTitle}>Eliminar cuenta</Text>
+            </View>
             <Text style={styles.deleteWarning}>
               Esta acción es permanente. Se eliminarán todos tus datos, viajes y reservas. No se puede deshacer.
             </Text>
@@ -459,7 +471,6 @@ const styles = StyleSheet.create({
     width: 26, height: 26, borderRadius: 13,
     alignItems: 'center', justifyContent: 'center',
   },
-  avatarCam: { fontSize: 13 },
   profileHeader: {
     alignItems: 'center',
     paddingTop: SPACING.xxl + SPACING.md,
@@ -476,6 +487,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm + 2, paddingHorizontal: SPACING.md,
     borderWidth: 1, borderColor: COLORS.border,
   },
+  statValueRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   statValue: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary },
   statLabel: { fontSize: 11, color: COLORS.textSecondary, marginTop: 2 },
   section: { paddingHorizontal: SPACING.lg, marginBottom: SPACING.lg },
@@ -488,7 +500,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card, borderRadius: RADIUS.lg,
     padding: SPACING.md, borderWidth: 1, borderColor: COLORS.border,
   },
-  carEmoji: { fontSize: 28 },
+  carIconWrap: {
+    width: 44, height: 44, borderRadius: RADIUS.md,
+    backgroundColor: COLORS.brandTint,
+    alignItems: 'center', justifyContent: 'center',
+  },
   carInfo: { flex: 1 },
   carName: { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
   carDetail: { fontSize: 13, color: COLORS.textSecondary },
@@ -501,7 +517,10 @@ const styles = StyleSheet.create({
     padding: SPACING.md, gap: SPACING.md,
     borderBottomWidth: 1, borderBottomColor: COLORS.border,
   },
-  menuIcon: { fontSize: 18, width: 28 },
+  menuIcon: {
+    width: 34, height: 34, borderRadius: RADIUS.sm,
+    alignItems: 'center', justifyContent: 'center',
+  },
   menuLabel: { flex: 1, fontSize: 15, color: COLORS.textPrimary },
   menuLabelDanger: { color: COLORS.error },
   menuChevron: { fontSize: 18, color: COLORS.textMuted },
@@ -517,6 +536,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface, borderTopLeftRadius: RADIUS.xl,
     borderTopRightRadius: RADIUS.xl, padding: SPACING.lg, gap: SPACING.md,
   },
+  modalTitleRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   modalTitle: { fontSize: 20, fontWeight: '800', color: COLORS.textPrimary },
   modalSubtitle: { fontSize: 13, color: COLORS.textSecondary, marginTop: -SPACING.xs },
   modalField: { gap: SPACING.xs },
