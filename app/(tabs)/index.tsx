@@ -9,6 +9,7 @@ import { COLORS, SPACING, RADIUS, TAB_BAR_SPACE } from '@/lib/constants'
 import type { Event, EventType } from '@/lib/types'
 import { EventCard } from '@/components/EventCard'
 import { FadeInUp } from '@/components/FadeInUp'
+import { Icon, type IconName } from '@/components/Icon'
 import { useNotificationsStore } from '@/stores/notificationsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useUserCity } from '@/hooks/useUserCity'
@@ -58,18 +59,18 @@ export default function HomeScreen() {
     return true
   })
 
-  const chips: { key: Filter; label: string }[] = [
-    { key: 'todos',     label: 'Todos' },
-    ...((!cityLoading && userCity) ? [{ key: 'mi_ciudad' as Filter, label: `📍 ${userCity}` }] : []),
-    { key: 'partido',   label: '⚽ Partidos' },
-    { key: 'recital',   label: '🎸 Recitales' },
+  const chips: { key: Filter; label: string; icon?: IconName }[] = [
+    { key: 'todos',     label: 'Todos',     icon: 'grid' },
+    ...((!cityLoading && userCity) ? [{ key: 'mi_ciudad' as Filter, label: userCity, icon: 'pin' as IconName }] : []),
+    { key: 'partido',   label: 'Partidos',  icon: 'ball' },
+    { key: 'recital',   label: 'Recitales', icon: 'music' },
   ]
 
   const ListHeader = (
     <View>
       {/* Buscador */}
       <View style={styles.searchWrap}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Icon name="search" size={18} color={COLORS.textMuted} />
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar evento o ciudad..."
@@ -86,13 +87,21 @@ export default function HomeScreen() {
         contentContainerStyle={styles.filtersContent}
         style={styles.filters}
       >
-        {chips.map(({ key, label }) => (
+        {chips.map(({ key, label, icon }) => (
           <TouchableOpacity
             key={key}
             style={[styles.chip, filter === key && styles.chipActive]}
             onPress={() => setFilter(key)}
             activeOpacity={0.7}
           >
+            {icon && (
+              <Icon
+                name={icon}
+                size={15}
+                color={filter === key ? COLORS.white : COLORS.textSecondary}
+                strokeWidth={1.8}
+              />
+            )}
             <Text style={[styles.chipText, filter === key && styles.chipTextActive]}>
               {label}
             </Text>
@@ -107,7 +116,7 @@ export default function HomeScreen() {
       {/* Header fijo */}
       <View style={styles.header}>
         <View>
-          {firstName && <Text style={styles.greeting}>Hola, {firstName} 👋</Text>}
+          {firstName && <Text style={styles.greeting}>Hola, {firstName}</Text>}
           <Text style={styles.headerTitle}>¿A dónde vamos?</Text>
         </View>
         <TouchableOpacity
@@ -115,7 +124,7 @@ export default function HomeScreen() {
           activeOpacity={0.6}
           style={styles.bellBtn}
         >
-          <Text style={styles.bellIcon}>🔔</Text>
+          <Icon name="bell" size={21} color={COLORS.textPrimary} />
           {unreadCount > 0 && (
             <View style={styles.bellBadge}>
               <Text style={styles.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
@@ -133,7 +142,9 @@ export default function HomeScreen() {
         <>
           {ListHeader}
           <View style={styles.center}>
-            <Text style={styles.emptyIcon}>🏟️</Text>
+            <View style={styles.emptyIconWrap}>
+              <Icon name="stadium" size={40} color={COLORS.textMuted} strokeWidth={1.5} />
+            </View>
             <Text style={styles.emptyText}>
               {filter === 'mi_ciudad' ? `No hay eventos en ${userCity}` : 'No hay eventos próximos'}
             </Text>
@@ -197,7 +208,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  bellIcon: { fontSize: 20 },
   bellBadge: {
     position: 'absolute', top: 0, right: 0,
     backgroundColor: COLORS.error,
@@ -219,7 +229,6 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     gap: 8,
   },
-  searchIcon: { fontSize: 15 },
   searchInput: {
     flex: 1,
     color: COLORS.textPrimary,
@@ -235,7 +244,10 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   chip: {
-    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: RADIUS.full,
     backgroundColor: COLORS.surface,
@@ -267,7 +279,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: SPACING.sm,
   },
-  emptyIcon:    { fontSize: 48 },
+  emptyIconWrap: {
+    width: 84, height: 84, borderRadius: RADIUS.full,
+    backgroundColor: COLORS.surface,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: SPACING.xs,
+  },
   emptyText:    { fontSize: 17, fontWeight: '600', color: COLORS.textPrimary },
   emptySubtext: { fontSize: 14, color: COLORS.textSecondary },
 })
