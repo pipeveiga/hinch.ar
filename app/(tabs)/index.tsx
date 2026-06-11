@@ -8,7 +8,9 @@ import { eventsApi } from '@/lib/supabase'
 import { COLORS, SPACING, RADIUS, TAB_BAR_SPACE } from '@/lib/constants'
 import type { Event, EventType } from '@/lib/types'
 import { EventCard } from '@/components/EventCard'
+import { FadeInUp } from '@/components/FadeInUp'
 import { useNotificationsStore } from '@/stores/notificationsStore'
+import { useAuthStore } from '@/stores/authStore'
 import { useUserCity } from '@/hooks/useUserCity'
 
 type Filter = 'todos' | EventType | 'mi_ciudad'
@@ -20,6 +22,7 @@ export default function HomeScreen() {
   const [filter,     setFilter]     = useState<Filter>('todos')
   const [search,     setSearch]     = useState('')
   const unreadCount = useNotificationsStore((s) => s.unreadCount)
+  const firstName = useAuthStore((s) => s.user?.full_name?.split(' ')[0])
   const { city: userCity, loading: cityLoading } = useUserCity()
 
   const load = useCallback(async () => {
@@ -103,7 +106,10 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {/* Header fijo */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>hinch.ar</Text>
+        <View>
+          {firstName && <Text style={styles.greeting}>Hola, {firstName} 👋</Text>}
+          <Text style={styles.headerTitle}>¿A dónde vamos?</Text>
+        </View>
         <TouchableOpacity
           onPress={() => router.push('/(tabs)/notificaciones')}
           activeOpacity={0.6}
@@ -139,8 +145,10 @@ export default function HomeScreen() {
           data={filtered}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={ListHeader}
-          renderItem={({ item }) => (
-            <EventCard event={item} onPress={() => router.push(`/evento/${item.id}`)} />
+          renderItem={({ item, index }) => (
+            <FadeInUp delay={index < 8 ? index * 70 : 0}>
+              <EventCard event={item} onPress={() => router.push(`/evento/${item.id}`)} />
+            </FadeInUp>
           )}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -168,14 +176,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  greeting: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    marginBottom: 2,
+  },
   headerTitle: {
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: '800',
     color: COLORS.textPrimary,
     letterSpacing: -1,
   },
-  bellBtn: { position: 'relative', padding: 4 },
-  bellIcon: { fontSize: 22 },
+  bellBtn: {
+    position: 'relative',
+    width: 44,
+    height: 44,
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bellIcon: { fontSize: 20 },
   bellBadge: {
     position: 'absolute', top: 0, right: 0,
     backgroundColor: COLORS.error,

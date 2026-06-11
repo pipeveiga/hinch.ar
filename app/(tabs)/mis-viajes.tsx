@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useTripsStore } from '@/stores/tripsStore'
 import { COLORS, SPACING, RADIUS, TAB_BAR_SPACE, BOOKING_STATUS_COLORS, BOOKING_STATUS_LABELS, TRIP_TYPE_LABELS } from '@/lib/constants'
 import { TripCard } from '@/components/TripCard'
+import { FadeInUp } from '@/components/FadeInUp'
 import type { Booking } from '@/lib/types'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -125,7 +126,11 @@ export default function MisViajesScreen() {
         <FlatList
           data={myBookings}
           keyExtractor={(b) => b.id}
-          renderItem={({ item }) => <BookingItem booking={item} />}
+          renderItem={({ item, index }) => (
+            <FadeInUp delay={index < 8 ? index * 70 : 0}>
+              <BookingItem booking={item} />
+            </FadeInUp>
+          )}
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <View style={styles.center}>
@@ -142,12 +147,14 @@ export default function MisViajesScreen() {
         <FlatList
           data={myTrips}
           keyExtractor={(t) => t.id}
-          renderItem={({ item }) => (
-            <TripCard
-              trip={item}
-              showEvent
-              onPress={() => router.push(`/viaje/${item.id}`)}
-            />
+          renderItem={({ item, index }) => (
+            <FadeInUp delay={index < 8 ? index * 70 : 0}>
+              <TripCard
+                trip={item}
+                showEvent
+                onPress={() => router.push(`/viaje/${item.id}`)}
+              />
+            </FadeInUp>
           )}
           contentContainerStyle={styles.list}
           ListEmptyComponent={
@@ -173,7 +180,7 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.xxl + SPACING.md,
     paddingBottom: SPACING.md,
   },
-  title: { fontSize: 28, fontWeight: '900', color: COLORS.textPrimary, letterSpacing: -0.5 },
+  title: { fontSize: 32, fontWeight: '800', color: COLORS.textPrimary, letterSpacing: -1 },
   tabs: { flexDirection: 'row', paddingHorizontal: SPACING.lg, gap: SPACING.sm, marginBottom: SPACING.md },
   tab: {
     flex: 1, paddingVertical: SPACING.sm, borderRadius: RADIUS.md,

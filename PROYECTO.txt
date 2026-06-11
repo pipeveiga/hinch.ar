@@ -6,10 +6,10 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-06-10 (más movimiento en la landing:
-cursor custom con anillo que persigue al mouse, botones magnéticos, tilt 3D
-en hero y tarjetas, blobs animados, marquee de eventos, barra de progreso;
-en la app las tarjetas se hunden con resorte al tocarlas)
+Última actualización del documento: 2026-06-11 (rediseño visible de la app:
+login nuevo con tarjeta flotante y botón degradado, home con saludo
+personalizado y lista en cascada, tarjeta de evento con fecha estilo
+calendario; OJO: en iOS/Android se ve recién con un build nuevo de EAS)
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -230,6 +230,21 @@ Hecho:
         rutas debajo del hero, barra de progreso de scroll arriba de todo.
   [x] Micro-interacción en la app: las tarjetas (eventos y viajes) se
       hunden con física de resorte al tocarlas (componente ScalePress).
+  [x] Rediseño visible de las pantallas principales de la app:
+      - Login: logo en tile con sombra, manchas de color de fondo,
+        formulario en tarjeta flotante, inputs que se iluminan al
+        enfocar, botón "Entrar" con degradado (expo-linear-gradient)
+        y entrada animada por bloques.
+      - Home: saludo personalizado ("Hola, <nombre> 👋 / ¿A dónde
+        vamos?"), campanita en burbuja, y las tarjetas entran en
+        cascada con resorte (componente FadeInUp).
+      - Tarjeta de evento: bloque de fecha estilo calendario (día
+        grande + mes; si es hoy, bloque azul "HOY" con la hora).
+      - Mis viajes y Chats: títulos grandes consistentes y listas
+        con la misma entrada en cascada.
+      IMPORTANTE: en iOS/Android estos cambios se ven recién al hacer
+      un build nuevo con EAS (la app instalada vieja no se actualiza
+      sola). En la web (app.hinch.ar) se ven con el deploy de Vercel.
   [x] Recuperación de contraseña: link "¿Olvidaste tu contraseña?" en login,
       pantalla para pedir el mail (recuperar) y pantalla para fijar la clave
       nueva desde el link (restablecer). Funciona en web y nativo.

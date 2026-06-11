@@ -5,35 +5,37 @@ import { COLORS, SPACING, RADIUS, SHADOWS, EVENT_TYPE_ICONS } from '@/lib/consta
 import type { Event } from '@/lib/types'
 import { ScalePress } from './ScalePress'
 
-const TILE_BG: Record<string, string> = {
-  partido: COLORS.brandTint,
-  recital: '#F3EAFF',
-  otro:    COLORS.surface,
-}
-
 interface EventCardProps {
   event:   Event
   onPress: () => void
 }
 
 export function EventCard({ event, onPress }: EventCardProps) {
-  const date      = new Date(event.event_date)
-  const isToday   = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
-  const dateLabel = isToday
-    ? `Hoy · ${format(date, 'HH:mm')}`
-    : format(date, "EEE d MMM · HH:mm", { locale: es })
+  const date    = new Date(event.event_date)
+  const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
   const tripsCount = (event.trips_count as unknown as { count: number }[])?.[0]?.count ?? 0
 
   return (
     <ScalePress style={styles.card} onPress={onPress}>
-      <View style={[styles.iconTile, { backgroundColor: TILE_BG[event.type] ?? COLORS.surface }]}>
-        <Text style={styles.iconEmoji}>{EVENT_TYPE_ICONS[event.type]}</Text>
+      {/* Bloque de fecha estilo calendario */}
+      <View style={[styles.dateBlock, isToday && styles.dateBlockToday]}>
+        {isToday ? (
+          <>
+            <Text style={styles.dateTodayLabel}>HOY</Text>
+            <Text style={styles.dateTodayTime}>{format(date, 'HH:mm')}</Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.dateDay}>{format(date, 'd')}</Text>
+            <Text style={styles.dateMonth}>{format(date, 'MMM', { locale: es }).replace('.', '').toUpperCase()}</Text>
+          </>
+        )}
       </View>
 
       <View style={styles.body}>
         <View style={styles.topRow}>
           <Text style={styles.competition} numberOfLines={1}>
-            {event.subtitle ?? event.competition ?? ''}
+            {EVENT_TYPE_ICONS[event.type]}  {event.subtitle ?? event.competition ?? ''}
           </Text>
           {event.is_featured && (
             <View style={styles.featuredBadge}>
@@ -45,12 +47,14 @@ export function EventCard({ event, onPress }: EventCardProps) {
         <Text style={styles.title} numberOfLines={2}>{event.title}</Text>
 
         <View style={styles.meta}>
-          <Text style={[styles.metaText, isToday && styles.metaToday]}>{dateLabel}</Text>
+          <Text style={styles.metaText}>
+            {isToday ? `Hoy · ${format(date, 'HH:mm')}` : format(date, "EEE · HH:mm", { locale: es })}
+          </Text>
           <Text style={styles.dot}>·</Text>
           <Text style={[styles.metaText, styles.venueText]} numberOfLines={1}>{event.venue_city}</Text>
           {tripsCount > 0 && (
             <View style={styles.tripsBadge}>
-              <Text style={styles.tripsText}>{tripsCount} {tripsCount === 1 ? 'viaje' : 'viajes'}</Text>
+              <Text style={styles.tripsText}>🚗 {tripsCount} {tripsCount === 1 ? 'viaje' : 'viajes'}</Text>
             </View>
           )}
         </View>
@@ -73,15 +77,42 @@ const styles = StyleSheet.create({
     paddingLeft: SPACING.md,
     ...SHADOWS.card,
   },
-  iconTile: {
-    width: 48,
-    height: 48,
+  dateBlock: {
+    width: 54,
+    height: 58,
     borderRadius: RADIUS.md,
+    backgroundColor: COLORS.brandTint,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconEmoji: {
-    fontSize: 24,
+  dateBlockToday: {
+    backgroundColor: COLORS.primary,
+    ...SHADOWS.button,
+  },
+  dateDay: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: COLORS.primary,
+    letterSpacing: -0.5,
+    lineHeight: 26,
+  },
+  dateMonth: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.primary,
+    letterSpacing: 1,
+  },
+  dateTodayLabel: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: COLORS.white,
+    letterSpacing: 1,
+  },
+  dateTodayTime: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.white,
+    opacity: 0.85,
   },
   body: {
     flex: 1,
@@ -131,10 +162,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.textSecondary,
     fontWeight: '500',
-  },
-  metaToday: {
-    color: COLORS.accent,
-    fontWeight: '600',
+    textTransform: 'capitalize',
   },
   dot: {
     fontSize: 13,
@@ -142,6 +170,7 @@ const styles = StyleSheet.create({
   },
   venueText: {
     color: COLORS.textSecondary,
+    textTransform: 'none',
   },
   tripsBadge: {
     backgroundColor: COLORS.successBg,
