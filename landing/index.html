@@ -33,6 +33,58 @@
     ============================================================
   -->
 
+  <!--
+    Set de íconos propio (line icons, stroke 1.7, currentColor).
+    Se referencian con <svg class="ic"><use href="#i-..."/></svg>.
+    Hechos a mano para tener una identidad visual coherente en vez de emojis.
+  -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-stadium" viewBox="0 0 24 24">
+        <ellipse cx="12" cy="8.5" rx="9" ry="4.5"/>
+        <ellipse cx="12" cy="8.5" rx="3.6" ry="1.8"/>
+        <path d="M3 8.5v3.5c0 2.6 4 4.7 9 4.7s9-2.1 9-4.7V8.5"/>
+      </symbol>
+      <symbol id="i-coins" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.4"/>
+        <path d="M12 6.8v10.4M14.6 9c-.6-.8-1.6-1.2-2.6-1.2-1.5 0-2.7.9-2.7 2.1s1.1 1.8 2.7 2.1 2.7 1 2.7 2.2-1.2 2.1-2.7 2.1c-1 0-2-.4-2.6-1.2"/>
+      </symbol>
+      <symbol id="i-people" viewBox="0 0 24 24">
+        <circle cx="9" cy="8.4" r="2.8"/>
+        <circle cx="16.6" cy="9.6" r="2.1"/>
+        <path d="M4 18c0-2.9 2.2-4.8 5-4.8 1.8 0 3.3.8 4.2 2"/>
+        <path d="M15 18c.1-2.1 1.4-3.4 3.3-3.4 1.2 0 2.2.5 2.9 1.5"/>
+      </symbol>
+      <symbol id="i-ball" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.4"/>
+        <path d="M12 8.6l3.1 2.2-1.2 3.7h-3.8L8.9 10.8z"/>
+        <path d="M12 8.6V5.1M15.1 10.8l3.1-1.4M13.9 14.5l2 2.9M10.1 14.5l-2 2.9M8.9 10.8 5.8 9.4"/>
+      </symbol>
+      <symbol id="i-car" viewBox="0 0 24 24">
+        <path d="M4 13.2l1.6-4A2.2 2.2 0 0 1 7.6 7.8h8.8a2.2 2.2 0 0 1 2 1.4l1.6 4"/>
+        <rect x="2.8" y="13.2" width="18.4" height="4.4" rx="1.4"/>
+        <circle cx="7.2" cy="17.8" r="1.5"/>
+        <circle cx="16.8" cy="17.8" r="1.5"/>
+      </symbol>
+      <symbol id="i-music" viewBox="0 0 24 24">
+        <path d="M9 17V6.2l9-2v9"/>
+        <circle cx="6.6" cy="17" r="2.4"/>
+        <circle cx="15.6" cy="15" r="2.4"/>
+      </symbol>
+      <symbol id="i-ticket" viewBox="0 0 24 24">
+        <path d="M4 8.2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a2 2 0 0 0 0 4v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2a2 2 0 0 0 0-4V8.2z"/>
+        <path d="M14 7.2v10" stroke-dasharray="1.6 2.2"/>
+      </symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24">
+        <path d="M12 3l7 2.5v5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9v-5L12 3z"/>
+        <path d="M9 12l2 2 4-4.3"/>
+      </symbol>
+      <symbol id="i-star" viewBox="0 0 24 24">
+        <path d="M12 4l2.3 4.9 5.3.7-3.9 3.7 1 5.3L12 16.2 7.3 18.6l1-5.3-3.9-3.7 5.3-.7L12 4z"/>
+      </symbol>
+    </defs>
+  </svg>
+
   <!-- Fondo vivo: manchas de color que derivan lento + progreso de scroll -->
   <div class="blob blob--a" aria-hidden="true"></div>
   <div class="blob blob--b" aria-hidden="true"></div>
@@ -91,15 +143,15 @@
   <!-- ===================== MARQUEE ===================== -->
   <div class="marquee" aria-hidden="true">
     <div class="marquee__track" id="marquee-track">
-      <span class="marquee__item">⚽ River – Boca · Monumental</span>
-      <span class="marquee__item">🚗 Rosario → Buenos Aires</span>
-      <span class="marquee__item">🎸 Recital en Vélez</span>
-      <span class="marquee__item">🏟️ La Bombonera</span>
-      <span class="marquee__item">🚗 Córdoba → Santiago del Estero</span>
-      <span class="marquee__item">🪪 Identidad verificada</span>
-      <span class="marquee__item">🎟️ Copa Argentina</span>
-      <span class="marquee__item">🚗 La Plata → Avellaneda</span>
-      <span class="marquee__item">⭐ Calificaciones 5x5</span>
+      <span class="marquee__item"><svg class="ic"><use href="#i-ball"/></svg>River – Boca · Monumental</span>
+      <span class="marquee__item"><svg class="ic"><use href="#i-car"/></svg>Rosario → Buenos Aires</span>
+      <span class="marquee__item"><svg class="ic"><use href="#i-music"/></svg>Recital en Vélez</span>
+      <span class="marquee__item"><svg class="ic"><use href="#i-stadium"/></svg>La Bombonera</span>
+      <span class="marquee__item"><svg class="ic"><use href="#i-car"/></svg>Córdoba → Santiago del Estero</span>
+      <span class="marquee__item"><svg class="ic"><use href="#i-shield"/></svg>Identidad verificada</span>
+      <span class="marquee__item"><svg class="ic"><use href="#i-ticket"/></svg>Copa Argentina</span>
+      <span class="marquee__item"><svg class="ic"><use href="#i-car"/></svg>La Plata → Avellaneda</span>
+      <span class="marquee__item"><svg class="ic"><use href="#i-star"/></svg>Calificaciones 5x5</span>
     </div>
   </div>
 
@@ -109,17 +161,17 @@
     <h2 class="section__title reveal">Por qué viajar con Hinch.ar</h2>
     <div class="grid">
       <article class="card reveal">
-        <div class="card__icon">🏟️</div>
+        <div class="card__icon"><svg class="ic"><use href="#i-stadium"/></svg></div>
         <h3>Llegá sin complicaciones</h3>
         <p>Olvidate del micro lleno o el estacionamiento imposible. Coordinás tu viaje al evento y listo.</p>
       </article>
       <article class="card reveal">
-        <div class="card__icon">💸</div>
+        <div class="card__icon"><svg class="ic"><use href="#i-coins"/></svg></div>
         <h3>Compartí los gastos</h3>
         <p>Nafta y peajes divididos entre todos. Viajar al partido sale mucho más barato.</p>
       </article>
       <article class="card reveal">
-        <div class="card__icon">🤝</div>
+        <div class="card__icon"><svg class="ic"><use href="#i-people"/></svg></div>
         <h3>Gente como vos</h3>
         <p>Una comunidad de hinchas. Verificamos la identidad de cada usuario para que viajes tranquilo.</p>
       </article>
