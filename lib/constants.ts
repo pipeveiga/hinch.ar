@@ -4,13 +4,14 @@ import type { RateeRole } from './types'
 // HINCH.AR — Constantes globales
 // =============================================================================
 
-// Paleta de colores — light theme, espejo de la landing (landing/styles.css)
+// Paleta de colores — light theme estilo Apple, espejo de la landing
+// (landing/styles.css): azul de marca + tintas frías, vidrio y sombras suaves.
 export const COLORS = {
   // Fondos
   background:   '#FFFFFF',
-  surface:      '#F6F7F9',
+  surface:      '#F5F7FB',
   card:         '#FFFFFF',
-  cardElevated: '#F6F7F9',
+  cardElevated: '#F5F7FB',
   border:       '#E7E9EE',
   borderLight:  '#D7DBE3',
 
@@ -23,8 +24,8 @@ export const COLORS = {
 
   // Textos
   textPrimary:   '#0B1220',
-  textSecondary: '#5B6472',
-  textMuted:     '#98A1AD',
+  textSecondary: '#51596B',
+  textMuted:     '#8A93A3',
   textInverse:   '#FFFFFF',
 
   // Neutros
@@ -34,14 +35,20 @@ export const COLORS = {
   // Marca — tinte claro para fondos suaves (chips, íconos)
   brandTint:     '#EEF3FF',
 
+  // Vidrio (liquid glass) — superficies translúcidas con blur detrás
+  glass:        'rgba(255,255,255,0.72)',
+  glassStrong:  'rgba(255,255,255,0.85)',
+  glassBorder:  'rgba(255,255,255,0.65)',
+  glassEdge:    'rgba(11,18,32,0.08)',
+
   // Semánticos
-  success:  '#16A34A',
-  successBg:'#DCFCE7',
-  error:    '#DC2626',
-  errorBg:  '#FEE2E2',
-  warning:  '#D97706',
-  warningBg:'#FEF3C7',
-  info:     '#0EA5E9',
+  success:  '#34C759',
+  successBg:'#E4F8EA',
+  error:    '#FF3B30',
+  errorBg:  '#FFE5E3',
+  warning:  '#FF9500',
+  warningBg:'#FFF2DF',
+  info:     '#32ADE6',
 
   // Equipos (para theming contextual)
   bocaBlue:     '#003DA5',
@@ -72,14 +79,43 @@ export const SPACING = {
   xxl: 48,
 } as const
 
-// Border radius
+// Border radius — curvas generosas estilo iOS
 export const RADIUS = {
-  sm:   6,
-  md:   12,
-  lg:   18,
-  xl:   24,
+  sm:   8,
+  md:   14,
+  lg:   20,
+  xl:   28,
   full: 9999,
 } as const
+
+// Sombras — suaves y difusas, estilo Apple. Usar con spread (...SHADOWS.card)
+export const SHADOWS = {
+  card: {
+    shadowColor: '#0B1220',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 3,
+  },
+  floating: {
+    shadowColor: '#0B1220',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 10,
+  },
+  button: {
+    shadowColor: '#1D4ED8',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 14,
+    elevation: 6,
+  },
+} as const
+
+// Alto reservado al final de las listas para que el contenido no quede
+// tapado por la tab bar flotante de vidrio
+export const TAB_BAR_SPACE = 104
 
 // =============================================================================
 // Sistema de calificación 5x5

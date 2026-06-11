@@ -8,11 +8,12 @@ import { useAuthStore } from '@/stores/authStore'
 import { useChatsStore } from '@/stores/chatsStore'
 import { bookingsApi } from '@/lib/supabase'
 import { useState } from 'react'
-import { COLORS, SPACING } from '@/lib/constants'
+import { COLORS, SPACING, TAB_BAR_SPACE } from '@/lib/constants'
 import type { Booking } from '@/lib/types'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { UserAvatar } from '@/components/UserAvatar'
+import { FadeInUp } from '@/components/FadeInUp'
 
 function ChatItem({ booking, userId, unread }: { booking: Booking; userId: string; unread: number }) {
   const isDriver    = booking.trip?.driver?.id === userId || booking.trip?.driver_id === userId
@@ -102,14 +103,17 @@ export default function ChatsScreen() {
         <FlatList
           data={bookings}
           keyExtractor={(b) => b.id}
-          renderItem={({ item }) => (
-            <ChatItem
-              booking={item}
-              userId={user!.id}
-              unread={unreadByBooking[item.id] ?? 0}
-            />
+          renderItem={({ item, index }) => (
+            <FadeInUp delay={index < 10 ? index * 50 : 0}>
+              <ChatItem
+                booking={item}
+                userId={user!.id}
+                unread={unreadByBooking[item.id] ?? 0}
+              />
+            </FadeInUp>
           )}
           refreshControl={<RefreshControl refreshing={false} onRefresh={load} tintColor={COLORS.primary} />}
+          contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
             <View style={styles.empty}>
@@ -128,9 +132,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   header: {
     paddingHorizontal: SPACING.lg, paddingTop: SPACING.xxl + SPACING.md, paddingBottom: SPACING.md,
-    backgroundColor: COLORS.surface, borderBottomWidth: 1, borderBottomColor: COLORS.border,
   },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.textPrimary },
+  headerTitle: { fontSize: 32, fontWeight: '800', color: COLORS.textPrimary, letterSpacing: -1 },
+  list: { paddingBottom: TAB_BAR_SPACE },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   item: {
     flexDirection: 'row', alignItems: 'center', gap: SPACING.md,

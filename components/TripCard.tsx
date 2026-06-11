@@ -1,14 +1,15 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import {
-  COLORS, SPACING, RADIUS,
+  COLORS, SPACING, RADIUS, SHADOWS,
   TRIP_TYPE_LABELS, TRIP_TYPE_COLORS, TRIP_TYPE_ICONS,
 } from '@/lib/constants'
 import type { Trip } from '@/lib/types'
 import { formatDistance } from '@/lib/distance'
 import { UserAvatar } from './UserAvatar'
 import { VerificationBadge } from './VerificationBadge'
+import { ScalePress } from './ScalePress'
 
 interface TripCardProps {
   trip:        Trip
@@ -25,14 +26,13 @@ export function TripCard({ trip, onPress, showEvent = false, distanceKm }: TripC
   const isCancelled = trip.status === 'cancelled'
 
   return (
-    <TouchableOpacity
+    <ScalePress
       style={[
         styles.card,
         isFull      && styles.cardFull,
         isCancelled && styles.cardCancelled,
       ]}
       onPress={onPress}
-      activeOpacity={0.85}
       disabled={isCancelled}
     >
       {/* Si mostramos el evento (en mis viajes) */}
@@ -139,7 +139,7 @@ export function TripCard({ trip, onPress, showEvent = false, distanceKm }: TripC
           {trip.accepts_pets    && <Text style={styles.extra}>🐾</Text>}
         </View>
       )}
-    </TouchableOpacity>
+    </ScalePress>
   )
 }
 
@@ -149,8 +149,9 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.glassEdge,
     gap: SPACING.sm,
+    ...SHADOWS.card,
   },
   cardFull: {
     opacity: 0.7,

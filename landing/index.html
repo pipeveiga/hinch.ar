@@ -10,7 +10,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Hinch.ar — Compartí el viaje, viví el partido" />
   <meta property="og:description" content="Carpool para hinchas argentinos. Publicá tu auto o reservá un lugar para llegar a partidos, recitales y eventos." />
-  <meta property="og:image" content="/assets/icon.png" />
+  <meta property="og:image" content="/assets/hero-scene.png" />
   <meta name="twitter:card" content="summary_large_image" />
 
   <link rel="icon" href="/assets/icon.png" />
@@ -29,8 +29,13 @@
     ============================================================
   -->
 
+  <!-- Fondo vivo: manchas de color que derivan lento + progreso de scroll -->
+  <div class="blob blob--a" aria-hidden="true"></div>
+  <div class="blob blob--b" aria-hidden="true"></div>
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
   <!-- ===================== NAV ===================== -->
-  <header class="nav">
+  <header class="nav" id="nav">
     <a class="brand" href="/">
       <img src="/assets/icon.png" alt="" class="brand__tile" />
       <span class="brand__name">Hinch<span class="brand__dot">.</span>ar</span>
@@ -45,67 +50,71 @@
 
   <!-- ===================== HERO ===================== -->
   <section class="hero">
-    <div class="hero__text">
-      <span class="eyebrow">Carpool para hinchas 🇦🇷</span>
-      <h1 class="hero__title">Compartí el viaje,<br /><span class="accent">viví el partido.</span></h1>
+    <!--
+      Desktop: el diseño completo va como una sola imagen (pixel-perfect),
+      con dos links transparentes clavados sobre los botones. El texto real
+      vive en el .hero-mobile (visible en celulares) + el alt/h1 para SEO.
+    -->
+    <div class="hero-shot">
+      <h1 class="sr-only">Hinch.ar — Compartí el viaje, viví el partido. Carpool para hinchas argentinos.</h1>
+      <img class="hero-shot__img"
+           src="/assets/hero-scene.png"
+           alt="Compartí el viaje, viví el partido. Encontrá gente que va al mismo partido y compartí los gastos." />
+      <a class="hero-shot__hit hero-shot__hit--app" data-app-link href="https://app.hinch.ar" aria-label="Ir a la plataforma"></a>
+      <a class="hero-shot__hit hero-shot__hit--how" href="#como-funciona" aria-label="Cómo funciona"></a>
+    </div>
+
+    <!-- Mobile: versión apilada y legible -->
+    <div class="hero-mobile">
+      <span class="eyebrow">Carpool para hinchas <small>AR</small></span>
+      <p class="hero__title" role="heading" aria-level="1">Compartí el viaje,<br /><span class="accent">viví el partido.</span></p>
       <p class="hero__subtitle">
-        Encontrá gente que va al mismo partido, recital o evento y compartí los gastos.
-        Con auto, publicás tu viaje. Sin auto, reservás un lugar en segundos.
+        Encontrá gente que va al <strong>mismo partido</strong>, recital o evento
+        y <strong>compartí</strong> los gastos. Con auto, publicás tu viaje.
+        Sin auto, reservás un lugar en segundos.
       </p>
       <div class="hero__cta">
         <a class="btn btn--primary btn--lg" data-app-link href="https://app.hinch.ar">Ir a la plataforma</a>
         <a class="btn btn--ghost btn--lg" href="#como-funciona">Cómo funciona</a>
       </div>
       <p class="hero__note">Gratis · Identidad verificada · Android y web</p>
-    </div>
-
-    <!-- Mockup de producto -->
-    <div class="hero__visual" aria-hidden="true">
-      <div class="trip-card">
-        <div class="trip-card__top">
-          <span class="trip-card__tag">Viaje disponible</span>
-          <span class="trip-card__price">$8.000</span>
-        </div>
-        <h3 class="trip-card__event">River vs. Boca</h3>
-        <p class="trip-card__venue">Estadio Monumental · Sáb 21:00</p>
-        <div class="route">
-          <span class="route__dot route__dot--from"></span>
-          <span class="route__line"></span>
-          <span class="route__dot route__dot--to"></span>
-        </div>
-        <div class="route__labels">
-          <span>Rosario</span>
-          <span>Buenos Aires</span>
-        </div>
-        <div class="trip-card__bottom">
-          <div class="driver">
-            <span class="driver__avatar">M</span>
-            <div>
-              <strong>Martín G.</strong>
-              <span class="driver__meta">★ 4.9 · Verificado</span>
-            </div>
-          </div>
-          <span class="seats">3 lugares</span>
-        </div>
+      <div class="hero-mobile__shot">
+        <img src="/assets/hero-scene-mobile.png" alt="" aria-hidden="true" />
       </div>
     </div>
   </section>
 
+  <!-- ===================== MARQUEE ===================== -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track" id="marquee-track">
+      <span class="marquee__item">⚽ River – Boca · Monumental</span>
+      <span class="marquee__item">🚗 Rosario → Buenos Aires</span>
+      <span class="marquee__item">🎸 Recital en Vélez</span>
+      <span class="marquee__item">🏟️ La Bombonera</span>
+      <span class="marquee__item">🚗 Córdoba → Santiago del Estero</span>
+      <span class="marquee__item">🪪 Identidad verificada</span>
+      <span class="marquee__item">🎟️ Copa Argentina</span>
+      <span class="marquee__item">🚗 La Plata → Avellaneda</span>
+      <span class="marquee__item">⭐ Calificaciones 5x5</span>
+    </div>
+  </div>
+
   <!-- ===================== BENEFICIOS ===================== -->
   <section id="beneficios" class="section">
-    <h2 class="section__title">Por qué viajar con Hinch.ar</h2>
+    <span class="kicker reveal">Beneficios</span>
+    <h2 class="section__title reveal">Por qué viajar con Hinch.ar</h2>
     <div class="grid">
-      <article class="card">
+      <article class="card reveal">
         <div class="card__icon">🏟️</div>
         <h3>Llegá sin complicaciones</h3>
         <p>Olvidate del micro lleno o el estacionamiento imposible. Coordinás tu viaje al evento y listo.</p>
       </article>
-      <article class="card">
+      <article class="card reveal">
         <div class="card__icon">💸</div>
         <h3>Compartí los gastos</h3>
         <p>Nafta y peajes divididos entre todos. Viajar al partido sale mucho más barato.</p>
       </article>
-      <article class="card">
+      <article class="card reveal">
         <div class="card__icon">🤝</div>
         <h3>Gente como vos</h3>
         <p>Una comunidad de hinchas. Verificamos la identidad de cada usuario para que viajes tranquilo.</p>
@@ -115,24 +124,25 @@
 
   <!-- ===================== CÓMO FUNCIONA ===================== -->
   <section id="como-funciona" class="section section--alt">
-    <h2 class="section__title">Cómo funciona</h2>
+    <span class="kicker reveal">Paso a paso</span>
+    <h2 class="section__title reveal">Cómo funciona</h2>
     <div class="steps">
-      <div class="step">
+      <div class="step reveal">
         <span class="step__num">1</span>
         <h3>Elegí el evento</h3>
         <p>Buscá tu partido, recital o evento en la lista y mirá los viajes disponibles.</p>
       </div>
-      <div class="step">
+      <div class="step reveal">
         <span class="step__num">2</span>
         <h3>Publicá o reservá</h3>
         <p>Con auto: publicás origen, asientos, precio y horario. Sin auto: reservás un lugar.</p>
       </div>
-      <div class="step">
+      <div class="step reveal">
         <span class="step__num">3</span>
         <h3>Coordiná por chat</h3>
         <p>El conductor confirma tu reserva y arreglan los detalles por el chat de la app.</p>
       </div>
-      <div class="step">
+      <div class="step reveal">
         <span class="step__num">4</span>
         <h3>Viajá y calificá</h3>
         <p>Después del viaje se califican mutuamente. La comunidad se cuida sola.</p>
@@ -143,7 +153,8 @@
   <!-- ===================== SEGURIDAD ===================== -->
   <section id="seguridad" class="section">
     <div class="split">
-      <div class="split__text">
+      <div class="split__text reveal">
+        <span class="kicker kicker--left">Seguridad</span>
         <h2 class="section__title section__title--left">Viajá tranquilo</h2>
         <ul class="checklist">
           <li>Identidad verificada con DNI para cada usuario.</li>
@@ -152,7 +163,7 @@
           <li>Perfiles públicos con historial de viajes y reputación.</li>
         </ul>
       </div>
-      <div class="split__media">
+      <div class="split__media reveal">
         <div class="badge-tile">
           <img src="/assets/icon.png" alt="Hinch.ar" />
           <span class="badge-tile__check">✓</span>
@@ -163,7 +174,7 @@
 
   <!-- ===================== CTA FINAL ===================== -->
   <section class="cta-final">
-    <div class="cta-final__box">
+    <div class="cta-final__box reveal">
       <h2>Tu próximo partido te espera</h2>
       <p>Sumate a la comunidad de hinchas que ya comparten viaje.</p>
       <a class="btn btn--primary btn--lg" data-app-link href="https://app.hinch.ar">Ir a la plataforma</a>
@@ -185,7 +196,134 @@
   </footer>
 
   <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
+    (function () {
+      'use strict';
+
+      var finePointer   = window.matchMedia('(pointer: fine)').matches;
+      var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      // El marquee duplica su contenido para loopear sin costura
+      // (la animación CSS recorre el 50% del track)
+      var track = document.getElementById('marquee-track');
+      if (track) track.innerHTML += track.innerHTML;
+
+      // Nav de vidrio: se vuelve más opaco al scrollear.
+      // Barra de progreso: scaleX según cuánto se scrolleó.
+      var nav = document.getElementById('nav');
+      var progress = document.getElementById('scroll-progress');
+      var onScroll = function () {
+        nav.classList.toggle('is-scrolled', window.scrollY > 8);
+        var max = document.documentElement.scrollHeight - window.innerHeight;
+        progress.style.transform = 'scaleX(' + (max > 0 ? window.scrollY / max : 0) + ')';
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      // Aparición suave de secciones al entrar en pantalla
+      var reveals = document.querySelectorAll('.reveal');
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+          });
+        }, { threshold: 0.12 });
+        reveals.forEach(function (el) { io.observe(el); });
+      } else {
+        reveals.forEach(function (el) { el.classList.add('in'); });
+      }
+
+      // Brillo que sigue al puntero + tilt 3D en las tarjetas de vidrio
+      document.querySelectorAll('.card, .step').forEach(function (el) {
+        el.addEventListener('pointermove', function (e) {
+          var r = el.getBoundingClientRect();
+          var x = e.clientX - r.left;
+          var y = e.clientY - r.top;
+          el.style.setProperty('--mx', x + 'px');
+          el.style.setProperty('--my', y + 'px');
+          if (finePointer && !reducedMotion) {
+            el.style.setProperty('--ry', ((x / r.width) - .5) * 7 + 'deg');
+            el.style.setProperty('--rx', ((y / r.height) - .5) * -7 + 'deg');
+          }
+        });
+        el.addEventListener('pointerleave', function () {
+          el.style.setProperty('--rx', '0deg');
+          el.style.setProperty('--ry', '0deg');
+        });
+      });
+
+      // Todo lo que sigue es solo para desktop con mouse y sin
+      // preferencia de movimiento reducido.
+      if (!finePointer || reducedMotion) return;
+
+      // ---- Tilt + parallax del hero ----
+      var heroShot = document.querySelector('.hero-shot');
+      if (heroShot) {
+        heroShot.addEventListener('pointermove', function (e) {
+          var r = heroShot.getBoundingClientRect();
+          heroShot.style.setProperty('--ry', (((e.clientX - r.left) / r.width) - .5) * 4 + 'deg');
+          heroShot.style.setProperty('--rx', (((e.clientY - r.top) / r.height) - .5) * -4 + 'deg');
+        });
+        heroShot.addEventListener('pointerleave', function () {
+          heroShot.style.setProperty('--rx', '0deg');
+          heroShot.style.setProperty('--ry', '0deg');
+        });
+        window.addEventListener('scroll', function () {
+          heroShot.style.setProperty('--py', Math.min(window.scrollY * .06, 40) + 'px');
+        }, { passive: true });
+      }
+
+      // ---- Botones magnéticos: se inclinan hacia el cursor ----
+      document.querySelectorAll('.btn').forEach(function (btn) {
+        btn.addEventListener('pointermove', function (e) {
+          var r = btn.getBoundingClientRect();
+          btn.style.setProperty('--mag-x', (e.clientX - r.left - r.width / 2) * .22 + 'px');
+          btn.style.setProperty('--mag-y', (e.clientY - r.top - r.height / 2) * .22 + 'px');
+        });
+        btn.addEventListener('pointerleave', function () {
+          btn.style.setProperty('--mag-x', '0px');
+          btn.style.setProperty('--mag-y', '0px');
+        });
+      });
+
+      // ---- Cursor custom: punto 1:1 + anillo que lo persigue ----
+      document.documentElement.classList.add('cursor-on');
+      var dot  = document.createElement('div');
+      var ring = document.createElement('div');
+      dot.className  = 'cursor-dot';
+      ring.className = 'cursor-ring';
+      document.body.appendChild(dot);
+      document.body.appendChild(ring);
+
+      var mx = -100, my = -100;   // mouse real
+      var rx = -100, ry = -100;   // posición del anillo (con inercia)
+      var ringScale = 1, targetScale = 1;
+      var seen = false;
+
+      document.addEventListener('pointermove', function (e) {
+        mx = e.clientX; my = e.clientY;
+        if (!seen) { seen = true; rx = mx; ry = my; dot.classList.add('is-active'); ring.classList.add('is-active'); }
+        // ¿Está sobre algo clickeable?
+        var link = e.target.closest && e.target.closest('a, button, .btn');
+        ring.classList.toggle('is-link', !!link);
+        targetScale = link ? 1.55 : 1;
+      }, { passive: true });
+
+      document.addEventListener('pointerdown', function () { targetScale = .75; });
+      document.addEventListener('pointerup',   function () { targetScale = ring.classList.contains('is-link') ? 1.55 : 1; });
+      document.addEventListener('mouseleave',  function () { dot.classList.remove('is-active'); ring.classList.remove('is-active'); });
+      document.addEventListener('mouseenter',  function () { if (seen) { dot.classList.add('is-active'); ring.classList.add('is-active'); } });
+
+      (function loop() {
+        rx += (mx - rx) * .16;
+        ry += (my - ry) * .16;
+        ringScale += (targetScale - ringScale) * .18;
+        dot.style.transform  = 'translate3d(' + mx + 'px,' + my + 'px,0)';
+        ring.style.transform = 'translate3d(' + rx + 'px,' + ry + 'px,0) scale(' + ringScale.toFixed(3) + ')';
+        requestAnimationFrame(loop);
+      })();
+    })();
   </script>
 </body>
 </html>

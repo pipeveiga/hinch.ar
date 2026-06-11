@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import Constants from 'expo-constants'
-import { supabase } from '@/lib/supabase'
+import { usersApi } from '@/lib/supabase'
 
 const isExpoGo = Constants.appOwnership === 'expo'
 const PROJECT_ID = Constants.expoConfig?.extra?.eas?.projectId as string | undefined
@@ -52,10 +52,8 @@ async function registerForPushNotifications(userId: string) {
     const token = tokenData.data
     if (!token) return
 
-    await supabase
-      .from('users')
-      .update({ push_token: token })
-      .eq('id', userId)
+    // Va por updateProfile() para pasar por el whitelist canónico.
+    await usersApi.updateProfile(userId, { push_token: token })
   } catch (e) {
     console.warn('[PushNotifications] Error al registrar token:', e)
   }

@@ -6,7 +6,11 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-06-02 (pantalla 404 para rutas inexistentes)
+Última actualización del documento: 2026-06-11 (rediseño visible de la app:
+login nuevo con tarjeta flotante y botón degradado, home con saludo
+personalizado y lista en cascada, tarjeta de evento con fecha estilo
+calendario; + pantalla 404 para rutas inexistentes; OJO: en iOS/Android se
+ve recién con un build nuevo de EAS)
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -76,8 +80,11 @@ landing/            Landing institucional (web pública). HTML/CSS estático,
                     propósito (carga rápido, buen SEO). Da info de la plataforma
                     y manda a la app vía botones "Ir a la plataforma".
   index.html          la página completa
-  styles.css          estilos (tema claro/minimalista propio de la landing)
+  styles.css          estilos (tema claro estilo Apple: nav de vidrio flotante,
+                       tarjetas con efecto "liquid glass", animaciones al scroll)
   assets/             logo, ícono, imágenes
+                      (hero-scene.png = render completo del hero para desktop;
+                       hero-scene-mobile.png = recorte del celular para mobile)
   vercel.json         config del proyecto Vercel de la landing
   README.md           cómo editar y desplegar la landing
 
@@ -210,26 +217,71 @@ Hecho:
       dos proyectos Vercel sobre el mismo repo, DNS configurado.
   [x] App migrada a tema light, espejo de la landing (fondo claro, azul de
       marca como acento). Paleta invertida en lib/constants.ts.
+  [x] Rediseño visual estilo Apple con "liquid glass" en la app (la landing
+      ya lo tenía): tab bar flotante tipo pastilla de vidrio con blur real
+      (expo-blur), tintas frías espejo de la landing, sombras suaves y
+      radios más redondeados en las tarjetas, buscador y chips estilo iOS.
+  [x] Capa de dinamismo en la landing (solo desktop con mouse, respeta
+      "movimiento reducido" del sistema operativo):
+      - Cursor custom: punto azul + anillo que persigue al mouse con
+        inercia; crece sobre los links y se achica al hacer click.
+      - Botones magnéticos que se inclinan hacia el cursor + destello
+        periódico en los CTA azules.
+      - Tilt 3D del hero y de las tarjetas siguiendo el mouse.
+      - Blobs de color que derivan lento de fondo, marquee de eventos y
+        rutas debajo del hero, barra de progreso de scroll arriba de todo.
+  [x] Micro-interacción en la app: las tarjetas (eventos y viajes) se
+      hunden con física de resorte al tocarlas (componente ScalePress).
+  [x] Rediseño visible de las pantallas principales de la app:
+      - Login: logo en tile con sombra, manchas de color de fondo,
+        formulario en tarjeta flotante, inputs que se iluminan al
+        enfocar, botón "Entrar" con degradado (expo-linear-gradient)
+        y entrada animada por bloques.
+      - Home: saludo personalizado ("Hola, <nombre> 👋 / ¿A dónde
+        vamos?"), campanita en burbuja, y las tarjetas entran en
+        cascada con resorte (componente FadeInUp).
+      - Tarjeta de evento: bloque de fecha estilo calendario (día
+        grande + mes; si es hoy, bloque azul "HOY" con la hora).
+      - Mis viajes y Chats: títulos grandes consistentes y listas
+        con la misma entrada en cascada.
+      IMPORTANTE: en iOS/Android estos cambios se ven recién al hacer
+      un build nuevo con EAS (la app instalada vieja no se actualiza
+      sola). En la web (app.hinch.ar) se ven con el deploy de Vercel.
   [x] Recuperación de contraseña: link "¿Olvidaste tu contraseña?" en login,
       pantalla para pedir el mail (recuperar) y pantalla para fijar la clave
       nueva desde el link (restablecer). Funciona en web y nativo.
+  [x] Auditoría de seguridad + endurecimiento (migración 003 completa):
+      - Trigger BEFORE UPDATE en users que impide auto-verificarse,
+        inflar ratings, modificar DNI o reactivar cuentas desactivadas.
+      - Edge function send-notification valida JWT y exige que el
+        invocador comparta un booking con el destinatario.
+      - Policy de chat ya no permite mandar mensajes a bookings ajenos
+        (cambio OR → AND).
+      - Columnas verification_status / verification_submitted_at agregadas
+        al schema (necesarias para el flujo de verificación).
+      - total_amount de bookings se calcula server-side (trigger).
+      - Resta atómica de seats_available (sin race conditions).
+      - RLS consolidada en un solo archivo (la migración 003 es la
+        fuente de verdad; scripts/rls-policies.sql quedó obsoleto).
+      - Rate limit básico en chat (20 mensajes/min por user).
+      - Security headers (CSP, X-Frame-Options, HSTS, etc.) en vercel.json.
+      - Tokens de sesión en mobile pasan de AsyncStorage a expo-secure-store.
+      - Whitelist de extensiones + MIME en uploads de verificación.
+      - Whitelist de trip_type en filtros (no más .or() con interpolación).
 
 Pendiente:
-  [ ] SEGURIDAD: correr la migración 003_security_hardening.sql en Supabase
-      (mueve a RLS reglas que hoy solo valida el cliente: auto-verificación,
-      auto-calificación, inyección en chats, auto-confirmación de reservas).
-      Testear después de aplicar. Re-deployar la edge function send-notification
-      (ahora exige usuario autenticado y que comparta reserva con el destino).
+  [ ] Aplicar la migración 003_security_hardening.sql en Supabase prod.
+  [ ] Redeploy de la edge function send-notification.
   [ ] CONFIG Supabase para el reset de contraseña: en Authentication → URL
       Configuration agregar a "Redirect URLs": https://app.hinch.ar/restablecer
       y hinchar://restablecer. Verificar el remitente/SMTP de los mails.
   [ ] QA real end-to-end en device Android (login, crear viaje, reservar,
-      chat, push notification).
+      chat, push notification, verificación).
   [ ] QA equivalente en device iOS con el .ipa preview ya buildeado.
-  [ ] QA web Vercel completo.
+  [ ] QA web Vercel completo (validar CSP no bloquee nada inesperado).
   [ ] Confirmar que la edge function send-notification está deployada con
       sus secrets en Supabase.
-  [ ] Bump a Expo SDK 55 para cerrar las 5 vulnerabilidades restantes
+  [ ] Bump a Expo SDK 55 para cerrar las vulnerabilidades restantes
       del árbol de Expo (npm audit).
   [x] App creada en App Store Connect (bundle ID ar.hinch.app).
   [ ] Generar API Key en App Store Connect (Users and Access →
