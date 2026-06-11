@@ -2,13 +2,13 @@ import { useState } from 'react'
 import {
   View, Text, TouchableOpacity, ScrollView,
   StyleSheet, Alert, Modal, TextInput, ActivityIndicator,
-  KeyboardAvoidingView, Platform,
+  KeyboardAvoidingView, Platform, Linking,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { router } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
 import { usersApi } from '@/lib/supabase'
-import { COLORS, SPACING, RADIUS, TAB_BAR_SPACE } from '@/lib/constants'
+import { COLORS, SPACING, RADIUS, TAB_BAR_SPACE, CONTACT } from '@/lib/constants'
 import { UserAvatar } from '@/components/UserAvatar'
 import { VerificationBadge } from '@/components/VerificationBadge'
 import { Icon, type IconName } from '@/components/Icon'
@@ -123,11 +123,23 @@ export default function PerfilScreen() {
       await signOut()
       router.replace('/(auth)/login')
     } catch {
-      Alert.alert('Error', 'No se pudo eliminar la cuenta. Escribinos a hola@hinch.ar')
+      Alert.alert('Error', `No se pudo eliminar la cuenta. Escribinos a ${CONTACT.EMAIL}`)
     } finally {
       setDeleteLoading(false)
       setDeleteModal(false)
     }
+  }
+
+  const handleEmail = () => {
+    Linking.openURL(`mailto:${CONTACT.EMAIL}`).catch(() => {
+      Alert.alert('Contacto', `Escribinos a ${CONTACT.EMAIL}`)
+    })
+  }
+
+  const handleWhatsApp = () => {
+    Linking.openURL(`https://wa.me/${CONTACT.WHATSAPP_NUMBER}`).catch(() => {
+      Alert.alert('Contacto', `Escribinos por WhatsApp al ${CONTACT.WHATSAPP_DISPLAY}`)
+    })
   }
 
   const handleSignOut = () => {
@@ -283,10 +295,22 @@ export default function PerfilScreen() {
                 router.push('/verificacion')
               }}
             />
+          </View>
+        </View>
+
+        {/* Contacto */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Ayuda y contacto</Text>
+          <View style={styles.menuCard}>
             <MenuItem
-              icon="help"
-              label="Ayuda y soporte"
-              onPress={() => Alert.alert('Soporte', 'Escribinos a hola@hinch.ar')}
+              icon="mail"
+              label="Escribinos por mail"
+              onPress={handleEmail}
+            />
+            <MenuItem
+              icon="whatsapp"
+              label="Escribinos por WhatsApp"
+              onPress={handleWhatsApp}
             />
           </View>
         </View>
