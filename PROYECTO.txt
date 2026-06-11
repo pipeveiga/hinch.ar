@@ -268,17 +268,15 @@ Hecho:
       - Whitelist de trip_type en filtros (no más .or() con interpolación).
 
 Pendiente:
-  [ ] SEGURIDAD (CRÍTICO) — aplicar en Supabase prod, en este orden:
-        1. 003_security_hardening.sql (si todavía no está aplicada).
-        2. 004_column_privileges.sql (cierra la fuga de DNI/teléfono/selfie:
-           antes cualquiera con la anon key podía leer esas columnas de todos
-           los usuarios; ahora los privilegios por columna lo impiden a nivel
-           base de datos). Requiere que 003 esté aplicada primero.
-        3. Verificar con scripts/test_security_004.sql (deben dar 4 "OK").
-        4. Confirmar en Storage que el bucket "verifications" sea PRIVADO
-           (si las fotos del DNI tienen URL pública es otra fuga aparte).
-      El código del cliente ya quedó adaptado (usersApi.getMe usa la función
-      get_my_profile en vez de select('*')).
+  [x] SEGURIDAD (CRÍTICO) — migraciones 003 y 004 aplicadas en Supabase prod
+      (2026-06-11). Cerrada la fuga de PII: las columnas dni/teléfono/selfie/
+      patente ya no son legibles con la anon key (privilegios por columna en
+      004). El cliente usa get_my_profile para el perfil propio. Test
+      scripts/test_security_004.sql disponible para re-verificar.
+      Quedan dos chequeos manuales:
+        [ ] Confirmar en Storage que el bucket "verifications" sea PRIVADO
+            (si las fotos del DNI tienen URL pública es otra fuga aparte).
+        [ ] Redeploy de la edge function send-notification (abajo).
   [ ] Activar el deep link de la landing al publicar la app: en el script
       de landing/index.html poner APP.LAUNCHED = true y completar
       APP.iosAppId con el ID numérico de App Store Connect. Desde el celu,
