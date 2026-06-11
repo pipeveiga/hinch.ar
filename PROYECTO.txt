@@ -13,7 +13,10 @@ y lista en cascada, tarjeta de evento con fecha estilo calendario, pantalla
 (componente Icon con react-native-svg y sprite SVG en la landing); + push
 notifications: edge function redeployada con auth obligatorio; + bucket
 de verificación privado en Storage. En iOS/Android se ve recién con la
-build #13 de EAS — ya subida a TestFlight)
+build #13 de EAS — ya subida a TestFlight; + diagnóstico del crash de
+push notifications: era un bug de iOS 26 + Expo SDK 54, el registro de
+push quedó habilitado de nuevo pero SOLO en Android — en iOS queda
+apagado hasta migrar a SDK 55+)
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -29,6 +32,9 @@ QUÉ HACE LA APP
    seguridad, comunicación, etc.).
 7. Verificación de identidad de usuarios (DNI) para que viajes tranquilo.
 8. Push notifications cuando te reservan, te confirman o te mandan chat.
+   (Por ahora solo en Android: en iPhone están apagadas porque una falla
+   de iOS 26 con la versión actual de Expo hacía crashear la app al
+   iniciar sesión. Se reactivan cuando migremos a Expo SDK 55+.)
 
 --------------------------------------------------------------------------------
 STACK TÉCNICO
@@ -299,6 +305,17 @@ Pendiente:
       sus secrets en Supabase.
   [ ] Bump a Expo SDK 55 para cerrar las vulnerabilidades restantes
       del árbol de Expo (npm audit).
+  [x] Diagnóstico del crash al activar push notifications (2026-06-11):
+      el registro del token en iOS 26 dispara un bug nativo de Expo
+      SDK 54 (expo/expo#44606: una excepción nativa corrompe la memoria
+      del motor JS y la app muere aunque el código tenga try/catch).
+      Fix aplicado: el registro de push quedó habilitado de nuevo, pero
+      solo en Android (que es donde funciona bien). En iOS sigue apagado.
+  [ ] Reactivar push notifications en iOS cuando el bump a SDK 55+
+      incluya el fix del crash de iOS 26 (revisar expo/expo#44606 antes).
+      Ojo: usuarios de iPhone que se registraron en abril/mayo pueden
+      tener un push_token viejo guardado en la DB; si algún iPhone
+      crashea al RECIBIR una notificación, limpiar esos tokens.
   [x] App creada en App Store Connect (bundle ID ar.hinch.app).
   [ ] Generar API Key en App Store Connect (Users and Access →
       Integrations → Keys) y guardar el .p8 en credentials/AuthKey.p8.
