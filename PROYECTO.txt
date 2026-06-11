@@ -6,10 +6,14 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-06-11 (set de íconos propio en
-landing y app reemplazando los emojis — componente Icon con react-native-svg
-y sprite SVG en la landing; menos cara de plantilla. En iOS/Android se ve
-recién con un build nuevo de EAS por ser dependencia nativa nueva)
+Última actualización del documento: 2026-06-11 (rediseño visible de la app:
+login con tarjeta flotante y botón degradado, home con saludo personalizado
+y lista en cascada, tarjeta de evento con fecha estilo calendario, pantalla
+404; + set de íconos propio en landing y app reemplazando los emojis
+(componente Icon con react-native-svg y sprite SVG en la landing); + push
+notifications: edge function redeployada con auth obligatorio; + bucket
+de verificación privado en Storage. En iOS/Android se ve recién con la
+build #13 de EAS — ya subida a TestFlight)
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -52,6 +56,7 @@ app/                Pantallas (routing por archivos con expo-router)
   calificar/          flujo de calificación post-viaje
   onboarding.tsx      3 slides de bienvenida
   verificacion.tsx    subir DNI
+  +not-found.tsx      pantalla 404 (rutas inexistentes)
 
 components/         EventCard, TripCard, UserAvatar, VerificationBadge,
                     LoadingScreen (pantalla de carga con fondo)

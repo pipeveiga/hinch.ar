@@ -6,18 +6,20 @@ import {
   TRIP_TYPE_LABELS, TRIP_TYPE_COLORS, TRIP_TYPE_ICONS,
 } from '@/lib/constants'
 import type { Trip } from '@/lib/types'
+import { formatDistance } from '@/lib/distance'
 import { UserAvatar } from './UserAvatar'
 import { VerificationBadge } from './VerificationBadge'
 import { ScalePress } from './ScalePress'
 import { Icon } from './Icon'
 
 interface TripCardProps {
-  trip:       Trip
-  onPress:    () => void
-  showEvent?: boolean  // muestra el evento si venimos de "Mis viajes"
+  trip:        Trip
+  onPress:     () => void
+  showEvent?:  boolean  // muestra el evento si venimos de "Mis viajes"
+  distanceKm?: number   // distancia desde la ubicación del usuario
 }
 
-export function TripCard({ trip, onPress, showEvent = false }: TripCardProps) {
+export function TripCard({ trip, onPress, showEvent = false, distanceKm }: TripCardProps) {
   const driver = trip.driver
   const event  = trip.event
 
@@ -74,6 +76,11 @@ export function TripCard({ trip, onPress, showEvent = false }: TripCardProps) {
             <Text style={styles.routeAddress} numberOfLines={1}>
               {trip.origin_address}
             </Text>
+            {distanceKm != null && (
+              <Text style={styles.distance}>
+                📍 a {formatDistance(distanceKm)} tuyo
+              </Text>
+            )}
           </View>
         </View>
 
@@ -214,6 +221,13 @@ const styles = StyleSheet.create({
   },
   routeCity: { fontSize: 14, fontWeight: '700', color: COLORS.textPrimary },
   routeAddress: { fontSize: 11, color: COLORS.textSecondary, maxWidth: 110 },
+  distance: {
+    fontSize: 11,
+    color: COLORS.accent,
+    fontWeight: '700',
+    marginTop: 2,
+    maxWidth: 110,
+  },
   routeArrow: { fontSize: 16, color: COLORS.textMuted },
   priceRow: { flexDirection: 'row', gap: SPACING.md },
   price: { fontSize: 14 },

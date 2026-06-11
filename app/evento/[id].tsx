@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   View, Text, FlatList, TouchableOpacity,
   StyleSheet, ActivityIndicator, Alert,
@@ -8,11 +8,13 @@ import { useLocalSearchParams, router, Stack } from 'expo-router'
 import { eventsApi } from '@/lib/supabase'
 import { useTripsStore } from '@/stores/tripsStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useUserLocation } from '@/hooks/useUserLocation'
+import { haversineKm } from '@/lib/distance'
 import {
   COLORS, SPACING, RADIUS,
   TRIP_TYPE_LABELS, TRIP_TYPE_COLORS,
 } from '@/lib/constants'
-import type { Event, TripSearchFilters } from '@/lib/types'
+import type { Event, Trip, TripSearchFilters } from '@/lib/types'
 import { TripCard } from '@/components/TripCard'
 import { Icon, EVENT_TYPE_ICON_NAME } from '@/components/Icon'
 import { format } from 'date-fns'
@@ -29,6 +31,34 @@ export default function EventoScreen() {
     eventTrips, eventTripsLoading,
     loadEventTrips, clearEventTrips,
   } = useTripsStore()
+
+  const { location: userLocation } = useUserLocation()
+
+  // Ordenar viajes por cercanía: con ubicación → distancia ascendente;
+  // sin ubicación → orden original (creación desc, ya viene del query).
+  // Los viajes sin origin_lat/lng se mandan al final.
+  const sortedTrips = useMemo(() => {
+    if (!userLocation) return eventTrips
+    const withDistance = eventTrips.map((t) => ({
+      trip:     t,
+      distance: (t.origin_lat != null && t.origin_lng != null)
+        ? haversineKm(userLocation.lat, userLocation.lng, t.origin_lat, t.origin_lng)
+        : Number.POSITIVE_INFINITY,
+    }))
+    withDistance.sort((a, b) => a.distance - b.distance)
+    return withDistance.map((x) => x.trip)
+  }, [eventTrips, userLocation])
+
+  const distancesByTripId = useMemo(() => {
+    if (!userLocation) return new Map<string, number>()
+    const m = new Map<string, number>()
+    for (const t of eventTrips) {
+      if (t.origin_lat != null && t.origin_lng != null) {
+        m.set(t.id, haversineKm(userLocation.lat, userLocation.lng, t.origin_lat, t.origin_lng))
+      }
+    }
+    return m
+  }, [eventTrips, userLocation])
 
   useEffect(() => {
     eventsApi.getById(id).then((e) => {
@@ -147,11 +177,12 @@ export default function EventoScreen() {
           </View>
         ) : (
           <FlatList
-            data={eventTrips}
+            data={sortedTrips}
             keyExtractor={(t) => t.id}
             renderItem={({ item }) => (
               <TripCard
                 trip={item}
+                distanceKm={distancesByTripId.get(item.id)}
                 onPress={() => router.push(`/viaje/${item.id}`)}
               />
             )}

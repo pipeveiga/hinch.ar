@@ -126,6 +126,8 @@ export interface NewTripForm {
   origin_address: string
   origin_city: string
   origin_province: string
+  origin_lat?: number
+  origin_lng?: number
   trip_type: TripType
   seats_total: number
   price_outbound?: number

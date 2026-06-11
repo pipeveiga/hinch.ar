@@ -13,12 +13,15 @@ import {
   MAJOR_CITIES,
 } from '@/lib/constants'
 import type { TripType, NewTripForm, Event } from '@/lib/types'
+import { AddressAutocomplete } from '@/components/AddressAutocomplete'
 
 const EMPTY_FORM: NewTripForm = {
   event_id:        '',
   origin_address:  '',
   origin_city:     '',
   origin_province: 'Buenos Aires',
+  origin_lat:      undefined,
+  origin_lng:      undefined,
   trip_type:       'ida',
   seats_total:     3,
   price_outbound:  undefined,
@@ -149,12 +152,27 @@ export default function NuevoViajeScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Punto de partida</Text>
           <Field label="Dirección de origen">
-            <TextInput
-              style={styles.input}
-              placeholder="Ej: Av. Corrientes 1234"
-              placeholderTextColor={COLORS.textMuted}
+            <AddressAutocomplete
               value={form.origin_address}
-              onChangeText={(v) => update('origin_address', v)}
+              onChangeText={(v) => {
+                update('origin_address', v)
+                // Si edita el texto a mano, invalidar las coords cargadas
+                if (form.origin_lat !== undefined) {
+                  update('origin_lat', undefined)
+                  update('origin_lng', undefined)
+                }
+              }}
+              onSelect={(p) => {
+                setForm((f) => ({
+                  ...f,
+                  origin_address:  p.address,
+                  origin_city:     p.city || f.origin_city,
+                  origin_province: p.province || f.origin_province,
+                  origin_lat:      p.lat,
+                  origin_lng:      p.lng,
+                }))
+              }}
+              placeholder="Ej: Av. Corrientes 1234"
             />
           </Field>
           <Field label="Ciudad">
