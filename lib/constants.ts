@@ -234,3 +234,12 @@ export const BUSINESS_RULES = {
   RATING_WINDOW_DAYS: 3,  // días post-evento para calificar
   MAX_BOOKING_SEATS:  4,  // máximo de asientos por reserva
 } as const
+
+// =============================================================================
+// Contacto de soporte
+// =============================================================================
+export const CONTACT = {
+  EMAIL:            'felipe@veiga.ar',
+  WHATSAPP_NUMBER:  '5493412274850',      // formato wa.me: sin '+' ni espacios
+  WHATSAPP_DISPLAY: '+54 9 341 227-4850',
+} as const

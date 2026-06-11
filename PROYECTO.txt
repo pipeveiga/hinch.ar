@@ -16,7 +16,8 @@ de verificación privado en Storage. En iOS/Android se ve recién con la
 build #13 de EAS — ya subida a TestFlight; + diagnóstico del crash de
 push notifications: era un bug de iOS 26 + Expo SDK 54, el registro de
 push quedó habilitado de nuevo pero SOLO en Android — en iOS queda
-apagado hasta migrar a SDK 55+)
+apagado hasta migrar a SDK 55+; + sección "Ayuda y contacto" en Perfil
+con botones de mail (felipe@veiga.ar) y WhatsApp (+54 9 341 227-4850))
 
 --------------------------------------------------------------------------------
 QUÉ HACE LA APP
@@ -35,6 +36,9 @@ QUÉ HACE LA APP
    (Por ahora solo en Android: en iPhone están apagadas porque una falla
    de iOS 26 con la versión actual de Expo hacía crashear la app al
    iniciar sesión. Se reactivan cuando migremos a Expo SDK 55+.)
+9. Contacto desde el Perfil: botones que abren un mail a felipe@veiga.ar
+   o un chat de WhatsApp a +54 9 341 227-4850. Los datos viven en
+   lib/constants.ts (CONTACT).
 
 --------------------------------------------------------------------------------
 STACK TÉCNICO

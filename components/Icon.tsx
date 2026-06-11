@@ -13,7 +13,7 @@ export type IconName =
   | 'people' | 'coins' | 'calendar' | 'grid' | 'luggage' | 'paw'
   | 'check' | 'plus' | 'logout' | 'edit' | 'id' | 'help'
   | 'clock' | 'x' | 'ban' | 'camera' | 'trash' | 'warn'
-  | 'eye' | 'eyeOff' | 'card' | 'bellOff'
+  | 'eye' | 'eyeOff' | 'card' | 'bellOff' | 'mail' | 'whatsapp'
 
 interface IconProps {
   name:         IconName
@@ -224,6 +224,18 @@ const PATHS: Record<IconName, (c: string, sw: number) => React.ReactNode> = {
     <>
       <Path d="M8.5 6.2A6 6 0 0 1 18 11c0 2.3.4 3.8.9 4.8M6.2 8.3A6 6 0 0 0 6 11c0 4-1.2 5.3-2 6h12.5" stroke={c} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" />
       <Path d="M10 19.5a2.2 2.2 0 0 0 4 0M4 4l16 16" stroke={c} strokeWidth={sw} strokeLinecap="round" />
+    </>
+  ),
+  mail: (c, sw) => (
+    <>
+      <Rect x={3} y={5.2} width={18} height={13.6} rx={2.4} stroke={c} strokeWidth={sw} />
+      <Path d="M4 7.5l8 6 8-6" stroke={c} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  ),
+  whatsapp: (c, sw) => (
+    <>
+      <Path d="M12 4a8 8 0 0 0-6.9 12L4 20l4.1-1.1A8 8 0 1 0 12 4z" stroke={c} strokeWidth={sw} strokeLinejoin="round" />
+      <Path d="M9.4 8.9c-.3 1.2.3 2.7 1.5 3.9s2.7 1.8 3.9 1.5" stroke={c} strokeWidth={sw} strokeLinecap="round" />
     </>
   ),
 }
