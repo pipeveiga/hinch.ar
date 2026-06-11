@@ -38,7 +38,8 @@ QUÉ HACE LA APP
    iniciar sesión. Se reactivan cuando migremos a Expo SDK 55+.)
 9. Contacto desde el Perfil: botones que abren un mail a felipe@veiga.ar
    o un chat de WhatsApp a +54 9 341 227-4850. Los datos viven en
-   lib/constants.ts (CONTACT).
+   lib/constants.ts (CONTACT). Los textos legales (Términos y Privacidad)
+   usan el mismo mail (antes decían hola@hinch.ar, casilla que no existe).
 
 --------------------------------------------------------------------------------
 STACK TÉCNICO
