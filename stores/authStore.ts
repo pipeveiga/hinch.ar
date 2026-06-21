@@ -31,7 +31,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // getSession()/getMe() vuelve a pedir ese lock y produce un DEADLOCK que
     // deja la app clavada en la pantalla de carga. El fetch del perfil se
     // difiere con setTimeout(…, 0) para que corra fuera del lock.
-    auth.onAuthStateChange((event, session) => {
+    // async para satisfacer el tipo del callback (espera Promise<void>), pero
+    // OJO: sigue sin haber ningún `await` de Supabase acá adentro — eso es lo
+    // que evita el deadlock; el async vacío resuelve al toque y libera el lock.
+    auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN') {
         set({ session })
         setTimeout(() => { get().refreshUser().catch(() => {}) }, 0)
