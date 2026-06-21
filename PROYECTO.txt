@@ -6,7 +6,12 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-06-11 (rediseño visible de la app:
+Última actualización del documento: 2026-06-13 (FIX CRÍTICO: la app se
+quedaba clavada en la pantalla de carga y no abría para usuarios ya
+logueados. Era un deadlock de supabase-js: se llamaba getMe()/getUser()
+dentro del callback de onAuthStateChange, que corre con el lock de auth
+tomado. Resuelto en stores/authStore.ts + red de seguridad de 8s para que
+la carga nunca cuelgue. Detalle anterior:) (rediseño visible de la app:
 login con tarjeta flotante y botón degradado, home con saludo personalizado
 y lista en cascada, tarjeta de evento con fecha estilo calendario, pantalla
 404; + set de íconos propio en landing y app reemplazando los emojis

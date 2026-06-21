@@ -25,38 +25,44 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isHydrated: false,
 
   initialize: async () => {
-    try {
-      // Escuchar cambios futuros de sesión
-      auth.onAuthStateChange(async (event, session) => {
-        if (event === 'INITIAL_SESSION') {
-          // Solo actuar si aún no nos hidratamos (getSession() puede llegar primero)
-          if (get().isHydrated) return
-          let user: User | null = null
-          if (session) {
-            try { user = await usersApi.getMe() } catch { /* ignorar */ }
-          }
-          set({ session, user, isLoading: false, isHydrated: true })
-        } else if (event === 'SIGNED_IN') {
-          set({ session })
-          try { set({ user: await usersApi.getMe() }) } catch { /* ignorar */ }
-        } else if (event === 'TOKEN_REFRESHED') {
-          set({ session })
-        } else if (event === 'SIGNED_OUT') {
-          set({ user: null, session: null })
-        }
-      })
-
-      // Fallback inmediato: getSession() lee AsyncStorage directamente.
-      // En Android a veces llega antes que INITIAL_SESSION.
-      const { data: { session } } = await auth.getSession()
-      if (get().isHydrated) return  // INITIAL_SESSION ya lo manejó
-      let user: User | null = null
-      if (session) {
-        try { user = await usersApi.getMe() } catch { /* ignorar */ }
+    // Listener de cambios FUTUROS de sesión.
+    // IMPORTANTE: NO hacer `await` de funciones de Supabase acá adentro.
+    // El callback corre con el lock interno de auth tomado; llamar getUser()/
+    // getSession()/getMe() vuelve a pedir ese lock y produce un DEADLOCK que
+    // deja la app clavada en la pantalla de carga. El fetch del perfil se
+    // difiere con setTimeout(…, 0) para que corra fuera del lock.
+    // async para satisfacer el tipo del callback (espera Promise<void>), pero
+    // OJO: sigue sin haber ningún `await` de Supabase acá adentro — eso es lo
+    // que evita el deadlock; el async vacío resuelve al toque y libera el lock.
+    auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN') {
+        set({ session })
+        setTimeout(() => { get().refreshUser().catch(() => {}) }, 0)
+      } else if (event === 'TOKEN_REFRESHED') {
+        set({ session })
+      } else if (event === 'SIGNED_OUT') {
+        set({ user: null, session: null })
       }
-      set({ session, user, isLoading: false, isHydrated: true })
+    })
+
+    // Red de seguridad: pase lo que pase (deadlock, red colgada, storage
+    // lento), salimos de la pantalla de carga como mucho en 8 segundos.
+    const failsafe = setTimeout(() => {
+      if (!get().isHydrated) set({ isLoading: false, isHydrated: true })
+    }, 8000)
+
+    try {
+      // Hidratación canónica: getSession() lee la sesión del storage. Corre
+      // fuera del callback, así que getMe() ya puede tomar el lock sin trabarse.
+      const { data: { session } } = await auth.getSession()
+      set({ session })
+      if (session) {
+        try { set({ user: await usersApi.getMe() }) } catch { /* perfil se reintenta luego */ }
+      }
     } catch (error) {
       console.error('[AuthStore] Error al inicializar:', error)
+    } finally {
+      clearTimeout(failsafe)
       set({ isLoading: false, isHydrated: true })
     }
   },
