@@ -7,6 +7,8 @@ import { router, Stack } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
 import { verificationApi } from '@/lib/supabase'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
+import { GradientButton } from '@/components/GradientButton'
+import { Icon, type IconName } from '@/components/Icon'
 
 type PhotoKey = 'dni_front' | 'dni_back' | 'selfie'
 
@@ -14,7 +16,7 @@ interface PhotoStep {
   key:         PhotoKey
   title:       string
   description: string
-  icon:        string
+  icon:        IconName
 }
 
 const STEPS: PhotoStep[] = [
@@ -22,19 +24,19 @@ const STEPS: PhotoStep[] = [
     key:         'dni_front',
     title:       'Frente del DNI',
     description: 'Sacá una foto clara del frente de tu DNI. Asegurate que se vean bien tu nombre y número.',
-    icon:        '🪪',
+    icon:        'id',
   },
   {
     key:         'dni_back',
     title:       'Dorso del DNI',
     description: 'Ahora el dorso. Que se vea el código de barras y toda la info.',
-    icon:        '🔄',
+    icon:        'card',
   },
   {
     key:         'selfie',
     title:       'Selfie con DNI',
     description: 'Sacate una selfie sosteniendo tu DNI al lado de tu cara. Tiene que verse tu cara y el DNI claramente.',
-    icon:        '🤳',
+    icon:        'camera',
   },
 ]
 
@@ -54,8 +56,9 @@ export default function VerificacionScreen() {
         <Text style={{ fontSize: 14, color: COLORS.textSecondary, textAlign: 'center' }}>
           La verificación de identidad requiere acceso a la cámara. Descargá la app para completarla.
         </Text>
-        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 8 }}>
-          <Text style={{ color: COLORS.primary, fontWeight: '600', fontSize: 16 }}>← Volver</Text>
+        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <Icon name="arrowLeft" size={18} color={COLORS.primary} strokeWidth={2} />
+          <Text style={{ color: COLORS.primary, fontWeight: '600', fontSize: 16 }}>Volver</Text>
         </TouchableOpacity>
       </View>
     )
@@ -125,7 +128,9 @@ export default function VerificacionScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         {/* Intro */}
         <View style={styles.intro}>
-          <Text style={styles.introIcon}>🔒</Text>
+          <View style={styles.introIconWrap}>
+            <Icon name="shield" size={30} color={COLORS.primary} strokeWidth={1.7} />
+          </View>
           <Text style={styles.introTitle}>Verificación de identidad</Text>
           <Text style={styles.introText}>
             Para que todos estén seguros, verificamos tu identidad con tu DNI.
@@ -142,12 +147,16 @@ export default function VerificacionScreen() {
             <View key={step.key} style={styles.stepCard}>
               <View style={styles.stepHeader}>
                 <View style={[styles.stepNumber, photo && styles.stepNumberDone]}>
-                  <Text style={styles.stepNumberText}>
-                    {photo ? '✓' : i + 1}
-                  </Text>
+                  {photo
+                    ? <Icon name="check" size={15} color={COLORS.white} strokeWidth={2.6} />
+                    : <Text style={styles.stepNumberText}>{i + 1}</Text>
+                  }
                 </View>
                 <View style={styles.stepInfo}>
-                  <Text style={styles.stepTitle}>{step.icon} {step.title}</Text>
+                  <View style={styles.stepTitleRow}>
+                    <Icon name={step.icon} size={16} color={COLORS.primary} strokeWidth={1.8} />
+                    <Text style={styles.stepTitle}>{step.title}</Text>
+                  </View>
                   <Text style={styles.stepDesc}>{step.description}</Text>
                 </View>
               </View>
@@ -170,7 +179,12 @@ export default function VerificacionScreen() {
                 >
                   {isLoading
                     ? <ActivityIndicator color={COLORS.primary} />
-                    : <Text style={styles.cameraBtnText}>📷 Tomar foto</Text>
+                    : (
+                      <View style={styles.cameraBtnRow}>
+                        <Icon name="camera" size={16} color={COLORS.primary} strokeWidth={1.9} />
+                        <Text style={styles.cameraBtnText}>Tomar foto</Text>
+                      </View>
+                    )
                   }
                 </TouchableOpacity>
               )}
@@ -184,19 +198,18 @@ export default function VerificacionScreen() {
         </Text>
 
         {/* Submit */}
-        <TouchableOpacity
-          style={[styles.submitBtn, (!allDone || loading === 'submit') && styles.submitBtnDisabled]}
+        <GradientButton
+          label={
+            loading === 'submit'
+              ? 'Enviando...'
+              : allDone
+                ? 'Enviar verificación'
+                : `Faltan ${3 - Object.keys(photos).length} foto${3 - Object.keys(photos).length !== 1 ? 's' : ''}`
+          }
           onPress={handleSubmit}
           disabled={!allDone || !!loading}
-          activeOpacity={0.85}
-        >
-          {loading === 'submit'
-            ? <ActivityIndicator color={COLORS.white} />
-            : <Text style={styles.submitBtnText}>
-                {allDone ? '✓ Enviar verificación' : `Faltan ${3 - Object.keys(photos).length} foto${3 - Object.keys(photos).length !== 1 ? 's' : ''}`}
-              </Text>
-          }
-        </TouchableOpacity>
+          style={styles.submitBtn}
+        />
       </ScrollView>
     </>
   )
@@ -207,7 +220,11 @@ const styles = StyleSheet.create({
   content:   { padding: SPACING.lg, gap: SPACING.lg, paddingBottom: SPACING.xxl },
 
   intro: { alignItems: 'center', gap: SPACING.sm, paddingVertical: SPACING.md },
-  introIcon:  { fontSize: 40 },
+  introIconWrap: {
+    width: 64, height: 64, borderRadius: 32,
+    backgroundColor: COLORS.brandTint,
+    alignItems: 'center', justifyContent: 'center',
+  },
   introTitle: { fontSize: 20, fontWeight: '800', color: COLORS.textPrimary },
   introText:  { fontSize: 14, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 20 },
 
@@ -223,6 +240,7 @@ const styles = StyleSheet.create({
   stepNumberDone:   { backgroundColor: COLORS.primary },
   stepNumberText:   { fontSize: 14, fontWeight: '800', color: COLORS.white },
   stepInfo:         { flex: 1, gap: 4 },
+  stepTitleRow:     { flexDirection: 'row', alignItems: 'center', gap: 6 },
   stepTitle:        { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
   stepDesc:         { fontSize: 13, color: COLORS.textSecondary, lineHeight: 18 },
 
@@ -231,6 +249,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: COLORS.primary, borderStyle: 'dashed',
     padding: SPACING.md, alignItems: 'center',
   },
+  cameraBtnRow:  { flexDirection: 'row', alignItems: 'center', gap: 6 },
   cameraBtnText: { color: COLORS.primary, fontWeight: '700', fontSize: 15 },
 
   photoPreview:  { gap: SPACING.sm },
@@ -243,10 +262,5 @@ const styles = StyleSheet.create({
   disclaimer: {
     fontSize: 12, color: COLORS.textMuted, textAlign: 'center', lineHeight: 17,
   },
-  submitBtn: {
-    backgroundColor: COLORS.primary, borderRadius: RADIUS.lg,
-    padding: SPACING.md, alignItems: 'center',
-  },
-  submitBtnDisabled: { opacity: 0.5 },
-  submitBtnText: { color: COLORS.white, fontSize: 16, fontWeight: '800' },
+  submitBtn: { marginTop: 0 },
 })

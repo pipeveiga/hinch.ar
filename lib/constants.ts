@@ -138,9 +138,12 @@ export const RATING_CATEGORIES: Record<RateeRole, string[]> = {
   ],
 }
 
+// Valores = nombres del set de íconos propio (IconName en components/Icon.tsx).
+// Se tipa como string[] para no crear un import circular constants↔Icon;
+// la pantalla de calificar castea a IconName al usarlos.
 export const RATING_CATEGORY_ICONS: Record<RateeRole, string[]> = {
-  driver:    ['⏰', '🛡️', '🚗', '💬', '😎'],
-  passenger: ['💸', '⏰', '🙌', '💬', '🪪'],
+  driver:    ['clock', 'shield', 'car', 'chat', 'star'],
+  passenger: ['coins', 'clock', 'people', 'chat', 'id'],
 }
 
 // Descripción corta de cada score
