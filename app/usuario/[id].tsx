@@ -8,6 +8,7 @@ import { usersApi, ratingsApi } from '@/lib/supabase'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
 import { UserAvatar } from '@/components/UserAvatar'
 import { VerificationBadge } from '@/components/VerificationBadge'
+import { Icon } from '@/components/Icon'
 import type { User, Rating } from '@/lib/types'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -103,7 +104,9 @@ export default function UsuarioPerfilScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Auto</Text>
             <View style={styles.card}>
-              <Text style={styles.carEmoji}>🚗</Text>
+              <View style={styles.carIconWrap}>
+                <Icon name="car" size={22} color={COLORS.primary} strokeWidth={1.8} />
+              </View>
               <View>
                 <Text style={styles.carName}>
                   {user.car_brand} {user.car_model} {user.car_year}
@@ -117,16 +120,20 @@ export default function UsuarioPerfilScreen() {
         {/* Calificaciones como conductor */}
         {user.total_trips_as_driver > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              Como conductor · ⭐ {user.avg_rating_as_driver.toFixed(1)}
-            </Text>
+            <View style={styles.sectionTitleRow}>
+              <Text style={styles.sectionTitle}>Como conductor ·</Text>
+              <Icon name="star" size={12} color={COLORS.warning} strokeWidth={2} />
+              <Text style={styles.sectionTitle}>{user.avg_rating_as_driver.toFixed(1)}</Text>
+            </View>
             <View style={styles.ratingsList}>
               {driverRatings.slice(0, 5).map((r) => (
                 <View key={r.id} style={styles.ratingCard}>
                   <View style={styles.ratingHeader}>
-                    <Text style={styles.ratingScore}>
-                      {'⭐'.repeat(Math.round((r.score_1 + r.score_2 + r.score_3 + r.score_4 + r.score_5) / 5))}
-                    </Text>
+                    <View style={styles.ratingStars}>
+                      {Array.from({ length: Math.round((r.score_1 + r.score_2 + r.score_3 + r.score_4 + r.score_5) / 5) }).map((_, k) => (
+                        <Icon key={k} name="star" size={13} color={COLORS.warning} strokeWidth={1.9} />
+                      ))}
+                    </View>
                     <Text style={styles.ratingDate}>
                       {format(new Date(r.created_at), "d MMM yyyy", { locale: es })}
                     </Text>
@@ -143,16 +150,20 @@ export default function UsuarioPerfilScreen() {
         {/* Calificaciones como pasajero */}
         {user.total_trips_as_passenger > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              Como pasajero · ⭐ {user.avg_rating_as_passenger.toFixed(1)}
-            </Text>
+            <View style={styles.sectionTitleRow}>
+              <Text style={styles.sectionTitle}>Como pasajero ·</Text>
+              <Icon name="star" size={12} color={COLORS.warning} strokeWidth={2} />
+              <Text style={styles.sectionTitle}>{user.avg_rating_as_passenger.toFixed(1)}</Text>
+            </View>
             <View style={styles.ratingsList}>
               {passengerRatings.slice(0, 5).map((r) => (
                 <View key={r.id} style={styles.ratingCard}>
                   <View style={styles.ratingHeader}>
-                    <Text style={styles.ratingScore}>
-                      {'⭐'.repeat(Math.round((r.score_1 + r.score_2 + r.score_3 + r.score_4 + r.score_5) / 5))}
-                    </Text>
+                    <View style={styles.ratingStars}>
+                      {Array.from({ length: Math.round((r.score_1 + r.score_2 + r.score_3 + r.score_4 + r.score_5) / 5) }).map((_, k) => (
+                        <Icon key={k} name="star" size={13} color={COLORS.warning} strokeWidth={1.9} />
+                      ))}
+                    </View>
                     <Text style={styles.ratingDate}>
                       {format(new Date(r.created_at), "d MMM yyyy", { locale: es })}
                     </Text>
@@ -216,12 +227,17 @@ const styles = StyleSheet.create({
     fontSize: 13, fontWeight: '700', color: COLORS.textMuted,
     textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: SPACING.sm,
   },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   card: {
     flexDirection: 'row', alignItems: 'center', gap: SPACING.md,
     backgroundColor: COLORS.card, borderRadius: RADIUS.lg,
     padding: SPACING.md, borderWidth: 1, borderColor: COLORS.border,
   },
-  carEmoji:  { fontSize: 28 },
+  carIconWrap: {
+    width: 44, height: 44, borderRadius: RADIUS.md,
+    backgroundColor: COLORS.brandTint,
+    alignItems: 'center', justifyContent: 'center',
+  },
   carName:   { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
   carDetail: { fontSize: 13, color: COLORS.textSecondary },
 
@@ -231,7 +247,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md, borderWidth: 1, borderColor: COLORS.border, gap: SPACING.xs,
   },
   ratingHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  ratingScore:  { fontSize: 13 },
+  ratingStars:  { flexDirection: 'row', gap: 1 },
   ratingDate:   { fontSize: 12, color: COLORS.textMuted },
   ratingComment: { fontSize: 14, color: COLORS.textSecondary, fontStyle: 'italic', lineHeight: 20 },
 

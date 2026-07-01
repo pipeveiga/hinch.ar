@@ -12,6 +12,8 @@ import {
 } from '@/lib/constants'
 import type { Booking, RateeRole, RatingScores } from '@/lib/types'
 import { UserAvatar } from '@/components/UserAvatar'
+import { GradientButton } from '@/components/GradientButton'
+import { Icon, type IconName } from '@/components/Icon'
 
 const DEFAULT_SCORES: RatingScores = {
   score_1: 5,
@@ -25,12 +27,12 @@ const DEFAULT_SCORES: RatingScores = {
 function StarRow({
   icon, category, score, onChange,
 }: {
-  icon: string; category: string; score: number; onChange: (n: number) => void
+  icon: IconName; category: string; score: number; onChange: (n: number) => void
 }) {
   return (
     <View style={styles.starRow}>
       <View style={styles.starHeader}>
-        <Text style={styles.starIcon}>{icon}</Text>
+        <Icon name={icon} size={17} color={COLORS.primary} strokeWidth={1.9} />
         <Text style={styles.starCategory}>{category}</Text>
       </View>
       <View style={styles.stars}>
@@ -156,7 +158,10 @@ export default function CalificarScreen() {
               Calificando {rateeRole === 'driver' ? 'al conductor' : 'al pasajero'}
             </Text>
             <Text style={styles.rateeName}>{rateeName}</Text>
-            <Text style={styles.overallPreview}>Promedio actual: ⭐ {overallPreview}</Text>
+            <View style={styles.overallPreviewRow}>
+              <Icon name="star" size={13} color={COLORS.warning} strokeWidth={1.9} />
+              <Text style={styles.overallPreview}>Promedio actual: {overallPreview}</Text>
+            </View>
           </View>
         </View>
 
@@ -173,7 +178,7 @@ export default function CalificarScreen() {
             return (
               <StarRow
                 key={cat}
-                icon={icons[i]}
+                icon={icons[i] as IconName}
                 category={cat}
                 score={scores[scoreKey] as number}
                 onChange={(n) => updateScore(scoreKey, n)}
@@ -199,17 +204,12 @@ export default function CalificarScreen() {
         </View>
 
         {/* Submit */}
-        <TouchableOpacity
-          style={[styles.submitBtn, submitting && styles.submitBtnDisabled]}
+        <GradientButton
+          label={submitting ? 'Enviando...' : 'Enviar calificación'}
           onPress={handleSubmit}
           disabled={submitting}
-          activeOpacity={0.85}
-        >
-          {submitting
-            ? <ActivityIndicator color={COLORS.white} />
-            : <Text style={styles.submitBtnText}>⭐ Enviar calificación</Text>
-          }
-        </TouchableOpacity>
+          style={styles.submitBtn}
+        />
 
         <Text style={styles.disclaimer}>
           Las calificaciones son anónimas hasta que ambas partes hayan calificado.
@@ -238,7 +238,8 @@ const styles = StyleSheet.create({
   rateeInfo: { flex: 1 },
   rateeLabel: { fontSize: 12, color: COLORS.textMuted, textTransform: 'uppercase', fontWeight: '700' },
   rateeName: { fontSize: 20, fontWeight: '800', color: COLORS.textPrimary },
-  overallPreview: { fontSize: 13, color: COLORS.accent, fontWeight: '700', marginTop: 4 },
+  overallPreviewRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+  overallPreview: { fontSize: 13, color: COLORS.accent, fontWeight: '700' },
   ratingsCard: {
     backgroundColor: COLORS.card, borderRadius: RADIUS.lg,
     padding: SPACING.md, borderWidth: 1, borderColor: COLORS.border, gap: SPACING.md,
@@ -250,7 +251,6 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   starHeader: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs, width: 160 },
-  starIcon: { fontSize: 16 },
   starCategory: { fontSize: 13, color: COLORS.textPrimary, fontWeight: '500', flex: 1 },
   stars: { flexDirection: 'row', gap: 4 },
   star: { fontSize: 22, color: COLORS.border },
@@ -267,11 +267,6 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary, fontSize: 14, height: 100,
     textAlignVertical: 'top',
   },
-  submitBtn: {
-    backgroundColor: COLORS.accent, borderRadius: RADIUS.lg,
-    padding: SPACING.md, alignItems: 'center',
-  },
-  submitBtnDisabled: { opacity: 0.6 },
-  submitBtnText: { color: COLORS.textInverse, fontSize: 16, fontWeight: '900' },
+  submitBtn: { marginTop: 0 },
   disclaimer: { fontSize: 12, color: COLORS.textMuted, textAlign: 'center', lineHeight: 18 },
 })
