@@ -15,7 +15,9 @@ Se preservó todo lo funcional (contacto mail/WhatsApp, deep-link, SEO/OG).
 + PORT del rediseño a la app — Flujo 1 (Auth): login/register/recuperar/
 restablecer unificados con componentes nuevos BrandMark (logo) y
 GradientButton (CTA con degradé), emojis reemplazados por el set de íconos
-(nuevos: arrowLeft, send).
+(nuevos: arrowLeft, send). Flujo 2 (viaje/[id]): badge de evento, hora,
+rating, botones aceptar/rechazar/chat y "Reservar" (con degradé) pasan de
+emojis a íconos del set.
 + agregada la carpeta design/
 con el prototipo de alta fidelidad del rediseño de la app + handoff para
 portar a StyleSheet; es material de referencia, no se buildea. Antes:) (FIX

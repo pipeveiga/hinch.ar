@@ -17,6 +17,8 @@ import {
 import type { TripType, NewBookingForm, Booking } from '@/lib/types'
 import { UserAvatar } from '@/components/UserAvatar'
 import { VerificationBadge } from '@/components/VerificationBadge'
+import { GradientButton } from '@/components/GradientButton'
+import { Icon, EVENT_TYPE_ICON_NAME } from '@/components/Icon'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -235,7 +237,10 @@ export default function ViajeDetailScreen() {
       {/* Header custom */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
-          <Text style={styles.backText}>‹ Volver</Text>
+          <View style={styles.backRow}>
+            <Icon name="arrowLeft" size={18} color={COLORS.primary} strokeWidth={2} />
+            <Text style={styles.backText}>Volver</Text>
+          </View>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Detalle del viaje</Text>
         {isOwn && trip?.status === 'active' ? (
@@ -251,7 +256,10 @@ export default function ViajeDetailScreen() {
         {/* Evento */}
         {event && (
           <View style={styles.eventBadge}>
-            <Text style={styles.eventBadgeText}>⚽ {event.title}</Text>
+            <View style={styles.eventBadgeTitleRow}>
+              <Icon name={EVENT_TYPE_ICON_NAME[event.type] ?? 'ball'} size={15} color={COLORS.primary} strokeWidth={1.9} />
+              <Text style={styles.eventBadgeText}>{event.title}</Text>
+            </View>
             <Text style={styles.eventBadgeSub}>
               {format(new Date(event.event_date), "d MMM · HH:mm", { locale: es })} · {event.venue_city}
             </Text>
@@ -288,9 +296,12 @@ export default function ViajeDetailScreen() {
                 <Text style={styles.routeAddress}>{trip.origin_address}</Text>
                 <Text style={styles.routeCity}>{trip.origin_city}</Text>
                 {trip.departure_time && (
-                  <Text style={styles.routeTime}>
-                    ⏰ Salida: {format(new Date(trip.departure_time), "HH:mm")}
-                  </Text>
+                  <View style={styles.routeTimeRow}>
+                    <Icon name="clock" size={13} color={COLORS.accent} strokeWidth={1.9} />
+                    <Text style={styles.routeTime}>
+                      Salida: {format(new Date(trip.departure_time), "HH:mm")}
+                    </Text>
+                  </View>
                 )}
               </View>
             </View>
@@ -361,9 +372,12 @@ export default function ViajeDetailScreen() {
                   <VerificationBadge verified={driver.is_verified} compact />
                 </View>
                 {driver.total_trips_as_driver > 0 ? (
-                  <Text style={styles.driverRating}>
-                    ⭐ {driver.avg_rating_as_driver.toFixed(1)} · {driver.total_trips_as_driver} viaje{driver.total_trips_as_driver !== 1 ? 's' : ''}
-                  </Text>
+                  <View style={styles.driverRatingRow}>
+                    <Icon name="star" size={13} color={COLORS.warning} strokeWidth={1.9} />
+                    <Text style={styles.driverRating}>
+                      {driver.avg_rating_as_driver.toFixed(1)} · {driver.total_trips_as_driver} viaje{driver.total_trips_as_driver !== 1 ? 's' : ''}
+                    </Text>
+                  </View>
                 ) : (
                   <Text style={styles.driverRating}>Conductor nuevo</Text>
                 )}
@@ -436,7 +450,10 @@ export default function ViajeDetailScreen() {
                         onPress={() => handleReject(b.id)}
                         disabled={actionLoading === b.id}
                       >
-                        <Text style={styles.rejectBtnText}>✕ Rechazar</Text>
+                        <View style={styles.btnLabel}>
+                          <Icon name="x" size={14} color={COLORS.error} strokeWidth={2.2} />
+                          <Text style={styles.rejectBtnText}>Rechazar</Text>
+                        </View>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={[styles.acceptBtn, actionLoading === b.id && { opacity: 0.6 }]}
@@ -445,7 +462,12 @@ export default function ViajeDetailScreen() {
                       >
                         {actionLoading === b.id
                           ? <ActivityIndicator size="small" color={COLORS.white} />
-                          : <Text style={styles.acceptBtnText}>✓ Aceptar</Text>
+                          : (
+                            <View style={styles.btnLabel}>
+                              <Icon name="check" size={14} color={COLORS.white} strokeWidth={2.6} />
+                              <Text style={styles.acceptBtnText}>Aceptar</Text>
+                            </View>
+                          )
                         }
                       </TouchableOpacity>
                     </View>
@@ -456,7 +478,10 @@ export default function ViajeDetailScreen() {
                       onPress={() => router.push(`/chat/${b.id}`)}
                       activeOpacity={0.8}
                     >
-                      <Text style={styles.chatBtnText}>💬 Abrir chat</Text>
+                      <View style={styles.btnLabel}>
+                        <Icon name="chat" size={15} color={COLORS.textSecondary} strokeWidth={1.9} />
+                        <Text style={styles.chatBtnText}>Abrir chat</Text>
+                      </View>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -492,13 +517,11 @@ export default function ViajeDetailScreen() {
               </TouchableOpacity>
             </View>
           ) : trip.status === 'active' && trip.seats_available > 0 ? (
-            <TouchableOpacity
-              style={styles.reservarBtn}
+            <GradientButton
+              label="Reservar lugar"
               onPress={() => setModalVisible(true)}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.reservarBtnText}>Reservar lugar</Text>
-            </TouchableOpacity>
+              style={styles.reservarBtn}
+            />
           ) : null}
         </View>
       )}
@@ -744,7 +767,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderBottomWidth: 1, borderBottomColor: COLORS.border,
   },
-  backBtn: { paddingVertical: SPACING.xs, paddingRight: SPACING.md, width: 80 },
+  backBtn: { paddingVertical: SPACING.xs, paddingRight: SPACING.md, width: 90 },
+  backRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   backText: { color: COLORS.primary, fontSize: 17, fontWeight: '600' },
   headerTitle: { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
   editBtn: { width: 60, alignItems: 'flex-end' },
@@ -753,7 +777,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface, padding: SPACING.md,
     borderBottomWidth: 1, borderBottomColor: COLORS.border,
   },
-  eventBadgeText: { fontSize: 14, fontWeight: '700', color: COLORS.textPrimary },
+  eventBadgeTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  eventBadgeText: { fontSize: 14, fontWeight: '700', color: COLORS.textPrimary, flex: 1 },
   eventBadgeSub: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
   tramoBadge: { flexDirection: 'row', gap: SPACING.sm, padding: SPACING.md },
   tramoChip: {
@@ -779,7 +804,8 @@ const styles = StyleSheet.create({
   routeLabel: { fontSize: 11, color: COLORS.textMuted, fontWeight: '600', textTransform: 'uppercase' },
   routeAddress: { fontSize: 14, fontWeight: '600', color: COLORS.textPrimary },
   routeCity: { fontSize: 12, color: COLORS.textSecondary },
-  routeTime: { fontSize: 12, color: COLORS.accent, fontWeight: '600', marginTop: 2 },
+  routeTimeRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
+  routeTime: { fontSize: 12, color: COLORS.accent, fontWeight: '600' },
   pricesCard: {
     backgroundColor: COLORS.card, borderRadius: RADIUS.lg,
     borderWidth: 1, borderColor: COLORS.border, overflow: 'hidden',
@@ -798,6 +824,7 @@ const styles = StyleSheet.create({
   driverInfo: { flex: 1 },
   driverNameRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs },
   driverName: { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary },
+  driverRatingRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
   driverRating: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2 },
   driverChevron: { fontSize: 20, color: COLORS.textMuted },
   extrasCard: {
@@ -813,11 +840,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface, padding: SPACING.md,
     borderTopWidth: 1, borderTopColor: COLORS.border,
   },
-  reservarBtn: {
-    backgroundColor: COLORS.primary, borderRadius: RADIUS.lg,
-    padding: SPACING.md, alignItems: 'center',
-  },
-  reservarBtnText: { color: COLORS.white, fontSize: 16, fontWeight: '800' },
+  reservarBtn: { marginTop: 0 },
   myBookingBar: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
   },
@@ -909,6 +932,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: COLORS.error, alignItems: 'center',
   },
   rejectBtnText: { color: COLORS.error, fontWeight: '700', fontSize: 13 },
+  btnLabel: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   acceptBtn: {
     flex: 2, padding: SPACING.sm, borderRadius: RADIUS.md,
     backgroundColor: COLORS.success ?? '#22c55e', alignItems: 'center',
