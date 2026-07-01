@@ -8,6 +8,8 @@ import { router, Link } from 'expo-router'
 import * as Linking from 'expo-linking'
 import { auth } from '@/lib/supabase'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
+import { BrandMark } from '@/components/BrandMark'
+import { GradientButton } from '@/components/GradientButton'
 
 // A dónde vuelve el link del mail. En web usamos el origin actual; en nativo el scheme.
 function buildRedirectTo() {
@@ -52,7 +54,7 @@ export default function RecuperarScreen() {
       >
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
-            <Text style={styles.logo}>⚽ hinch.ar</Text>
+            <BrandMark />
           </View>
 
           {sent ? (
@@ -63,9 +65,7 @@ export default function RecuperarScreen() {
                 te mandamos un link para restablecer tu contraseña. Puede tardar unos minutos;
                 fijate también en spam.
               </Text>
-              <TouchableOpacity style={styles.btn} onPress={() => router.replace('/(auth)/login')} activeOpacity={0.8}>
-                <Text style={styles.btnText}>Volver a iniciar sesión</Text>
-              </TouchableOpacity>
+              <GradientButton label="Volver a iniciar sesión" onPress={() => router.replace('/(auth)/login')} />
             </View>
           ) : (
             <View style={styles.form}>
@@ -96,14 +96,11 @@ export default function RecuperarScreen() {
                 </View>
               )}
 
-              <TouchableOpacity
-                style={[styles.btn, loading && styles.btnDisabled]}
+              <GradientButton
+                label={loading ? 'Enviando...' : 'Enviar link'}
                 onPress={handleSubmit}
                 disabled={loading}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.btnText}>{loading ? 'Enviando...' : 'Enviar link'}</Text>
-              </TouchableOpacity>
+              />
 
               <View style={styles.footer}>
                 <Link href="/(auth)/login" asChild>
@@ -124,7 +121,6 @@ const styles = StyleSheet.create({
   flex:      { flex: 1, backgroundColor: COLORS.background },
   container: { flexGrow: 1, padding: SPACING.lg, justifyContent: 'center' },
   header:    { alignItems: 'center', marginBottom: SPACING.xxl },
-  logo:      { fontSize: 36, fontWeight: '900', color: COLORS.textPrimary, letterSpacing: -1 },
   form:      { gap: SPACING.md },
   title:     { fontSize: 24, fontWeight: '700', color: COLORS.textPrimary },
   help:      { fontSize: 14, color: COLORS.textSecondary, lineHeight: 20 },
@@ -136,12 +132,6 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md,
     padding: SPACING.md, color: COLORS.textPrimary, fontSize: 16,
   },
-  btn: {
-    backgroundColor: COLORS.primary, borderRadius: RADIUS.md,
-    padding: SPACING.md, alignItems: 'center', marginTop: SPACING.sm,
-  },
-  btnDisabled: { opacity: 0.6 },
-  btnText:     { color: COLORS.white, fontSize: 16, fontWeight: '700' },
   errorBox: {
     backgroundColor: COLORS.errorBg, borderWidth: 1, borderColor: COLORS.error,
     borderRadius: RADIUS.md, padding: SPACING.sm,

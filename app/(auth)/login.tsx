@@ -2,7 +2,7 @@ import { useState } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, KeyboardAvoidingView, Platform,
-  ScrollView, Alert, Pressable, Image,
+  ScrollView, Alert, Pressable,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -11,6 +11,8 @@ import { useAuthStore } from '@/stores/authStore'
 import { COLORS, SPACING, RADIUS, SHADOWS } from '@/lib/constants'
 import { FadeInUp } from '@/components/FadeInUp'
 import { ScalePress } from '@/components/ScalePress'
+import { BrandMark } from '@/components/BrandMark'
+import { Icon } from '@/components/Icon'
 
 export default function LoginScreen() {
   const [email,       setEmail]       = useState('')
@@ -69,13 +71,7 @@ export default function LoginScreen() {
           {/* Header */}
           <FadeInUp delay={0}>
             <View style={styles.header}>
-              <View style={styles.logoTile}>
-                <Image source={require('@/assets/icon.png')} style={styles.logoImg} />
-              </View>
-              <Text style={styles.logo}>
-                hinch<Text style={styles.logoDot}>.</Text>ar
-              </Text>
-              <Text style={styles.tagline}>Compartí el viaje, viví el partido.</Text>
+              <BrandMark tagline />
             </View>
           </FadeInUp>
 
@@ -117,7 +113,7 @@ export default function LoginScreen() {
                     textContentType="password"
                   />
                   <Pressable onPress={() => setShowPass((v) => !v)} style={styles.eyeBtn}>
-                    <Text style={styles.eyeIcon}>{showPass ? '🙈' : '👁️'}</Text>
+                    <Icon name={showPass ? 'eyeOff' : 'eye'} size={20} color={COLORS.textMuted} strokeWidth={1.8} />
                   </Pressable>
                 </View>
               </View>
@@ -198,32 +194,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.xl,
   },
-  logoTile: {
-    width: 76,
-    height: 76,
-    borderRadius: RADIUS.lg,
-    overflow: 'hidden',
-    marginBottom: SPACING.md,
-    ...SHADOWS.floating,
-  },
-  logoImg: {
-    width: '100%',
-    height: '100%',
-  },
-  logo: {
-    fontSize: 36,
-    fontWeight: '900',
-    color: COLORS.textPrimary,
-    letterSpacing: -1,
-  },
-  logoDot: {
-    color: COLORS.primary,
-  },
-  tagline: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginTop: SPACING.xs,
-  },
 
   // Tarjeta del formulario
   formCard: {
@@ -276,7 +246,6 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary, fontSize: 16,
   },
   eyeBtn: { paddingHorizontal: SPACING.md },
-  eyeIcon: { fontSize: 18 },
   btn: {
     borderRadius: RADIUS.full,
     padding: SPACING.md,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
-  View, Text, TextInput, TouchableOpacity,
+  View, Text, TextInput,
   StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Pressable,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -8,6 +8,9 @@ import { router } from 'expo-router'
 import * as Linking from 'expo-linking'
 import { auth, supabase } from '@/lib/supabase'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
+import { BrandMark } from '@/components/BrandMark'
+import { GradientButton } from '@/components/GradientButton'
+import { Icon } from '@/components/Icon'
 
 const MIN_PASSWORD = 8
 
@@ -98,9 +101,7 @@ export default function RestablecerScreen() {
         <>
           <Text style={styles.title}>¡Listo!</Text>
           <Text style={styles.help}>Tu contraseña se actualizó. Ya podés iniciar sesión.</Text>
-          <TouchableOpacity style={styles.btn} onPress={() => router.replace('/(auth)/login')} activeOpacity={0.8}>
-            <Text style={styles.btnText}>Iniciar sesión</Text>
-          </TouchableOpacity>
+          <GradientButton label="Iniciar sesión" onPress={() => router.replace('/(auth)/login')} />
         </>
       )
     }
@@ -111,9 +112,7 @@ export default function RestablecerScreen() {
           <Text style={styles.help}>
             El link de recuperación no es válido o ya expiró. Pedí uno nuevo desde la pantalla de inicio de sesión.
           </Text>
-          <TouchableOpacity style={styles.btn} onPress={() => router.replace('/(auth)/recuperar')} activeOpacity={0.8}>
-            <Text style={styles.btnText}>Pedir otro link</Text>
-          </TouchableOpacity>
+          <GradientButton label="Pedir otro link" onPress={() => router.replace('/(auth)/recuperar')} />
         </>
       )
     }
@@ -136,7 +135,7 @@ export default function RestablecerScreen() {
               textContentType="newPassword"
             />
             <Pressable onPress={() => setShowPass((v) => !v)} style={styles.eyeBtn}>
-              <Text style={styles.eyeIcon}>{showPass ? '🙈' : '👁️'}</Text>
+              <Icon name={showPass ? 'eyeOff' : 'eye'} size={20} color={COLORS.textMuted} strokeWidth={1.8} />
             </Pressable>
           </View>
         </View>
@@ -163,14 +162,11 @@ export default function RestablecerScreen() {
           </View>
         )}
 
-        <TouchableOpacity
-          style={[styles.btn, saving && styles.btnDisabled]}
+        <GradientButton
+          label={saving ? 'Guardando...' : 'Guardar contraseña'}
           onPress={handleSave}
           disabled={saving}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.btnText}>{saving ? 'Guardando...' : 'Guardar contraseña'}</Text>
-        </TouchableOpacity>
+        />
       </>
     )
   }
@@ -183,7 +179,7 @@ export default function RestablecerScreen() {
       >
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
-            <Text style={styles.logo}>⚽ hinch.ar</Text>
+            <BrandMark />
           </View>
           <View style={styles.form}>{renderBody()}</View>
         </ScrollView>
@@ -196,7 +192,6 @@ const styles = StyleSheet.create({
   flex:      { flex: 1, backgroundColor: COLORS.background },
   container: { flexGrow: 1, padding: SPACING.lg, justifyContent: 'center' },
   header:    { alignItems: 'center', marginBottom: SPACING.xxl },
-  logo:      { fontSize: 36, fontWeight: '900', color: COLORS.textPrimary, letterSpacing: -1 },
   form:      { gap: SPACING.md },
   title:     { fontSize: 24, fontWeight: '700', color: COLORS.textPrimary },
   help:      { fontSize: 14, color: COLORS.textSecondary, lineHeight: 20 },
@@ -214,13 +209,6 @@ const styles = StyleSheet.create({
   },
   inputFlex: { flex: 1, padding: SPACING.md, color: COLORS.textPrimary, fontSize: 16 },
   eyeBtn:    { paddingHorizontal: SPACING.md },
-  eyeIcon:   { fontSize: 18 },
-  btn: {
-    backgroundColor: COLORS.primary, borderRadius: RADIUS.md,
-    padding: SPACING.md, alignItems: 'center', marginTop: SPACING.sm,
-  },
-  btnDisabled: { opacity: 0.6 },
-  btnText:     { color: COLORS.white, fontSize: 16, fontWeight: '700' },
   errorBox: {
     backgroundColor: COLORS.errorBg, borderWidth: 1, borderColor: COLORS.error,
     borderRadius: RADIUS.md, padding: SPACING.sm,

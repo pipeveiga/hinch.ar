@@ -6,6 +6,9 @@ import {
 import { router, Link } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
+import { BrandMark } from '@/components/BrandMark'
+import { GradientButton } from '@/components/GradientButton'
+import { Icon } from '@/components/Icon'
 
 export default function RegisterScreen() {
   const [step, setStep]         = useState<1 | 2>(1)
@@ -68,8 +71,7 @@ export default function RegisterScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.logo}>⚽ hinch.ar</Text>
-          <Text style={styles.tagline}>Compartí el viaje, viví el partido.</Text>
+          <BrandMark tagline />
         </View>
 
         {/* Step indicator */}
@@ -115,9 +117,7 @@ export default function RegisterScreen() {
               />
             </View>
 
-            <TouchableOpacity style={styles.btn} onPress={handleNext} activeOpacity={0.8}>
-              <Text style={styles.btnText}>Continuar →</Text>
-            </TouchableOpacity>
+            <GradientButton label="Continuar" onPress={handleNext} />
           </View>
         )}
 
@@ -155,7 +155,7 @@ export default function RegisterScreen() {
                   secureTextEntry={!showPass}
                 />
                 <Pressable onPress={() => setShowPass((v) => !v)} style={styles.eyeBtn}>
-                  <Text style={styles.eyeIcon}>{showPass ? '🙈' : '👁️'}</Text>
+                  <Icon name={showPass ? 'eyeOff' : 'eye'} size={20} color={COLORS.textMuted} strokeWidth={1.8} />
                 </Pressable>
               </View>
             </View>
@@ -172,7 +172,7 @@ export default function RegisterScreen() {
                   secureTextEntry={!showConfirm}
                 />
                 <Pressable onPress={() => setShowConfirm((v) => !v)} style={styles.eyeBtn}>
-                  <Text style={styles.eyeIcon}>{showConfirm ? '🙈' : '👁️'}</Text>
+                  <Icon name={showConfirm ? 'eyeOff' : 'eye'} size={20} color={COLORS.textMuted} strokeWidth={1.8} />
                 </Pressable>
               </View>
             </View>
@@ -184,7 +184,7 @@ export default function RegisterScreen() {
               activeOpacity={0.7}
             >
               <View style={[styles.checkbox, aceptaTerminos && styles.checkboxChecked]}>
-                {aceptaTerminos && <Text style={styles.checkmark}>✓</Text>}
+                {aceptaTerminos && <Icon name="check" size={14} color={COLORS.white} strokeWidth={2.4} />}
               </View>
               <Text style={styles.checkboxText}>
                 Leí y acepto los{' '}
@@ -198,19 +198,15 @@ export default function RegisterScreen() {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.btn, (isLoading || !aceptaTerminos) && styles.btnDisabled]}
+            <GradientButton
+              label={isLoading ? 'Creando cuenta...' : 'Crear cuenta'}
               onPress={handleRegister}
               disabled={isLoading || !aceptaTerminos}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.btnText}>
-                {isLoading ? 'Creando cuenta...' : 'Crear cuenta'}
-              </Text>
-            </TouchableOpacity>
+            />
 
             <TouchableOpacity style={styles.backBtn} onPress={() => setStep(1)}>
-              <Text style={styles.backBtnText}>← Volver</Text>
+              <Icon name="arrowLeft" size={16} color={COLORS.textSecondary} strokeWidth={1.9} />
+              <Text style={styles.backBtnText}>Volver</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -244,8 +240,6 @@ const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.background },
   container: { flexGrow: 1, padding: SPACING.lg, justifyContent: 'center' },
   header: { alignItems: 'center', marginBottom: SPACING.xl },
-  logo: { fontSize: 36, fontWeight: '900', color: COLORS.textPrimary, letterSpacing: -1 },
-  tagline: { fontSize: 14, color: COLORS.textSecondary, marginTop: SPACING.xs },
   steps: { flexDirection: 'row', gap: SPACING.sm, justifyContent: 'center', marginBottom: SPACING.xl },
   stepDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.border },
   stepDotActive: { backgroundColor: COLORS.primary, width: 24 },
@@ -268,18 +262,14 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary, fontSize: 16,
   },
   eyeBtn: { paddingHorizontal: SPACING.md },
-  eyeIcon: { fontSize: 18 },
   input: {
     backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border,
     borderRadius: RADIUS.md, padding: SPACING.md, color: COLORS.textPrimary, fontSize: 16,
   },
-  btn: {
-    backgroundColor: COLORS.primary, borderRadius: RADIUS.md,
-    padding: SPACING.md, alignItems: 'center', marginTop: SPACING.sm,
+  backBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: SPACING.xs, padding: SPACING.sm,
   },
-  btnDisabled: { opacity: 0.6 },
-  btnText: { color: COLORS.white, fontSize: 16, fontWeight: '700' },
-  backBtn: { alignItems: 'center', padding: SPACING.sm },
   backBtnText: { color: COLORS.textSecondary, fontSize: 14 },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: SPACING.xl },
   footerText: { color: COLORS.textSecondary, fontSize: 14 },
@@ -297,7 +287,6 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   checkboxChecked: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  checkmark: { color: '#fff', fontSize: 13, fontWeight: '700' },
   checkboxText: { flex: 1, fontSize: 13, color: COLORS.textSecondary, lineHeight: 20 },
   checkboxLink: { color: COLORS.primaryLight, fontWeight: '600' },
 })
