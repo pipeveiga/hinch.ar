@@ -10,15 +10,15 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Hinch.ar — Compartí el viaje, viví el partido" />
   <meta property="og:description" content="Carpool para hinchas argentinos. Publicá tu auto o reservá un lugar para llegar a partidos, recitales y eventos." />
-  <meta property="og:image" content="/assets/hero-scene.png" />
+  <meta property="og:image" content="assets/hero-scene.png" />
   <meta name="twitter:card" content="summary_large_image" />
 
-  <link rel="icon" href="/assets/icon.png" />
-  <link rel="apple-touch-icon" href="/assets/icon.png" />
+  <link rel="icon" href="assets/icon.png" />
+  <link rel="apple-touch-icon" href="assets/icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <!--
@@ -26,7 +26,6 @@
     URL de la plataforma (app Expo en el subdominio).
     Los CTAs usan data-app-link; si cambia el subdominio,
     actualizá esos href.
-
     Esos mismos data-app-link son los que, desde un celular, abren
     la app nativa o mandan a la tienda. La config (flag LAUNCHED +
     IDs de tienda) está en el bloque de scripts del final del archivo.
@@ -36,7 +35,7 @@
   <!--
     Set de íconos propio (line icons, stroke 1.7, currentColor).
     Se referencian con <svg class="ic"><use href="#i-..."/></svg>.
-    Hechos a mano para tener una identidad visual coherente en vez de emojis.
+    Hechos a mano para tener identidad visual coherente en vez de emojis.
   -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
     <defs>
@@ -82,10 +81,30 @@
       <symbol id="i-star" viewBox="0 0 24 24">
         <path d="M12 4l2.3 4.9 5.3.7-3.9 3.7 1 5.3L12 16.2 7.3 18.6l1-5.3-3.9-3.7 5.3-.7L12 4z"/>
       </symbol>
+      <!-- Nuevos íconos (mismo estilo: line, stroke 1.7, viewBox 24) -->
+      <symbol id="i-route" viewBox="0 0 24 24">
+        <circle cx="6" cy="18" r="2.4"/>
+        <circle cx="18" cy="6" r="2.4"/>
+        <path d="M8.4 18h6a3.6 3.6 0 0 0 0-7.2h-4.8A3.6 3.6 0 0 1 9.6 6H15.6"/>
+      </symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24">
+        <path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5H9.5L6 20.5V17H5A1.5 1.5 0 0 1 3.5 15.5V7A1.5 1.5 0 0 1 5 5.5z"/>
+        <path d="M8 10.2h8M8 13h5"/>
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24">
+        <path d="M5 12.5l4.2 4.3L19 7.2"/>
+      </symbol>
+      <symbol id="i-bolt" viewBox="0 0 24 24">
+        <path d="M13.2 3.5 5.5 13.4h5.1L10 20.5l7.7-9.9h-5.1z"/>
+      </symbol>
+      <symbol id="i-verified" viewBox="0 0 24 24">
+        <path d="M12 3.2l2.1 1.5 2.6-.2.9 2.4 2.1 1.5-.7 2.5.7 2.5-2.1 1.5-.9 2.4-2.6-.2L12 20.8l-2.1-1.5-2.6.2-.9-2.4-2.1-1.5.7-2.5-.7-2.5 2.1-1.5.9-2.4 2.6.2z"/>
+        <path d="M9.2 12.2l2 2 3.6-3.9"/>
+      </symbol>
     </defs>
   </svg>
 
-  <!-- Fondo vivo: manchas de color que derivan lento + progreso de scroll -->
+  <!-- Fondo vivo -->
   <div class="blob blob--a" aria-hidden="true"></div>
   <div class="blob blob--b" aria-hidden="true"></div>
   <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
@@ -93,7 +112,7 @@
   <!-- ===================== NAV ===================== -->
   <header class="nav" id="nav">
     <a class="brand" href="/">
-      <img src="/assets/icon.png" alt="" class="brand__tile" />
+      <img src="assets/icon.png" alt="" class="brand__tile" />
       <span class="brand__name">Hinch<span class="brand__dot">.</span>ar</span>
     </a>
     <nav class="nav__links">
@@ -106,36 +125,76 @@
 
   <!-- ===================== HERO ===================== -->
   <section class="hero">
-    <!--
-      Desktop: el diseño completo va como una sola imagen (pixel-perfect),
-      con dos links transparentes clavados sobre los botones. El texto real
-      vive en el .hero-mobile (visible en celulares) + el alt/h1 para SEO.
-    -->
-    <div class="hero-shot">
-      <h1 class="sr-only">Hinch.ar — Compartí el viaje, viví el partido. Carpool para hinchas argentinos.</h1>
-      <img class="hero-shot__img"
-           src="/assets/hero-scene.png"
-           alt="Compartí el viaje, viví el partido. Encontrá gente que va al mismo partido y compartí los gastos." />
-      <a class="hero-shot__hit hero-shot__hit--app" data-app-link href="https://app.hinch.ar" aria-label="Ir a la plataforma"></a>
-      <a class="hero-shot__hit hero-shot__hit--how" href="#como-funciona" aria-label="Cómo funciona"></a>
-    </div>
-
-    <!-- Mobile: versión apilada y legible -->
-    <div class="hero-mobile">
-      <span class="eyebrow">Carpool para hinchas <small>AR</small></span>
-      <p class="hero__title" role="heading" aria-level="1">Compartí el viaje,<br /><span class="accent">viví el partido.</span></p>
+    <div class="hero__copy">
+      <span class="eyebrow"><svg class="ic"><use href="#i-route"/></svg> Carpool para hinchas <small>AR</small></span>
+      <h1 class="hero__title display">Compartí el viaje,<br /><span class="accent">viví el partido.</span></h1>
       <p class="hero__subtitle">
         Encontrá gente que va al <strong>mismo partido</strong>, recital o evento
-        y <strong>compartí</strong> los gastos. Con auto, publicás tu viaje.
-        Sin auto, reservás un lugar en segundos.
+        y compartí los gastos. Con auto, publicás tu viaje. Sin auto,
+        reservás un lugar en segundos.
       </p>
       <div class="hero__cta">
         <a class="btn btn--primary btn--lg" data-app-link href="https://app.hinch.ar">Ir a la plataforma</a>
         <a class="btn btn--ghost btn--lg" href="#como-funciona">Cómo funciona</a>
       </div>
-      <p class="hero__note">Gratis · Identidad verificada · Android y web</p>
-      <div class="hero-mobile__shot">
-        <img src="/assets/hero-scene-mobile.png" alt="" aria-hidden="true" />
+      <p class="hero__note">
+        <span><svg class="ic"><use href="#i-check"/></svg> Gratis</span>
+        <span><svg class="ic"><use href="#i-check"/></svg> Identidad verificada</span>
+        <span><svg class="ic"><use href="#i-check"/></svg> Android y web</span>
+      </p>
+    </div>
+
+    <div class="hero__stage" id="hero-stage">
+      <div class="hero__stage-glow" aria-hidden="true"></div>
+      <svg class="route-ribbon" viewBox="0 0 460 620" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <path class="road" d="M-20 470 C 120 520, 180 400, 300 430 S 470 380, 500 250"/>
+        <path class="lane" d="M-20 470 C 120 520, 180 400, 300 430 S 470 380, 500 250"/>
+      </svg>
+
+      <!-- Chips de vidrio flotantes -->
+      <div class="float-chip float-chip--car" aria-hidden="true"><svg class="ic"><use href="#i-car"/></svg></div>
+      <div class="float-chip float-chip--ticket" aria-hidden="true"><svg class="ic"><use href="#i-ticket"/></svg></div>
+      <div class="float-chip float-chip--star" aria-hidden="true"><svg class="ic"><use href="#i-star"/></svg></div>
+
+      <!-- Maqueta de teléfono (construida con tokens + set de íconos) -->
+      <div class="phone" id="phone" aria-hidden="true">
+        <div class="phone__notch"></div>
+        <div class="phone__screen">
+          <div class="phone__status">
+            <span class="mono">9:41</span>
+            <span class="phone__status-icons"><i class="sig"></i><i class="wifi"></i><i class="bat"></i></span>
+          </div>
+          <div class="phone__head">
+            <span class="phone__brand"><img src="assets/icon.png" alt="" /><span>Hinch.ar</span></span>
+            <span class="phone__menu"><i></i><i></i><i></i></span>
+          </div>
+          <div class="phone__body">
+            <span class="phone__label">Viaje disponible</span>
+            <div class="trip">
+              <div class="trip__top">
+                <span class="trip__chip"><span class="dot"></span> Confirmado</span>
+                <span class="trip__price">$8.000<small>por lugar</small></span>
+              </div>
+              <div class="trip__title">River vs. Boca</div>
+              <div class="trip__meta">Estadio Monumental · Sáb 21:00</div>
+              <div class="trip__route">
+                <div class="trip__pt"><span class="trip__city">Rosario</span><span class="trip__time">17:30</span></div>
+                <div class="trip__line"><span class="o"></span><span class="d"></span></div>
+                <div class="trip__pt end"><span class="trip__city">Buenos Aires</span><span class="trip__time">21:00</span></div>
+              </div>
+              <div class="trip__div"></div>
+              <div class="trip__driver">
+                <div class="trip__avatar">M</div>
+                <div class="trip__who">
+                  <div class="trip__name">Martín G. <svg class="ic ver"><use href="#i-verified"/></svg></div>
+                  <div class="trip__rate"><svg class="ic"><use href="#i-star"/></svg> 4.9 · 32 viajes</div>
+                </div>
+                <span class="trip__seats">3 lugares</span>
+              </div>
+              <button class="trip__cta" type="button">Reservar lugar</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -157,8 +216,11 @@
 
   <!-- ===================== BENEFICIOS ===================== -->
   <section id="beneficios" class="section">
-    <span class="kicker reveal">Beneficios</span>
-    <h2 class="section__title reveal">Por qué viajar con Hinch.ar</h2>
+    <div class="section__head section__head--center reveal">
+      <span class="kicker">Beneficios</span>
+      <h2 class="section__title display">Por qué viajar con Hinch.ar</h2>
+      <p class="section__desc">Todo lo que hace falta para llegar al evento, sin vueltas y con gente de confianza.</p>
+    </div>
     <div class="grid">
       <article class="card reveal">
         <div class="card__icon"><svg class="ic"><use href="#i-stadium"/></svg></div>
@@ -180,8 +242,10 @@
 
   <!-- ===================== CÓMO FUNCIONA ===================== -->
   <section id="como-funciona" class="section section--alt">
-    <span class="kicker reveal">Paso a paso</span>
-    <h2 class="section__title reveal">Cómo funciona</h2>
+    <div class="section__head section__head--center reveal">
+      <span class="kicker">Paso a paso</span>
+      <h2 class="section__title display">Cómo funciona</h2>
+    </div>
     <div class="steps">
       <div class="step reveal">
         <span class="step__num">1</span>
@@ -210,19 +274,22 @@
   <section id="seguridad" class="section">
     <div class="split">
       <div class="split__text reveal">
-        <span class="kicker kicker--left">Seguridad</span>
-        <h2 class="section__title section__title--left">Viajá tranquilo</h2>
+        <div class="section__head section__head--left">
+          <span class="kicker">Seguridad</span>
+          <h2 class="section__title display">Viajá tranquilo</h2>
+        </div>
         <ul class="checklist">
-          <li>Identidad verificada con DNI para cada usuario.</li>
-          <li>Calificaciones de 5 dimensiones: puntualidad, seguridad, comunicación y más.</li>
-          <li>Chat interno: coordinás todo sin compartir tu teléfono.</li>
-          <li>Perfiles públicos con historial de viajes y reputación.</li>
+          <li><strong>Identidad verificada</strong> con DNI para cada usuario.</li>
+          <li><strong>Calificaciones de 5 dimensiones</strong>: puntualidad, seguridad, comunicación y más.</li>
+          <li><strong>Chat interno</strong>: coordinás todo sin compartir tu teléfono.</li>
+          <li><strong>Perfiles públicos</strong> con historial de viajes y reputación.</li>
         </ul>
       </div>
       <div class="split__media reveal">
         <div class="badge-tile">
-          <img src="/assets/icon.png" alt="Hinch.ar" />
-          <span class="badge-tile__check">✓</span>
+          <span class="badge-tile__ring" aria-hidden="true"></span>
+          <img src="assets/icon.png" alt="Hinch.ar" />
+          <span class="badge-tile__check"><svg class="ic"><use href="#i-check"/></svg></span>
         </div>
       </div>
     </div>
@@ -231,6 +298,7 @@
   <!-- ===================== CTA FINAL ===================== -->
   <section class="cta-final">
     <div class="cta-final__box reveal">
+      <span class="kicker">Tu próximo partido</span>
       <h2>Tu próximo partido te espera</h2>
       <p>Sumate a la comunidad de hinchas que ya comparten viaje.</p>
       <a class="btn btn--primary btn--lg" data-app-link href="https://app.hinch.ar">Ir a la plataforma</a>
@@ -244,7 +312,7 @@
   <!-- ===================== FOOTER ===================== -->
   <footer class="footer">
     <a class="brand" href="/">
-      <img src="/assets/icon.png" alt="" class="brand__tile" />
+      <img src="assets/icon.png" alt="" class="brand__tile" />
       <span class="brand__name">Hinch<span class="brand__dot">.</span>ar</span>
     </a>
     <nav class="footer__links">
@@ -267,40 +335,30 @@
       document.getElementById('year').textContent = new Date().getFullYear();
 
       // El marquee duplica su contenido para loopear sin costura
-      // (la animación CSS recorre el 50% del track)
       var track = document.getElementById('marquee-track');
       if (track) track.innerHTML += track.innerHTML;
 
       // ============================================================
       // Abrir la app nativa / mandar a la tienda (deferred deep link)
-      // ------------------------------------------------------------
-      // Al tocar "Ir a la plataforma" desde un celular: intenta abrir la
-      // app instalada (esquema hinchar://). Si no está, va a la tienda
-      // que corresponda. En desktop no cambia nada (va a la web app).
-      //
       // ►► PRE-LANZAMIENTO: con LAUNCHED:false el mecanismo está dormido y
-      //    los botones siguen yendo a la web. Cuando publiques la app:
-      //      1) poné LAUNCHED: true
-      //      2) completá iosAppId con el ID numérico de App Store Connect
-      //    (el package de Android ya está; la URL de Play se arma sola).
+      //    los botones siguen yendo a la web. Al publicar: LAUNCHED:true +
+      //    completar iosAppId con el ID numérico de App Store Connect.
       // ============================================================
       var APP = {
         LAUNCHED:   false,
-        scheme:     'hinchar',                // app.json → expo.scheme
+        scheme:     'hinchar',
         webApp:     'https://app.hinch.ar',
-        iosAppId:   '',                       // ← ID numérico de App Store (ej: 1234567890)
-        androidPkg: 'ar.hinch.app',           // app.json → android.package
+        iosAppId:   '',
+        androidPkg: 'ar.hinch.app',
       };
       APP.appStoreUrl  = 'https://apps.apple.com/app/id' + APP.iosAppId;
       APP.playStoreUrl = 'https://play.google.com/store/apps/details?id=' + APP.androidPkg;
 
       var ua        = navigator.userAgent || '';
-      var isIOS     = /iPhone|iPad|iPod/.test(ua) ||
-                      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      var isIOS     = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       var isAndroid = /Android/.test(ua);
       var isMobile  = isIOS || isAndroid;
 
-      // Mapea la ruta web (app.hinch.ar/terminos) a la ruta de la app
       function appPath(href) {
         try { return new URL(href, location.href).pathname.replace(/^\/+/, ''); }
         catch (e) { return ''; }
@@ -308,9 +366,7 @@
 
       function openInApp(href) {
         var path = appPath(href);
-
         if (isAndroid) {
-          // Intent URL: abre la app si está instalada; si no, va al fallback.
           var aFallback = APP.LAUNCHED ? APP.playStoreUrl : APP.webApp;
           window.location.href =
             'intent://' + path + '#Intent;scheme=' + APP.scheme +
@@ -318,17 +374,12 @@
             ';S.browser_fallback_url=' + encodeURIComponent(aFallback) + ';end';
           return;
         }
-
-        // iOS: probamos el esquema. Si la app abre, la pestaña se oculta y
-        // cancelamos. Si seguimos visibles, vamos a la tienda / web.
         var iFallback = APP.LAUNCHED ? APP.appStoreUrl : APP.webApp;
         var hidden = false;
         var onHide = function () { hidden = true; };
         document.addEventListener('visibilitychange', onHide);
         window.addEventListener('pagehide', onHide);
-
         window.location.href = APP.scheme + '://' + path;
-
         setTimeout(function () {
           document.removeEventListener('visibilitychange', onHide);
           window.removeEventListener('pagehide', onHide);
@@ -336,19 +387,13 @@
         }, 1200);
       }
 
-      // Dormido hasta el lanzamiento: solo intercepta en mobile y con LAUNCHED.
       if (isMobile && APP.LAUNCHED) {
         document.querySelectorAll('a[data-app-link]').forEach(function (a) {
-          a.addEventListener('click', function (e) {
-            e.preventDefault();
-            openInApp(a.getAttribute('href'));
-          });
+          a.addEventListener('click', function (e) { e.preventDefault(); openInApp(a.getAttribute('href')); });
         });
       }
 
-
-      // Nav de vidrio: se vuelve más opaco al scrollear.
-      // Barra de progreso: scaleX según cuánto se scrolleó.
+      // Nav de vidrio + barra de progreso
       var nav = document.getElementById('nav');
       var progress = document.getElementById('scroll-progress');
       var onScroll = function () {
@@ -359,25 +404,22 @@
       window.addEventListener('scroll', onScroll, { passive: true });
       onScroll();
 
-      // Aparición suave de secciones al entrar en pantalla
+      // Aparición suave al entrar en pantalla
       var reveals = document.querySelectorAll('.reveal');
       if ('IntersectionObserver' in window) {
         var io = new IntersectionObserver(function (entries) {
-          entries.forEach(function (e) {
-            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-          });
+          entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
         }, { threshold: 0.12 });
         reveals.forEach(function (el) { io.observe(el); });
       } else {
         reveals.forEach(function (el) { el.classList.add('in'); });
       }
 
-      // Brillo que sigue al puntero + tilt 3D en las tarjetas de vidrio
+      // Brillo + tilt 3D en tarjetas de vidrio
       document.querySelectorAll('.card, .step').forEach(function (el) {
         el.addEventListener('pointermove', function (e) {
           var r = el.getBoundingClientRect();
-          var x = e.clientX - r.left;
-          var y = e.clientY - r.top;
+          var x = e.clientX - r.left, y = e.clientY - r.top;
           el.style.setProperty('--mx', x + 'px');
           el.style.setProperty('--my', y + 'px');
           if (finePointer && !reducedMotion) {
@@ -391,28 +433,28 @@
         });
       });
 
-      // Todo lo que sigue es solo para desktop con mouse y sin
-      // preferencia de movimiento reducido.
+      // Solo desktop con mouse y sin movimiento reducido
       if (!finePointer || reducedMotion) return;
 
-      // ---- Tilt + parallax del hero ----
-      var heroShot = document.querySelector('.hero-shot');
-      if (heroShot) {
-        heroShot.addEventListener('pointermove', function (e) {
-          var r = heroShot.getBoundingClientRect();
-          heroShot.style.setProperty('--ry', (((e.clientX - r.left) / r.width) - .5) * 4 + 'deg');
-          heroShot.style.setProperty('--rx', (((e.clientY - r.top) / r.height) - .5) * -4 + 'deg');
+      // Tilt + parallax del teléfono del hero
+      var stage = document.getElementById('hero-stage');
+      var phone = document.getElementById('phone');
+      if (stage && phone) {
+        stage.addEventListener('pointermove', function (e) {
+          var r = stage.getBoundingClientRect();
+          phone.style.setProperty('--ry', (((e.clientX - r.left) / r.width) - .5) * 8 + 'deg');
+          phone.style.setProperty('--rx', (((e.clientY - r.top) / r.height) - .5) * -8 + 'deg');
         });
-        heroShot.addEventListener('pointerleave', function () {
-          heroShot.style.setProperty('--rx', '0deg');
-          heroShot.style.setProperty('--ry', '0deg');
+        stage.addEventListener('pointerleave', function () {
+          phone.style.setProperty('--rx', '0deg');
+          phone.style.setProperty('--ry', '0deg');
         });
         window.addEventListener('scroll', function () {
-          heroShot.style.setProperty('--py', Math.min(window.scrollY * .06, 40) + 'px');
+          phone.style.setProperty('--py', Math.min(window.scrollY * .05, 34) + 'px');
         }, { passive: true });
       }
 
-      // ---- Botones magnéticos: se inclinan hacia el cursor ----
+      // Botones magnéticos
       document.querySelectorAll('.btn').forEach(function (btn) {
         btn.addEventListener('pointermove', function (e) {
           var r = btn.getBoundingClientRect();
@@ -425,24 +467,20 @@
         });
       });
 
-      // ---- Cursor custom: punto 1:1 + anillo que lo persigue ----
+      // Cursor custom
       document.documentElement.classList.add('cursor-on');
-      var dot  = document.createElement('div');
+      var dot = document.createElement('div');
       var ring = document.createElement('div');
-      dot.className  = 'cursor-dot';
+      dot.className = 'cursor-dot';
       ring.className = 'cursor-ring';
       document.body.appendChild(dot);
       document.body.appendChild(ring);
 
-      var mx = -100, my = -100;   // mouse real
-      var rx = -100, ry = -100;   // posición del anillo (con inercia)
-      var ringScale = 1, targetScale = 1;
-      var seen = false;
+      var mx = -100, my = -100, rx = -100, ry = -100, ringScale = 1, targetScale = 1, seen = false;
 
       document.addEventListener('pointermove', function (e) {
         mx = e.clientX; my = e.clientY;
         if (!seen) { seen = true; rx = mx; ry = my; dot.classList.add('is-active'); ring.classList.add('is-active'); }
-        // ¿Está sobre algo clickeable?
         var link = e.target.closest && e.target.closest('a, button, .btn');
         ring.classList.toggle('is-link', !!link);
         targetScale = link ? 1.55 : 1;

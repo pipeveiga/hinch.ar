@@ -34,6 +34,7 @@ export const COLORS = {
 
   // Marca — tinte claro para fondos suaves (chips, íconos)
   brandTint:     '#EEF3FF',
+  sky:           '#60A5FA',   // azul claro — degradés/glows suaves (espejo landing --sky)
 
   // Vidrio (liquid glass) — superficies translúcidas con blur detrás
   glass:        'rgba(255,255,255,0.72)',

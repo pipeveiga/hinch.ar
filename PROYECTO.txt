@@ -6,7 +6,13 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-07-01 (agregada la carpeta design/
+Última actualización del documento: 2026-07-01 (REDISEÑO de la landing
+aplicado: index.html + styles.css reescritos, estética premium tipo
+Apple/Linear, hero 100% en vivo (sin la imagen horneada de 1.4MB) con
+maqueta de teléfono hecha con los tokens y el set de íconos; fuentes Inter
+Tight + Space Grotesk; token nuevo COLORS.sky espejado en lib/constants.ts.
+Se preservó todo lo funcional (contacto mail/WhatsApp, deep-link, SEO/OG).
++ agregada la carpeta design/
 con el prototipo de alta fidelidad del rediseño de la app + handoff para
 portar a StyleSheet; es material de referencia, no se buildea. Antes:) (FIX
 CRÍTICO: la app se
@@ -104,8 +110,11 @@ landing/            Landing institucional (web pública). HTML/CSS estático,
                     propósito (carga rápido, buen SEO). Da info de la plataforma
                     y manda a la app vía botones "Ir a la plataforma".
   index.html          la página completa
-  styles.css          estilos (tema claro estilo Apple: nav de vidrio flotante,
-                       tarjetas con efecto "liquid glass", animaciones al scroll)
+  styles.css          estilos (tema claro estilo Apple/Linear: nav de vidrio
+                       flotante, tarjetas "liquid glass", hero en vivo con
+                       maqueta de teléfono, animaciones al scroll). Rediseño
+                       2026: fuentes Inter Tight + Space Grotesk, 5 íconos
+                       SVG nuevos, token --sky. Paleta espejo de lib/constants.ts.
   assets/             logo, ícono, imágenes
                       (hero-scene.png = render completo del hero para desktop;
                        hero-scene-mobile.png = recorte del celular para mobile)
