@@ -14,6 +14,7 @@ export type IconName =
   | 'check' | 'plus' | 'logout' | 'edit' | 'id' | 'help'
   | 'clock' | 'x' | 'ban' | 'camera' | 'trash' | 'warn'
   | 'eye' | 'eyeOff' | 'card' | 'bellOff' | 'mail' | 'whatsapp'
+  | 'arrowLeft' | 'send'
 
 interface IconProps {
   name:         IconName
@@ -237,6 +238,12 @@ const PATHS: Record<IconName, (c: string, sw: number) => React.ReactNode> = {
       <Path d="M12 4a8 8 0 0 0-6.9 12L4 20l4.1-1.1A8 8 0 1 0 12 4z" stroke={c} strokeWidth={sw} strokeLinejoin="round" />
       <Path d="M9.4 8.9c-.3 1.2.3 2.7 1.5 3.9s2.7 1.8 3.9 1.5" stroke={c} strokeWidth={sw} strokeLinecap="round" />
     </>
+  ),
+  arrowLeft: (c, sw) => (
+    <Path d="M15 5l-7 7 7 7M8 12h12" stroke={c} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" />
+  ),
+  send: (c, sw) => (
+    <Path d="M5 12L20 5l-5 15-3.5-6.5L5 12z" stroke={c} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" />
   ),
 }
 
