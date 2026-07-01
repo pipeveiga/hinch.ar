@@ -6,7 +6,10 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-06-13 (FIX CRÍTICO: la app se
+Última actualización del documento: 2026-07-01 (agregada la carpeta design/
+con el prototipo de alta fidelidad del rediseño de la app + handoff para
+portar a StyleSheet; es material de referencia, no se buildea. Antes:) (FIX
+CRÍTICO: la app se
 quedaba clavada en la pantalla de carga y no abría para usuarios ya
 logueados. Era un deadlock de supabase-js: se llamaba getMe()/getUser()
 dentro del callback de onAuthStateChange, que corre con el lock de auth
@@ -108,6 +111,14 @@ landing/            Landing institucional (web pública). HTML/CSS estático,
                        hero-scene-mobile.png = recorte del celular para mobile)
   vercel.json         config del proyecto Vercel de la landing
   README.md           cómo editar y desplegar la landing
+
+design/             Material de rediseño visual (referencia, NO se buildea ni
+                    se despliega). Prototipo de alta fidelidad de toda la app
+                    hecho con Cloud Design, para portar a StyleSheet.
+  prototipo-app.html  las 14 pantallas en un HTML self-contained (se abre solo
+                      en el navegador). Espejo visual de la landing rediseñada.
+  HANDOFF.md          decisiones de diseño + spec de porteo a React Native
+                      (tokens, íconos a reemplazar, fixes puntuales, fases).
 
 --------------------------------------------------------------------------------
 CÓMO CORRERLO
