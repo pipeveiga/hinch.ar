@@ -315,6 +315,19 @@ export default function PerfilScreen() {
           </View>
         </View>
 
+        {user.is_admin && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Administración</Text>
+            <View style={styles.menuCard}>
+              <MenuItem
+                icon="ball"
+                label="Gestionar eventos"
+                onPress={() => router.push('/admin')}
+              />
+            </View>
+          </View>
+        )}
+
         <View style={[styles.section, { marginBottom: SPACING.xxl }]}>
           <View style={styles.menuCard}>
             <MenuItem icon="logout" label="Cerrar sesión" onPress={handleSignOut} danger />

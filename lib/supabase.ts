@@ -62,7 +62,7 @@ const nativeSecureStorage = {
 const storage = Platform.OS === 'web' ? webStorage : nativeSecureStorage
 import type {
   User, Event, Trip, Booking, Rating, Message,
-  AppNotification, TripSearchFilters, NewTripForm, NewBookingForm, RatingScores,
+  AppNotification, TripSearchFilters, NewTripForm, NewBookingForm, NewEventForm, RatingScores,
 } from './types'
 
 // Durante el build estático (Vercel) las vars pueden no estar — el runtime las tendrá
@@ -304,6 +304,49 @@ export const eventsApi = {
       .order('event_date', { ascending: true })
       .limit(5)
     return data ?? []
+  },
+
+  // ADMIN — protegido por RLS (users.is_admin = TRUE).
+  // Un usuario común que llame a estos verá "permission denied" desde Postgres.
+  async listAll(): Promise<Event[]> {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .order('event_date', { ascending: true })
+    if (error) throw error
+    return (data ?? []) as Event[]
+  },
+
+  async create(form: NewEventForm): Promise<Event> {
+    const { data, error } = await supabase
+      .from('events')
+      .insert({ ...form, source: 'manual', is_active: true })
+      .select()
+      .single()
+    if (error) throw error
+    return data as Event
+  },
+
+  async update(id: string, patch: Partial<NewEventForm> & { is_active?: boolean }): Promise<Event> {
+    const { data, error } = await supabase
+      .from('events')
+      .update(patch)
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) throw error
+    return data as Event
+  },
+
+  async toggleFeatured(id: string, is_featured: boolean): Promise<void> {
+    const { error } = await supabase.from('events').update({ is_featured }).eq('id', id)
+    if (error) throw error
+  },
+
+  async remove(id: string): Promise<void> {
+    // Soft delete: preferimos desactivar para no romper referencias en trips.
+    const { error } = await supabase.from('events').update({ is_active: false }).eq('id', id)
+    if (error) throw error
   },
 }
 
@@ -647,6 +690,35 @@ export const bookingsApi = {
       .single()
     return data as Booking | null
   },
+
+  // Reservas completadas del conductor que todavía no calificó al pasajero.
+  async getPendingRatingsAsDriver(driverId: string): Promise<Booking[]> {
+    const { data: trips } = await supabase
+      .from('trips')
+      .select('id')
+      .eq('driver_id', driverId)
+    if (!trips?.length) return []
+    const tripIds = trips.map((t) => t.id)
+    const { data } = await supabase
+      .from('bookings')
+      .select(`
+        *,
+        passenger:users!passenger_id (
+          id, full_name, avatar_url, is_verified, avg_rating_as_passenger
+        ),
+        trip:trips!trip_id (
+          *,
+          event:events!event_id (
+            id, title, event_date, venue_name, venue_city, image_url
+          )
+        )
+      `)
+      .in('trip_id', tripIds)
+      .eq('status', 'completed')
+      .eq('driver_rated_passenger', false)
+      .order('created_at', { ascending: false })
+    return (data ?? []) as Booking[]
+  },
 }
 
 // =============================================================================
@@ -654,17 +726,44 @@ export const bookingsApi = {
 // =============================================================================
 
 export const ratingsApi = {
-  async getRatingsForUser(userId: string, role?: 'driver' | 'passenger'): Promise<Rating[]> {
+  // viewerId: quien está mirando. Si coincide con userId (ratee), se ocultan
+  // las calificaciones cuya contraparte todavía no calificó, para respetar
+  // la promesa de "anónimo hasta que ambos calificaron".
+  async getRatingsForUser(
+    userId: string,
+    opts?: { role?: 'driver' | 'passenger'; viewerId?: string },
+  ): Promise<Rating[]> {
+    const role     = opts?.role
+    const viewerId = opts?.viewerId
+
     let query = supabase
       .from('ratings')
-      .select('*')
+      .select('*, booking:bookings!booking_id(driver_rated_passenger, passenger_rated_driver)')
       .eq('ratee_id', userId)
       .order('created_at', { ascending: false })
 
     if (role) query = query.eq('ratee_role', role)
 
     const { data } = await query
-    return data ?? []
+    const rows = (data ?? []) as Array<Rating & {
+      booking?: { driver_rated_passenger: boolean; passenger_rated_driver: boolean } | null
+    }>
+
+    const isSelf = viewerId && viewerId === userId
+    const filtered = isSelf
+      ? rows.filter((r) => {
+          // Ratee = driver → la contraparte (pasajero) es quien calificó al driver.
+          // Se revela cuando el driver también calificó al pasajero.
+          // Ratee = passenger → simétrico.
+          const b = r.booking
+          if (!b) return true
+          return r.ratee_role === 'driver'
+            ? b.driver_rated_passenger
+            : b.passenger_rated_driver
+        })
+      : rows
+
+    return filtered.map(({ booking: _b, ...rating }) => rating as Rating)
   },
 
   async submitRating(
