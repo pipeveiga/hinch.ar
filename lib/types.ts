@@ -37,6 +37,7 @@ export interface User {
   car_plate?: string
   car_photo_url?: string
   is_active: boolean
+  is_admin?: boolean
   verification_status: 'none' | 'pending' | 'approved' | 'rejected'
   verification_submitted_at?: string
 }
@@ -78,8 +79,30 @@ export interface Event {
   tags: string[]
   is_active: boolean
   is_featured: boolean
+  external_id?: string
+  source: 'manual' | 'thesportsdb' | 'ticketmaster'
   // calculado en query (count de trips activos)
   trips_count?: number
+}
+
+// Formulario para crear/editar eventos desde el panel de admin
+export interface NewEventForm {
+  type: EventType
+  title: string
+  subtitle?: string
+  venue_name: string
+  venue_address: string
+  venue_city: string
+  venue_province: string
+  event_date: string
+  image_url?: string
+  home_team?: string
+  away_team?: string
+  competition?: string
+  artist?: string
+  genre?: string
+  tags: string[]
+  is_featured: boolean
 }
 
 // =============================================================================

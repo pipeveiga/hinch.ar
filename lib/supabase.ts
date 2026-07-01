@@ -62,7 +62,7 @@ const nativeSecureStorage = {
 const storage = Platform.OS === 'web' ? webStorage : nativeSecureStorage
 import type {
   User, Event, Trip, Booking, Rating, Message,
-  AppNotification, TripSearchFilters, NewTripForm, NewBookingForm, RatingScores,
+  AppNotification, TripSearchFilters, NewTripForm, NewBookingForm, NewEventForm, RatingScores,
 } from './types'
 
 // Durante el build estático (Vercel) las vars pueden no estar — el runtime las tendrá
@@ -304,6 +304,49 @@ export const eventsApi = {
       .order('event_date', { ascending: true })
       .limit(5)
     return data ?? []
+  },
+
+  // ADMIN — protegido por RLS (users.is_admin = TRUE).
+  // Un usuario común que llame a estos verá "permission denied" desde Postgres.
+  async listAll(): Promise<Event[]> {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .order('event_date', { ascending: true })
+    if (error) throw error
+    return (data ?? []) as Event[]
+  },
+
+  async create(form: NewEventForm): Promise<Event> {
+    const { data, error } = await supabase
+      .from('events')
+      .insert({ ...form, source: 'manual', is_active: true })
+      .select()
+      .single()
+    if (error) throw error
+    return data as Event
+  },
+
+  async update(id: string, patch: Partial<NewEventForm> & { is_active?: boolean }): Promise<Event> {
+    const { data, error } = await supabase
+      .from('events')
+      .update(patch)
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) throw error
+    return data as Event
+  },
+
+  async toggleFeatured(id: string, is_featured: boolean): Promise<void> {
+    const { error } = await supabase.from('events').update({ is_featured }).eq('id', id)
+    if (error) throw error
+  },
+
+  async remove(id: string): Promise<void> {
+    // Soft delete: preferimos desactivar para no romper referencias en trips.
+    const { error } = await supabase.from('events').update({ is_active: false }).eq('id', id)
+    if (error) throw error
   },
 }
 

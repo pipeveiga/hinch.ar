@@ -6,7 +6,25 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-07-01 (Sistema de VALORACIONES
+Última actualización del documento: 2026-07-01 (Sistema de CARGA DE
+EVENTOS híbrido: 1) migración 006 agrega columnas events.external_id
+(único cuando no es NULL) y events.source ('manual'|'thesportsdb'|
+'ticketmaster'), y users.is_admin. Las políticas RLS de events pasan
+de "insert_disabled" a permitir INSERT/UPDATE/DELETE cuando el caller
+es admin; el trigger protect_user_columns extendido bloquea la
+auto-promoción a admin desde el cliente. 2) el script sync-events.mjs
+se reescribió: fuera el scraper frágil de promiedos.com.ar, adentro
+TheSportsDB (Argentina Primera División, sin API key) para fútbol y
+Ticketmaster para recitales CABA + GBA. Los eventos editados a mano
+(source='manual') no los pisa el bot en corridas posteriores. 3) el
+workflow de GitHub Actions ahora corre cada 6 horas (antes era 1×
+por semana). 4) pantalla nueva app/admin.tsx con lista de eventos +
+modal para crear/editar, toggle "destacado" y ocultar (soft delete);
+se accede desde Perfil → Administración (solo visible si is_admin).
+5) tipos actualizados (Event agrega external_id/source, User agrega
+is_admin, NewEventForm nuevo). El seed inicial de eventos hardcoded
+de la migración 001 queda como estaba pero se puede ocultar desde el
+admin ni bien haya datos reales del sync). Antes:) (Sistema de VALORACIONES
 completo: 1) los conductores ahora también pueden calificar a los
 pasajeros, con una fila horizontal de "Pasajeros a calificar" arriba de
 la pestaña Conductor en Mis Viajes; 2) pantalla Calificar ahora carga
@@ -276,6 +294,17 @@ Hecho:
       la reserva ya fue calificada. Antes el ciclo estaba a medio
       terminar: solo el pasajero calificaba, las reservas nunca pasaban
       a "completadas" y nadie recibía recordatorio.
+  [x] Sistema de carga de eventos híbrido (2026-07-01):
+      - Sync automático cada 6h vía GitHub Actions:
+        · Fútbol Primera División Argentina desde TheSportsDB (gratis).
+        · Recitales CABA/GBA desde Ticketmaster.
+        · Nunca pisa eventos editados a mano (source='manual').
+      - Panel de admin en app/admin.tsx con lista + crear/editar/
+        ocultar y toggle destacado. Solo lo ve quien tiene is_admin=TRUE
+        en la tabla users (se le pone a mano desde el SQL editor de
+        Supabase la primera vez).
+      - Migración 006 con el schema (external_id, source, is_admin) y
+        las RLS de events reconfiguradas.
   [x] Onboarding 3 slides (refactor a control por estado para que ande en web).
   [x] Web deploy en Vercel (con guard SSR para window).
   [x] Android EAS configurado (preview + production).
@@ -347,6 +376,15 @@ Hecho:
       - Whitelist de trip_type en filtros (no más .or() con interpolación).
 
 Pendiente:
+  [ ] Deployar migraciones 005 y 006 en Supabase prod:
+      · 005: auto-completar reservas + recordatorio (pg_cron horario)
+      · 006: schema de admin + fuentes de eventos + RLS
+      Después de correr 006, marcar a Felipe como admin con:
+        UPDATE public.users SET is_admin = TRUE
+         WHERE id = (SELECT id FROM auth.users WHERE email = 'pipeveiga2003@gmail.com');
+      Configurar secrets del repo (Settings → Secrets → Actions):
+        · SUPABASE_URL, SUPABASE_SERVICE_KEY (para el sync)
+        · TICKETMASTER_KEY (para recitales)
   [ ] Deployar migración 005_auto_complete_bookings.sql en Supabase prod
       (`supabase db push` o subirla desde el dashboard) para que el cron
       empiece a marcar reservas como completadas y a mandar los
