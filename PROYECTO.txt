@@ -6,7 +6,23 @@ App de carpool para hinchas argentinos. La idea: si vas a un partido, recital
 o evento, podés publicar tu auto y sumar pasajeros que vayan al mismo lugar.
 Si no tenés auto, reservás un lugar en el viaje de alguien más.
 
-Última actualización del documento: 2026-07-01 (REDISEÑO de la landing
+Última actualización del documento: 2026-07-01 (Sistema de VALORACIONES
+completo: 1) los conductores ahora también pueden calificar a los
+pasajeros, con una fila horizontal de "Pasajeros a calificar" arriba de
+la pestaña Conductor en Mis Viajes; 2) pantalla Calificar ahora carga
+la reserva completa con el nombre y foto reales del pasajero (antes
+decía "Pasajero" a secas) y detecta correctamente el rol de quien está
+calificando; 3) chequea antes de mostrar el formulario que la reserva
+no esté ya calificada — si lo está muestra un mensaje amable en vez de
+romperse al enviar; 4) el texto engañoso "Promedio actual" ahora dice
+"Tu puntaje"; 5) las reservas se marcan solas como "completadas" 6 hs
+después del inicio del evento vía una nueva migración 005 con pg_cron
+que corre cada hora, y al mismo tiempo inserta una notificación
+in-app tipo "recordatorio de calificar" para ambas partes; 6) el
+"anónimo hasta que ambos califiquen" ahora se cumple de verdad: cuando
+mirás TU propio perfil no ves las calificaciones que te dejaron hasta
+que vos también calificaste a la contraparte, en perfiles ajenos se ven
+todas). Antes:) (REDISEÑO de la landing
 aplicado: index.html + styles.css reescritos, estética premium tipo
 Apple/Linear, hero 100% en vivo (sin la imagen horneada de 1.4MB) con
 maqueta de teléfono hecha con los tokens y el set de íconos; fuentes Inter
@@ -253,6 +269,13 @@ ESTADO ACTUAL Y PRÓXIMOS PASOS
 
 Hecho:
   [x] MVP funcional: auth, eventos, viajes, reservas, chat, ratings, push.
+  [x] Sistema de valoraciones cerrado (2026-07-01): conductor puede
+      calificar pasajeros, auto-completado de reservas + recordatorio
+      in-app (migración 005 con pg_cron cada hora), anonimato real hasta
+      que ambos califican, y la pantalla de calificar ya no se rompe si
+      la reserva ya fue calificada. Antes el ciclo estaba a medio
+      terminar: solo el pasajero calificaba, las reservas nunca pasaban
+      a "completadas" y nadie recibía recordatorio.
   [x] Onboarding 3 slides (refactor a control por estado para que ande en web).
   [x] Web deploy en Vercel (con guard SSR para window).
   [x] Android EAS configurado (preview + production).
@@ -324,6 +347,13 @@ Hecho:
       - Whitelist de trip_type en filtros (no más .or() con interpolación).
 
 Pendiente:
+  [ ] Deployar migración 005_auto_complete_bookings.sql en Supabase prod
+      (`supabase db push` o subirla desde el dashboard) para que el cron
+      empiece a marcar reservas como completadas y a mandar los
+      recordatorios de calificar. Si pg_cron no está habilitado en el
+      proyecto, agendarlo a mano desde el dashboard (Database → Cron
+      Jobs) con la expresión `0 * * * *` y el SELECT
+      `public.mark_completed_bookings()`.
   [x] SEGURIDAD (CRÍTICO) — migraciones 003 y 004 aplicadas en Supabase prod
       (2026-06-11). Cerrada la fuga de PII: las columnas dni/teléfono/selfie/
       patente ya no son legibles con la anon key (privilegios por columna en

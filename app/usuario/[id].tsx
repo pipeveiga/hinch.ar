@@ -5,6 +5,7 @@ import {
 } from 'react-native'
 import { useLocalSearchParams, Stack } from 'expo-router'
 import { usersApi, ratingsApi } from '@/lib/supabase'
+import { useAuthStore } from '@/stores/authStore'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
 import { UserAvatar } from '@/components/UserAvatar'
 import { VerificationBadge } from '@/components/VerificationBadge'
@@ -15,6 +16,7 @@ import { es } from 'date-fns/locale'
 
 export default function UsuarioPerfilScreen() {
   const { id }              = useLocalSearchParams<{ id: string }>()
+  const { user: viewer }    = useAuthStore()
   const [user, setUser]       = useState<User | null>(null)
   const [ratings, setRatings] = useState<Rating[]>([])
   const [loading, setLoading] = useState(true)
@@ -23,12 +25,12 @@ export default function UsuarioPerfilScreen() {
   useEffect(() => {
     Promise.all([
       usersApi.getById(id),
-      ratingsApi.getRatingsForUser(id),
+      ratingsApi.getRatingsForUser(id, { viewerId: viewer?.id }),
     ]).then(([u, r]) => {
       setUser(u as User | null)
       setRatings(r)
     }).finally(() => setLoading(false))
-  }, [id])
+  }, [id, viewer?.id])
 
   if (loading) {
     return (

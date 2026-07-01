@@ -53,17 +53,25 @@ export default function CalificarScreen() {
 
   const [booking,   setBooking]   = useState<Booking | null>(null)
   const [loading,   setLoading]   = useState(true)
+  const [alreadyRated, setAlreadyRated] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [scores,    setScores]    = useState<RatingScores>(DEFAULT_SCORES)
 
   useEffect(() => {
-    const myBookings = bookingsApi.getMyBookings(user?.id ?? '')
-    myBookings.then((bookings) => {
-      const b = bookings.find((b) => b.id === bookingId)
-      setBooking(b ?? null)
+    let alive = true
+    ;(async () => {
+      if (!user || !bookingId) { setLoading(false); return }
+      const [b, canRate] = await Promise.all([
+        bookingsApi.getById(bookingId),
+        ratingsApi.canRate(bookingId, user.id),
+      ])
+      if (!alive) return
+      setBooking(b)
+      setAlreadyRated(!canRate)
       setLoading(false)
-    })
-  }, [bookingId])
+    })()
+    return () => { alive = false }
+  }, [bookingId, user?.id])
 
   if (loading) {
     return (
@@ -81,18 +89,52 @@ export default function CalificarScreen() {
     )
   }
 
-  const trip   = booking.trip
-  const driver = trip?.driver
-  const event  = trip?.event
+  const trip      = booking.trip
+  const driver    = trip?.driver
+  const passenger = booking.passenger
+  const event     = trip?.event
 
-  // Determinar a quién calificamos
-  const isCalificandoDriver = booking.passenger_id === user.id && !booking.passenger_rated_driver
-  const rateeRole: RateeRole = isCalificandoDriver ? 'driver' : 'passenger'
-  const rateeId = isCalificandoDriver ? trip?.driver_id ?? '' : booking.passenger_id
-  const rateeName = isCalificandoDriver
+  // ¿Soy pasajero o conductor de esta reserva?
+  const isDriverViewer = trip?.driver_id === user.id
+  const isPassengerViewer = booking.passenger_id === user.id
+
+  if (!isDriverViewer && !isPassengerViewer) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>No participaste de esta reserva</Text>
+      </View>
+    )
+  }
+
+  // Determinar a quién calificamos: el "otro" rol
+  const rateeRole: RateeRole = isPassengerViewer ? 'driver' : 'passenger'
+  const rateeId = isPassengerViewer ? (trip?.driver_id ?? '') : booking.passenger_id
+  const rateeName = isPassengerViewer
     ? (driver?.full_name ?? 'Conductor')
-    : 'Pasajero'
-  const rateeAvatar = isCalificandoDriver ? driver?.avatar_url : undefined
+    : (passenger?.full_name ?? 'Pasajero')
+  const rateeAvatar = isPassengerViewer ? driver?.avatar_url : passenger?.avatar_url
+
+  if (alreadyRated) {
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            headerShown:     true,
+            headerTitle:     'Calificar',
+            headerStyle:     { backgroundColor: COLORS.surface },
+            headerTintColor: COLORS.textPrimary,
+          }}
+        />
+        <View style={styles.center}>
+          <Icon name="star" size={48} color={COLORS.accent} strokeWidth={1.8} />
+          <Text style={styles.alreadyTitle}>Ya calificaste este viaje</Text>
+          <Text style={styles.alreadyBody}>
+            Gracias por tu calificación a {rateeName}. Solo se puede calificar una vez por reserva.
+          </Text>
+        </View>
+      </>
+    )
+  }
 
   const categories = RATING_CATEGORIES[rateeRole]
   const icons      = RATING_CATEGORY_ICONS[rateeRole]
@@ -160,7 +202,7 @@ export default function CalificarScreen() {
             <Text style={styles.rateeName}>{rateeName}</Text>
             <View style={styles.overallPreviewRow}>
               <Icon name="star" size={13} color={COLORS.warning} strokeWidth={1.9} />
-              <Text style={styles.overallPreview}>Promedio actual: {overallPreview}</Text>
+              <Text style={styles.overallPreview}>Tu puntaje: {overallPreview}</Text>
             </View>
           </View>
         </View>
@@ -269,4 +311,13 @@ const styles = StyleSheet.create({
   },
   submitBtn: { marginTop: 0 },
   disclaimer: { fontSize: 12, color: COLORS.textMuted, textAlign: 'center', lineHeight: 18 },
+  alreadyTitle: {
+    fontSize: 18, fontWeight: '800', color: COLORS.textPrimary,
+    marginTop: SPACING.md, textAlign: 'center',
+  },
+  alreadyBody: {
+    fontSize: 14, color: COLORS.textSecondary,
+    marginTop: SPACING.xs, textAlign: 'center',
+    paddingHorizontal: SPACING.lg, lineHeight: 20,
+  },
 })

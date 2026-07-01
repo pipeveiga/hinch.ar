@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
-  View, Text, FlatList, TouchableOpacity,
+  View, Text, FlatList, TouchableOpacity, ScrollView,
   StyleSheet, ActivityIndicator,
 } from 'react-native'
 import { router } from 'expo-router'
@@ -10,6 +10,8 @@ import { COLORS, SPACING, RADIUS, TAB_BAR_SPACE, BOOKING_STATUS_COLORS, BOOKING_
 import { TripCard } from '@/components/TripCard'
 import { FadeInUp } from '@/components/FadeInUp'
 import { Icon } from '@/components/Icon'
+import { UserAvatar } from '@/components/UserAvatar'
+import { bookingsApi } from '@/lib/supabase'
 import type { Booking } from '@/lib/types'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -83,6 +85,62 @@ function BookingItem({ booking }: { booking: Booking }) {
         </View>
       </View>
     </TouchableOpacity>
+  )
+}
+
+function PendingDriverRatings({ driverId }: { driverId: string }) {
+  const [pending, setPending] = useState<Booking[]>([])
+
+  useEffect(() => {
+    let alive = true
+    bookingsApi.getPendingRatingsAsDriver(driverId).then((rows) => {
+      if (alive) setPending(rows)
+    })
+    return () => { alive = false }
+  }, [driverId])
+
+  if (!pending.length) return null
+
+  return (
+    <View style={styles.pendingBox}>
+      <View style={styles.pendingHeader}>
+        <Icon name="star" size={16} color={COLORS.accent} strokeWidth={1.9} />
+        <Text style={styles.pendingTitle}>
+          Pasajeros a calificar ({pending.length})
+        </Text>
+      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.pendingList}
+      >
+        {pending.map((b) => {
+          const p = b.passenger
+          const eventTitle = b.trip?.event?.title
+          return (
+            <TouchableOpacity
+              key={b.id}
+              style={styles.pendingChip}
+              onPress={() => router.push(`/calificar/${b.id}`)}
+              activeOpacity={0.8}
+            >
+              <UserAvatar uri={p?.avatar_url} name={p?.full_name ?? '—'} size={40} />
+              <View style={styles.pendingChipText}>
+                <Text style={styles.pendingChipName} numberOfLines={1}>
+                  {p?.full_name ?? 'Pasajero'}
+                </Text>
+                {eventTitle && (
+                  <Text style={styles.pendingChipSub} numberOfLines={1}>
+                    {eventTitle}
+                  </Text>
+                )}
+              </View>
+              <Icon name="star" size={14} color={COLORS.accent} strokeWidth={1.9} />
+            </TouchableOpacity>
+          )
+        })}
+      </ScrollView>
+    </View>
   )
 }
 
@@ -170,6 +228,9 @@ export default function MisViajesScreen() {
               />
             </FadeInUp>
           )}
+          ListHeaderComponent={
+            user ? <PendingDriverRatings driverId={user.id} /> : null
+          }
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <View style={styles.center}>
@@ -247,4 +308,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs,
   },
   rateBtnText: { color: COLORS.accent, fontWeight: '700', fontSize: 13 },
+
+  // Pasajeros pendientes de calificar (tab Conductor)
+  pendingBox: {
+    backgroundColor: COLORS.accent + '12',
+    borderColor: COLORS.accent + '40',
+    borderWidth: 1,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    gap: SPACING.sm,
+  },
+  pendingHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  pendingTitle: { fontSize: 13, fontWeight: '800', color: COLORS.textPrimary },
+  pendingList: { gap: SPACING.sm, paddingRight: SPACING.md },
+  pendingChip: {
+    flexDirection: 'row', alignItems: 'center', gap: SPACING.sm,
+    backgroundColor: COLORS.card,
+    borderRadius: RADIUS.full,
+    paddingLeft: 4, paddingRight: SPACING.md, paddingVertical: 4,
+    borderWidth: 1, borderColor: COLORS.border,
+    maxWidth: 240,
+  },
+  pendingChipText: { flex: 1 },
+  pendingChipName: { fontSize: 13, fontWeight: '700', color: COLORS.textPrimary },
+  pendingChipSub:  { fontSize: 11, color: COLORS.textMuted },
 })
