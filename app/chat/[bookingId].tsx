@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useChatsStore } from '@/stores/chatsStore'
 import { messagesApi, bookingsApi } from '@/lib/supabase'
 import { COLORS, SPACING, RADIUS } from '@/lib/constants'
+import { Icon } from '@/components/Icon'
 import type { Message, Booking } from '@/lib/types'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 
@@ -102,7 +103,10 @@ export default function ChatScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>← Volver</Text>
+          <View style={styles.backRow}>
+            <Icon name="arrowLeft" size={18} color={COLORS.primary} strokeWidth={2} />
+            <Text style={styles.backText}>Volver</Text>
+          </View>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.headerCenter}
@@ -114,7 +118,7 @@ export default function ChatScreen() {
             <Text style={styles.headerSub} numberOfLines={1}>{booking.trip.event.title}</Text>
           ) : null}
         </TouchableOpacity>
-        <View style={{ width: 70 }} />
+        <View style={{ width: 80 }} />
       </View>
 
       <KeyboardAvoidingView
@@ -136,7 +140,7 @@ export default function ChatScreen() {
             inverted
             ListEmptyComponent={
               <View style={styles.empty}>
-                <Text style={styles.emptyIcon}>💬</Text>
+                <Icon name="chat" size={40} color={COLORS.textMuted} strokeWidth={1.6} />
                 <Text style={styles.emptyText}>Mandá el primer mensaje</Text>
               </View>
             }
@@ -164,7 +168,7 @@ export default function ChatScreen() {
           >
             {sending
               ? <ActivityIndicator size="small" color={COLORS.white} />
-              : <Text style={styles.sendIcon}>↑</Text>
+              : <Icon name="send" size={20} color={COLORS.white} strokeWidth={2} />
             }
           </TouchableOpacity>
         </View>
@@ -182,7 +186,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderBottomWidth: 1, borderBottomColor: COLORS.border,
   },
-  backBtn:    { width: 70 },
+  backBtn:    { width: 80 },
+  backRow:    { flexDirection: 'row', alignItems: 'center', gap: 3 },
   backText:   { color: COLORS.primary, fontSize: 14, fontWeight: '600' },
   headerCenter: { flex: 1, alignItems: 'center' },
   headerName: { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
@@ -196,7 +201,6 @@ const styles = StyleSheet.create({
   },
 
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: SPACING.sm, paddingVertical: 60 },
-  emptyIcon: { fontSize: 40 },
   emptyText: { fontSize: 14, color: COLORS.textMuted },
 
   bubble: {
@@ -206,7 +210,7 @@ const styles = StyleSheet.create({
   bubbleThem: { alignSelf: 'flex-start', backgroundColor: COLORS.card, borderBottomLeftRadius: 4 },
 
   bubbleText:     { fontSize: 15, lineHeight: 20 },
-  bubbleTextMe:   { color: COLORS.textPrimary },
+  bubbleTextMe:   { color: COLORS.white },
   bubbleTextThem: { color: COLORS.textPrimary },
 
   bubbleTime:     { fontSize: 10, marginTop: 3, alignSelf: 'flex-end' },
@@ -230,5 +234,4 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   sendBtnDisabled: { opacity: 0.4 },
-  sendIcon: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '700' },
 })

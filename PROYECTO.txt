@@ -17,7 +17,9 @@ restablecer unificados con componentes nuevos BrandMark (logo) y
 GradientButton (CTA con degradé), emojis reemplazados por el set de íconos
 (nuevos: arrowLeft, send). Flujo 2 (viaje/[id]): badge de evento, hora,
 rating, botones aceptar/rechazar/chat y "Reservar" (con degradé) pasan de
-emojis a íconos del set.
+emojis a íconos del set. Flujo 3 (viaje/nuevo) y 4 (chat): más emojis→íconos,
+botón "Publicar" con degradé, y fix de contraste de las burbujas propias del
+chat (texto blanco sobre azul, antes texto oscuro ilegible).
 + agregada la carpeta design/
 con el prototipo de alta fidelidad del rediseño de la app + handoff para
 portar a StyleSheet; es material de referencia, no se buildea. Antes:) (FIX
