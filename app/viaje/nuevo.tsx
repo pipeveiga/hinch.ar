@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   View, Text, ScrollView, TouchableOpacity,
-  TextInput, StyleSheet, Alert, Switch, ActivityIndicator,
+  TextInput, StyleSheet, Alert, Switch,
 } from 'react-native'
 import { router, Stack, useLocalSearchParams } from 'expo-router'
 import { useAuthStore } from '@/stores/authStore'
@@ -14,6 +14,8 @@ import {
 } from '@/lib/constants'
 import type { TripType, NewTripForm, Event } from '@/lib/types'
 import { AddressAutocomplete } from '@/components/AddressAutocomplete'
+import { GradientButton } from '@/components/GradientButton'
+import { Icon } from '@/components/Icon'
 
 const EMPTY_FORM: NewTripForm = {
   event_id:        '',
@@ -109,7 +111,10 @@ export default function NuevoViajeScreen() {
           {event ? (
             <View style={styles.eventCard}>
               <Text style={styles.eventTitle}>{event.title}</Text>
-              <Text style={styles.eventMeta}>📍 {event.venue_city}</Text>
+              <View style={styles.eventMetaRow}>
+                <Icon name="pin" size={13} color={COLORS.textSecondary} strokeWidth={1.8} />
+                <Text style={styles.eventMeta}>{event.venue_city}</Text>
+              </View>
             </View>
           ) : (
             <TouchableOpacity
@@ -297,18 +302,12 @@ export default function NuevoViajeScreen() {
         </View>
 
         {/* Submit */}
-        <TouchableOpacity
-          style={[styles.submitBtn, submitting && styles.submitBtnDisabled]}
+        <GradientButton
+          label={submitting ? 'Publicando...' : 'Publicar viaje'}
           onPress={handleSubmit}
           disabled={submitting}
-          activeOpacity={0.85}
-        >
-          {submitting ? (
-            <ActivityIndicator color={COLORS.white} />
-          ) : (
-            <Text style={styles.submitBtnText}>🚗 Publicar viaje</Text>
-          )}
-        </TouchableOpacity>
+          style={styles.submitBtn}
+        />
 
         <Text style={styles.disclaimer}>
           Al publicar, aceptás que el pago se acuerda directamente con los pasajeros.
@@ -349,6 +348,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md, borderWidth: 1, borderColor: COLORS.border,
   },
   eventTitle: { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
+  eventMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
   eventMeta: { fontSize: 13, color: COLORS.textSecondary },
   selectEventBtn: {
     backgroundColor: COLORS.card, borderRadius: RADIUS.lg, padding: SPACING.md,
@@ -393,12 +393,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
   },
   switchLabel: { fontSize: 15, color: COLORS.textPrimary },
-  submitBtn: {
-    backgroundColor: COLORS.primary, borderRadius: RADIUS.lg,
-    padding: SPACING.md, alignItems: 'center', marginTop: SPACING.md,
-  },
-  submitBtnDisabled: { opacity: 0.6 },
-  submitBtnText: { color: COLORS.white, fontSize: 16, fontWeight: '800' },
+  submitBtn: { marginTop: SPACING.md },
   disclaimer: {
     fontSize: 12, color: COLORS.textMuted, textAlign: 'center', lineHeight: 18,
   },
